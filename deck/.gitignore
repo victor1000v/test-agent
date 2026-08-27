@@ -1,0 +1,5 @@
+node_modules
+shots/
+package*.json
+artifact.html
+standalone.html

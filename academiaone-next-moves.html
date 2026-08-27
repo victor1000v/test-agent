@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<title>AcademiaOne: The Next Moves</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=Noto+Serif+SC:wght@300;400;500;600;700&family=Archivo:ital,wght@0,400..700;1,400..700&display=swap">
+<style>
+:root{
+  --paper:#F5F0E4; --panel:#FBF8F1; --wash:#EFE8D3; --ink:#211C11; --ink-2:#5E5540; --ink-3:#8C8168;
+  --line:#E3DAC4; --line-2:#CFC3A4; --gold:#A87B24; --gold-ink:#7A5A1B; --gold-soft:#C9A968;
+  --oxblood:#8E2F1F; --oxblood-soft:#F3E2DC; --good:#3D6B1F;
+  --s1:#2F63C1; --s2:#A87B24; --s3:#0B8A6E; --s4:#C74436; --s5:#8A4FA3;
+  --serif:"Newsreader","Noto Serif SC",Georgia,"Songti SC",serif;
+  --cjk:"Noto Serif SC","Newsreader",Georgia,"Songti SC",serif;
+  --sans:"Archivo","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--serif); overflow:hidden; -webkit-font-smoothing:antialiased}
+body.zh{font-family:var(--cjk)}
+body.zh .en{display:none !important}
+body:not(.zh) .zh{display:none !important}
+::selection{background:var(--gold-soft)}
+
+/* ---------- deck chrome ---------- */
+.deck{position:fixed; inset:0}
+.slide{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transform:translateX(28px); transition:opacity .45s ease, transform .45s ease;
+  overflow:hidden;
+}
+.slide.on{opacity:1; pointer-events:auto; transform:none}
+.slide.back{transform:translateX(-28px)}
+.stage{width:min(1180px, 94vw); max-height:92vh; overflow-y:auto; padding:24px 8px; scrollbar-width:thin}
+
+.chrome{position:fixed; z-index:50; font-family:var(--sans)}
+#brand{top:22px; left:28px; font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase}
+#brand em{color:var(--gold-ink); font-style:normal}
+#brand .sub{display:block; font-size:9.5px; letter-spacing:.14em; color:var(--ink-3); margin-top:3px; font-weight:600}
+#langbar{top:18px; right:24px; display:flex; border:1px solid var(--line-2); border-radius:99px; background:var(--panel); overflow:hidden; box-shadow:0 2px 10px rgba(33,28,17,.07)}
+#langbar button{font-family:var(--sans); font-size:12px; letter-spacing:.06em; padding:7px 14px; background:transparent; color:var(--ink-2); border:0; cursor:pointer}
+#langbar button.on{background:var(--ink); color:var(--paper)}
+#counter{bottom:24px; left:28px; font-size:11.5px; letter-spacing:.12em; color:var(--ink-3); font-variant-numeric:tabular-nums}
+#navbtns{bottom:18px; right:24px; display:flex; gap:8px}
+#navbtns button{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line-2); background:var(--panel);
+  color:var(--ink-2); font-size:15px; cursor:pointer; line-height:1;
+}
+#navbtns button:hover{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+#dots{bottom:31px; left:50%; transform:translateX(-50%); display:flex; gap:5px; max-width:52vw; flex-wrap:wrap; justify-content:center}
+#dots button{width:7px; height:7px; border-radius:50%; border:0; background:var(--line-2); cursor:pointer; padding:0}
+#dots button.on{background:var(--gold); transform:scale(1.35)}
+#progress{top:0; left:0; height:3px; background:var(--gold); transition:width .45s ease; z-index:60}
+.hint{bottom:24px; left:50%; transform:translateX(-50%); font-size:10.5px; color:var(--ink-3); letter-spacing:.1em; text-transform:uppercase; opacity:0; transition:opacity .5s}
+body.hint-on .hint{opacity:1}
+
+/* ---------- slide typography ---------- */
+.eyebrow{font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-ink); margin-bottom:16px}
+body.zh .eyebrow{font-family:var(--cjk); letter-spacing:.4em}
+.eyebrow .n{color:var(--ink-3); margin-right:10px}
+h1{font-family:var(--serif); font-weight:400; font-size:clamp(44px,5.6vw,76px); line-height:1.04; letter-spacing:-.01em}
+body.zh h1{font-family:var(--cjk); font-weight:500; line-height:1.2}
+h2{font-family:var(--serif); font-weight:400; font-size:clamp(30px,3.4vw,46px); line-height:1.1; letter-spacing:-.005em; margin-bottom:14px; text-wrap:balance}
+body.zh h2{font-family:var(--cjk); font-weight:500; line-height:1.3}
+h3{font-family:var(--serif); font-weight:500; font-size:21px; line-height:1.3}
+body.zh h3{font-family:var(--cjk)}
+.dek{font-size:19px; line-height:1.55; color:var(--ink-2); max-width:62ch; margin-bottom:22px}
+body.zh .dek{font-size:17px; line-height:1.8}
+p{line-height:1.6}
+.small{font-family:var(--sans); font-size:12.5px; color:var(--ink-2); line-height:1.55}
+body.zh .small{font-family:var(--cjk)}
+.num{font-variant-numeric:tabular-nums}
+.foot{font-family:var(--sans); font-size:11px; color:var(--ink-3); margin-top:16px; line-height:1.5}
+body.zh .foot{font-family:var(--cjk)}
+.gold-rule{width:52px; height:3px; background:var(--gold); border:0; margin:20px 0}
+
+/* ---------- components ---------- */
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.grid5{display:grid; grid-template-columns:repeat(5,1fr); gap:12px}
+@media(max-width:900px){.grid3,.grid4,.grid5{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:20px 22px}
+.card.warn{background:var(--oxblood-soft); border-color:#D9B3A8}
+.card.dark{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.card.dark .small{color:#B9AE93}
+.card h4, h4.lbl{font-family:var(--sans); font-size:11.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-ink); margin-bottom:9px}
+body.zh .card h4, body.zh h4.lbl{font-family:var(--cjk); letter-spacing:.25em}
+.card.warn h4{color:var(--oxblood)}
+.card.dark h4{color:var(--gold-soft)}
+.stat .v{font-family:var(--serif); font-size:clamp(42px,4.6vw,64px); line-height:1; letter-spacing:-.01em}
+.stat .v small{font-size:.5em; color:var(--ink-2)}
+.stat .k{font-family:var(--sans); font-size:11.5px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-top:10px; line-height:1.5}
+body.zh .stat .k{font-family:var(--cjk); letter-spacing:.18em}
+.stat .s{font-family:var(--sans); font-size:12px; color:var(--ink-2); margin-top:6px; line-height:1.5}
+body.zh .stat .s{font-family:var(--cjk)}
+.chip{display:inline-block; font-family:var(--sans); font-size:11.5px; font-weight:600; padding:4px 11px; border-radius:99px; border:1px solid var(--line-2); color:var(--ink-2); background:var(--panel)}
+body.zh .chip{font-family:var(--cjk)}
+.chip.red{border-color:#D9B3A8; color:var(--oxblood); background:var(--oxblood-soft)}
+.chip.gold{border-color:var(--gold-soft); color:var(--gold-ink); background:#F6EEDA}
+.figbox{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:18px 20px 12px}
+.figbox .ft{font-family:var(--sans); font-size:13px; font-weight:700; margin-bottom:2px}
+body.zh .figbox .ft{font-family:var(--cjk)}
+.figbox .fs{font-family:var(--sans); font-size:11px; color:var(--ink-3); margin-bottom:12px}
+body.zh .figbox .fs{font-family:var(--cjk)}
+.figbox svg{display:block; max-width:100%; height:auto}
+table.dt{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:13.5px}
+body.zh table.dt{font-family:var(--cjk)}
+table.dt th{text-align:left; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); border-bottom:2px solid var(--line-2); padding:7px 12px 7px 0}
+table.dt td{border-bottom:1px solid var(--line); padding:9px 12px 9px 0; vertical-align:top; line-height:1.5}
+table.dt tr:last-child td{border-bottom:none}
+.check{display:flex; gap:12px; align-items:flex-start; padding:9px 0; border-bottom:1px solid var(--line); font-size:16px; line-height:1.5}
+.check:last-child{border-bottom:none}
+.check .bx{flex:0 0 auto; width:20px; height:20px; border:2px solid var(--gold); border-radius:4px; margin-top:2px; position:relative}
+.check .bx::after{content:''; position:absolute; inset:3px; background:var(--gold); border-radius:1px; opacity:.15}
+
+#tip{position:fixed; z-index:99; pointer-events:none; display:none; max-width:300px; background:var(--ink); color:var(--paper); font-family:var(--sans); font-size:12px; line-height:1.5; padding:8px 11px; border-radius:4px; box-shadow:0 6px 18px rgba(33,28,17,.3)}
+#tip b{color:var(--gold-soft)}
+#tip .en,#tip .zh{display:inline}
+
+@media print{
+  body{overflow:visible}
+  .deck{position:static}
+  .slide{position:static; opacity:1 !important; pointer-events:auto; transform:none; page-break-after:always; height:100vh}
+  .chrome,#tip{display:none !important}
+}
+</style>
+<div class="deck" id="deck">
+
+<!-- S1 · TITLE -->
+<section class="slide" data-t="Title">
+  <div class="stage" style="text-align:left">
+    <div class="eyebrow"><span class="en">AcademiaOne · Strategy Deck · August 2026</span><span class="zh">AcademiaOne · 战略汇报 · 2026年8月</span></div>
+    <h1 style="max-width:14ch"><span class="en">The Next Moves</span><span class="zh">下一步棋</span></h1>
+    <hr class="gold-rule">
+    <p class="dek" style="font-size:22px; max-width:56ch"><span class="en">What 141 competitors, four deep dives and one graveyard tell us to do — as a sequence of decisions, not a pile of data.</span><span class="zh">141 家竞争对手、四份深度研究和一座行业墓园告诉我们该做什么——以决策序列的形式，而不是一堆数据。</span></p>
+    <p class="small" style="margin-top:28px"><span class="en">Built on The Masters Market Atlas · use ← → keys, click, or swipe · EN/中文 toggle top right</span><span class="zh">基于《硕士申请市场全景图》· 使用 ← → 方向键、点击或滑动翻页 · 右上角切换语言</span></p>
+  </div>
+</section>
+
+<!-- S2 · EVIDENCE BASE -->
+<section class="slide" data-t="Evidence">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">01</span><span class="en">Where this comes from</span><span class="zh">结论从哪里来</span></div>
+    <h2><span class="en">We mapped the entire battlefield first</span><span class="zh">我们先画完了整张战场地图</span></h2>
+    <div class="grid4" style="margin-top:26px">
+      <div class="card dark stat"><div class="v num">141</div><div class="k"><span class="en">companies profiled</span><span class="zh">家公司深度画像</span></div><div class="s"><span class="en">China + global, bilingual sources</span><span class="zh">中国 + 国际，中英双语信源</span></div></div>
+      <div class="card stat"><div class="v num">9</div><div class="k"><span class="en">competitive archetypes</span><span class="zh">大竞争原型</span></div><div class="s"><span class="en">every rival runs one of them</span><span class="zh">每个对手都在运行其中一种</span></div></div>
+      <div class="card stat"><div class="v num">43</div><div class="k"><span class="en">failures dissected</span><span class="zh">个失败样本解剖</span></div><div class="s"><span class="en">defunct, troubled, absorbed, pivoted</span><span class="zh">倒闭、困境、被收编、转型</span></div></div>
+      <div class="card stat"><div class="v num">560<small>+</small></div><div class="k"><span class="en">source domains</span><span class="zh">个信息来源域</span></div><div class="s"><span class="en">filings, funding DBs, complaints, communities</span><span class="zh">披露文件 · 融资库 · 投诉平台 · 社区</span></div></div>
+    </div>
+    <p class="dek" style="margin-top:26px; margin-bottom:0"><span class="en">Every recommendation in this deck cites that evidence. Nothing here is taste — it is what survived, what died, and why, converted into our moves.</span><span class="zh">本汇报的每一条建议都引用这份证据。这里没有一条是「品味」——只有谁活了、谁死了、为什么，然后换算成我们的行动。</span></p>
+    <p class="foot"><span class="en">Full detail: The Masters Market Atlas (22 chapters, interactive database) — linked on the final slide.</span><span class="zh">完整细节见《硕士申请市场全景图》（22 章 + 交互数据库）——最后一页附链接。</span></p>
+  </div>
+</section>
+
+<!-- S3 · THE TAILWIND -->
+<section class="slide" data-t="Tailwind">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">02</span><span class="en">The market · demand</span><span class="zh">市场 · 需求侧</span></div>
+    <h2><span class="en">The wind is at our back — measurably</span><span class="zh">顺风是可测量的</span></h2>
+    <div class="grid2" style="grid-template-columns:1fr 1.25fr; align-items:start; margin-top:20px">
+      <div>
+        <div class="card stat" style="margin-bottom:14px"><div class="v num">−27<small>%</small></div><div class="k"><span class="en">考研 registrations 2023→2026</span><span class="zh">考研报名 2023→2026</span></div><div class="s"><span class="en">4.74M → 3.43M (教育部). Every Jan–Mar the pivot season feeds HK/UK rounds.</span><span class="zh">474 万 → 343 万（教育部）。每年 1–3 月的转化季直接喂给港英申请轮。</span></div></div>
+        <div class="card stat" style="margin-bottom:14px"><div class="v num">+30–50<small>%</small></div><div class="k"><span class="en">HK taught-Masters applications, per cycle</span><span class="zh">香港授课型硕士申请量（每季）</span></div><div class="s"><span class="en">two cycles running; TPG is quota-free</span><span class="zh">连续两季；授课硕士不设限额</span></div></div>
+        <div class="card stat"><div class="v num">~90k</div><div class="k"><span class="en">Chinese postgraduates in UK universities</span><span class="zh">在英中国研究生</span></div><div class="s"><span class="en">the single largest nationality in UK PGT</span><span class="zh">英国授课型硕士第一大生源</span></div></div>
+      </div>
+      <div class="figbox">
+        <div class="ft"><span class="en">The 考研 release valve</span><span class="zh">考研泄压阀</span></div>
+        <div class="fs"><span class="en">National postgraduate-exam registrations, millions (教育部)</span><span class="zh">全国硕士研究生报名人数（百万，教育部）</span></div>
+        <div id="fig-kaoyan"></div>
+        <div class="fs" style="margin:10px 0 4px"><span class="en">1.3 million people stopped registering in three years. A meaningful slice buys a one-year overseas Masters instead — our product.</span><span class="zh">三年间 130 万人不再报名。其中相当一部分转而购买一年制海外硕士——正是我们的产品。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S4 · THE RESHUFFLE -->
+<section class="slide" data-t="Reshuffle">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">03</span><span class="en">The market · destinations</span><span class="zh">市场 · 目的地</span></div>
+    <h2><span class="en">Demand migrated to exactly our corridor</span><span class="zh">需求迁移到了我们的走廊</span></h2>
+    <p class="dek"><span class="en">The US is down ~29% from peak and politically volatile. The UK holds as the default Masters destination. HK and Singapore absorb the overflow. The default client now runs 英港新联申 — simultaneous UK + HK + SG applications.</span><span class="zh">美国较峰值下跌约 29% 且政治动荡；英国守住默认硕士目的地；港新承接溢出。客户的默认策略已是「英港新联申」。</span></p>
+    <div class="figbox">
+      <div class="ft"><span class="en">Chinese students enrolled, thousands</span><span class="zh">在读中国学生（千人）</span></div>
+      <div class="fs"><span class="en">US: IIE Open Doors · UK: HESA · hover for values</span><span class="zh">美国：IIE Open Doors · 英国：HESA · 悬停查看数值</span></div>
+      <div id="fig-dest"></div>
+    </div>
+    <p class="foot"><span class="en">Implication: multi-destination competence is not a nice-to-have — single-destination shops (US-only 天道/藤门/托普仕 generation) were broken by exactly this chart.</span><span class="zh">含义：多目的地能力不是加分项——单一目的地机构（押注美国的天道/藤门/托普仕一代）正是被这张图打断了脊梁。</span></p>
+  </div>
+</section>
+
+<!-- S5 · THE GRAVEYARD -->
+<section class="slide" data-t="Graveyard">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">04</span><span class="en">The market · supply</span><span class="zh">市场 · 供给侧</span></div>
+    <h2><span class="en">Our price tier just lost its incumbents</span><span class="zh">我们的价格档刚刚失去了在位者</span></h2>
+    <div class="grid4" style="margin-top:22px">
+      <div class="card warn"><h4>再来人 Valeon · 12/2025</h4><p class="small"><span class="en">THE premium Masters benchmark, dead. Mentor costs ¥30–50k/student → gross margin &lt;30% → wage arrears → gone. Its clients need a new home.</span><span class="zh">高端硕士申请的行业标杆，已倒闭。每生导师成本 3–5 万 → 毛利不足 30% → 欠薪 → 清场。它的客户需要新去处。</span></p></div>
+      <div class="card warn"><h4>天道 · 2022</h4><p class="small"><span class="en">2010s premium grad brand: prepaid fees spent as working capital, ¥14.23M unrefunded at collapse. Chinese families remember.</span><span class="zh">2010 年代的高端硕博品牌：预收款被当运营资金，倒闭时欠退费 1423 万。中国家庭都记得。</span></p></div>
+      <div class="card warn"><h4>世毕盟 GGU</h4><p class="small"><span class="en">Alive but bleeding: ¥80–100k fees on ~15 insured staff; the notorious 一亩三分地 complaint thread is its search result.</span><span class="zh">还活着但在失血：8–10 万收费背后约 15 名参保员工；一亩三分地那条著名控诉帖就挂在它的搜索结果里。</span></p></div>
+      <div class="card warn"><h4>IDP / ApplyBoard / Adventus</h4><p class="small"><span class="en">The commission-volume giants: −90% from peak, >80% written down, dead — one correlated bet on visa politics.</span><span class="zh">佣金流量巨头：较峰值 -90%、减记超 80%、倒闭——同一笔押在签证政治上的相关性赌注。</span></p></div>
+    </div>
+    <p class="dek" style="margin-top:24px; margin-bottom:0"><span class="en">Meanwhile the healthiest operators — 指南者, mbaMission, Menlo, Studyportals — share one profile: bootstrapped, transparent, full-time delivery, owned channels. That profile is the blueprint for everything that follows.</span><span class="zh">与此同时，最健康的运营者——指南者、mbaMission、Menlo、Studyportals——共享同一副面孔：自筹资金、透明、全职交付、自有渠道。这副面孔就是后面每一页的蓝图。</span></p>
+  </div>
+</section>
+
+<!-- S6 · THE EMPTY SQUARE -->
+<section class="slide" data-t="Position">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">05</span><span class="en">The thesis</span><span class="zh">核心论点</span></div>
+    <h2><span class="en">One square is empty. We take it.</span><span class="zh">有一个方格空着。我们去占。</span></h2>
+    <p class="dek"><span class="en">Across all 141 companies, nobody combines these six properties. Each one is the inverse of a documented failure mode:</span><span class="zh">141 家公司中，没有一家同时具备下面六个属性。每一个都是某种有据可查的死亡模式的反面：</span></p>
+    <div class="grid3">
+      <div class="card"><h4><span class="en">Published prices</span><span class="zh">公开定价</span></h4><p class="small"><span class="en">Hidden pricing correlates with "sign-then-downgrade" complaints across every Chinese premium shop.</span><span class="zh">藏价与「签约后降级」投诉在每家中国高端机构身上高度相关。</span></p></div>
+      <div class="card"><h4><span class="en">Senior, full-time, capped</span><span class="zh">资深 · 全职 · 限额</span></h4><p class="small"><span class="en">Part-time mentor networks broke GGU and killed Valeon. Full-time delivery is the only premium quality moat.</span><span class="zh">兼职导师网络拖垮世毕盟、杀死再来人。全职交付是高价位唯一可靠的质量护城河。</span></p></div>
+      <div class="card"><h4><span class="en">Milestone billing, ring-fenced</span><span class="zh">里程碑计费 · 资金专户</span></h4><p class="small"><span class="en">Prepay float is the industry's #1 killer (天道, 太傻). Refund safety becomes our product.</span><span class="zh">预付款浮存是行业头号死因（天道、太傻）。退费安全成为我们的产品。</span></p></div>
+      <div class="card"><h4><span class="en">Genuinely UK-based</span><span class="zh">真正扎根英国</span></h4><p class="small"><span class="en">优越 and UKEC sell the story; nobody delivers UK depth at premium price. We are the proof they can't fake.</span><span class="zh">优越和 UKEC 卖的是故事；无人在高端档真实交付英国深度。我们是他们伪造不了的证据。</span></p></div>
+      <div class="card"><h4><span class="en">Zero commissions</span><span class="zh">零院校佣金</span></h4><p class="small"><span class="en">"We are paid only by you" — the direct counter to the steering conflict clients now openly discuss.</span><span class="zh">「我们只收你的钱」——正面反制客户已经公开讨论的返佣导向冲突。</span></p></div>
+      <div class="card"><h4><span class="en">Verifiable outcomes</span><span class="zh">可验证的成果</span></h4><p class="small"><span class="en">Only 2 of 141 firms audit their numbers. In a market where every figure is assumed false, one honest number wins.</span><span class="zh">141 家中只有 2 家审计自己的数字。在一个所有数字都被默认为假的市场，一个诚实的数字就能赢。</span></p></div>
+    </div>
+    <p class="foot"><span class="en">Founder-fronted on 小红书, institutionally documented underneath — multi-destination UK+HK+SG with US/PhD as premium options.</span><span class="zh">小红书上创始人出镜，底层机构化沉淀——英港新多目的地，美国与博士作为高端选项。</span></p>
+  </div>
+</section>
+
+<!-- S7 · THE PRICE MAP -->
+<section class="slide" data-t="PriceMap">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">06</span><span class="en">The thesis · pricing</span><span class="zh">核心论点 · 定价</span></div>
+    <h2><span class="en">Where we sit: the ¥40–80k band</span><span class="zh">我们的位置：4–8 万价格带</span></h2>
+    <div class="figbox">
+      <div class="ft"><span class="en">Masters package price bands (RMB thousands)</span><span class="zh">硕士申请套餐价格区间（人民币千元）</span></div>
+      <div class="fs"><span class="en">Published prices where they exist; forum-cited bands elsewhere. Shaded zone = the AcademiaOne target band.</span><span class="zh">有公开价的取公开价，其余为论坛引用区间。底纹区 = AcademiaOne 目标价格带。</span></div>
+      <div id="fig-price"></div>
+    </div>
+    <p class="dek" style="margin-top:18px; margin-bottom:0"><span class="en">Below us, Compass industrialised transparency at ¥18–24k with junior staff — it cannot serve depth. Above us, the ¥100k+ mentor tier is dead or discredited. Priced at 2–3× Compass, justified by seniority and caps.</span><span class="zh">下方，指南者用初级全职团队在 1.8–2.4 万档把透明工业化——但做不了深度。上方，10 万+ 导师档已死或信誉扫地。我们定价为指南者的 2–3 倍，由资深团队与接案上限支撑。</span></p>
+  </div>
+</section>
+
+<!-- S8 · REC 1 SERVICE LADDER -->
+<section class="slide" data-t="Rec1">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">07</span><span class="en">Move 1 · Product</span><span class="zh">第一步 · 产品</span></div>
+    <h2><span class="en">Ship this service ladder — published, in writing</span><span class="zh">上线这个服务阶梯——公开、成文</span></h2>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card"><h4><span class="en">1 · Diagnostic</span><span class="zh">1 · 诊断咨询</span></h4><div class="stat"><div class="v" style="font-size:30px">¥1.5–2.5k</div></div><p class="small" style="margin-top:8px"><span class="en">90-min session + written school-list report. Paid lead-qualifier; creditable against tiers 3–4.</span><span class="zh">90 分钟 + 书面选校报告。付费筛选器；可抵扣 3–4 档费用。</span></p></div>
+      <div class="card"><h4><span class="en">2 · Per-school modules</span><span class="zh">2 · 单校模块</span></h4><div class="stat"><div class="v" style="font-size:30px">¥3–6k<small>/school 校</small></div></div><p class="small" style="margin-top:8px"><span class="en">Essays, interview, CV — MBA-style flat pricing, first in this segment.</span><span class="zh">文书、面试、简历——MBA 式单校定价，细分市场首创。</span></p></div>
+      <div class="card dark"><h4><span class="en">3 · Core full-service ★</span><span class="zh">3 · 核心全服务 ★</span></h4><div class="stat"><div class="v" style="font-size:30px; color:var(--gold-soft)">¥45–60k</div></div><p class="small" style="margin-top:8px"><span class="en">UK/HK/SG, 6–8 schools, named senior consultant (cap 35) + editor + success manager. Billed 30/40/30.</span><span class="zh">英港新 6–8 校联申，署名资深顾问（35 案上限）+ 文书 + 服务经理。按 30/40/30 分段。</span></p></div>
+      <div class="card"><h4><span class="en">4 · Premium cross-destination</span><span class="zh">4 · 高端跨区</span></h4><div class="stat"><div class="v" style="font-size:30px">¥70–85k</div></div><p class="small" style="margin-top:8px"><span class="en">+US/AUS, scholarships, 2-year runway. Founder/principal, cap 20 — scarcity is the positioning.</span><span class="zh">+美澳、奖学金、两年规划。创始人/首席，20 案上限——稀缺即定位。</span></p></div>
+      <div class="card"><h4><span class="en">5 · PhD / MRes</span><span class="zh">5 · 博士 / 研究型</span></h4><div class="stat"><div class="v" style="font-size:30px">¥60–90k</div></div><p class="small" style="margin-top:8px"><span class="en">Supervisor mapping, proposal coaching, funding strategy. Launch month 6 — unowned whitespace.</span><span class="zh">套磁、研究计划辅导、奖学金策略。第 6 个月上线——无主空白区。</span></p></div>
+      <div class="card"><h4><span class="en">6 · In-UK add-ons</span><span class="zh">6 · 在英增值</span></h4><div class="stat"><div class="v" style="font-size:30px">£500–1.5k</div></div><p class="small" style="margin-top:8px"><span class="en">Arrival, dissertation-season coaching, Masters→PhD progression — low-CAC upsell.</span><span class="zh">落地、论文季辅导、硕转博——低获客成本的增售。</span></p></div>
+    </div>
+    <p class="foot"><span class="en">Unit economics at the anchor: ¥50k avg × 35 cases = ¥1.75M per consultant vs ~¥500–700k pod cost → 55–65% gross margin. Valeon died below 30% — this only works full-time.</span><span class="zh">锚点产品的单位经济：5 万均价 × 35 案 = 每顾问 175 万收入，对约 50–70 万小组成本 → 毛利 55–65%。再来人死于 30% 以下——这只在全职交付下成立。</span></p>
+  </div>
+</section>
+<!-- S9 · REC 2 TRANSPARENCY -->
+<section class="slide" data-t="Rec2">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">08</span><span class="en">Move 2 · Trust</span><span class="zh">第二步 · 信任</span></div>
+    <h2><span class="en">Publish everything competitors hide</span><span class="zh">把对手隐藏的一切都公开</span></h2>
+    <p class="dek"><span class="en">Every Chinese premium boutique hides its prices — and hidden pricing tracks with the industry's #1 complaint class. The Western MBA cluster has published per-school rates for 25 years and compounds quietly. Transparency is a weapon nobody in our tier has picked up.</span><span class="zh">中国高端精品全都藏价——而藏价与行业头号投诉类别如影随形。西方 MBA 集群明码标价 25 年，静静复利。透明是我们档位里没人捡起来的武器。</span></p>
+    <div class="grid3">
+      <div class="card"><h4><span class="en">Price page, verbatim</span><span class="zh">一字不差的价格页</span></h4><p class="small"><span class="en">Full ladder + refund policy published on day one. Price filters leads — Menlo proved expensive-and-published converts better buyers.</span><span class="zh">阶梯价格 + 退款政策第一天就全文公开。价格本身筛选客户——Menlo 证明「贵而公开」带来更好的买家。</span></p></div>
+      <div class="card"><h4><span class="en">Annual outcome report</span><span class="zh">年度成果报告</span></h4><p class="small"><span class="en">Cohort size, offer rate, first-choice rate, methodology stated — from year one, however small. Only 2 of 141 firms audit outcomes. Audited modest beats claimed perfect.</span><span class="zh">样本量、录取率、首选率、公开方法论——从第一年起，无论多小。141 家中只有 2 家审计成果。经审计的普通数字胜过宣称的完美数字。</span></p></div>
+      <div class="card"><h4><span class="en">Public reviews, no deletions</span><span class="zh">公开评价 · 承诺不删</span></h4><p class="small"><span class="en">芝士圈-style per-consultant review ledger with a written no-deletion policy. One deletion accusation is existential for a transparency brand — so make not-deleting a contract.</span><span class="zh">芝士圈式的逐顾问评价账本 + 书面「不删评」政策。对透明品牌而言，一次删评指控就是生死题——所以把「不删」写进承诺。</span></p></div>
+    </div>
+    <div class="card warn" style="margin-top:18px"><h4><span class="en">Never</span><span class="zh">绝不</span></h4><p class="small"><span class="en">Self-authored ranking articles (优越), advertorial walls (新通), fantasy statistics ("99%", "98.8%", "zero complaints") — all now recognised and actively held against brands by the buyers we want.</span><span class="zh">自产排名软文（优越）、广告软文墙（新通）、幻想统计（「99%」「98.8%」「零投诉」）——我们想要的那批买家已经识破这些，并把它们记为品牌负分。</span></p></div>
+  </div>
+</section>
+
+<!-- S10 · REC 3 REFUND SAFETY -->
+<section class="slide" data-t="Rec3">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">09</span><span class="en">Move 3 · Contract architecture</span><span class="zh">第三步 · 合同架构</span></div>
+    <h2><span class="en">Sell the thing families fear losing: their money</span><span class="zh">把家庭最怕失去的东西做成卖点：他们的钱</span></h2>
+    <p class="dek"><span class="en">After 天道 (¥14.23M unrefunded), 太傻 and Valeon, prepay loss is Chinese families' #1 fear. No Chinese premium shop answers it. We answer it structurally:</span><span class="zh">天道（欠退费 1423 万）、太傻、再来人之后，预付款损失是中国家庭的头号恐惧。没有一家中国高端机构回应它。我们从结构上回应：</span></p>
+    <div class="figbox">
+      <div class="ft"><span class="en">Milestone billing — 30 / 40 / 30</span><span class="zh">里程碑计费——30 / 40 / 30</span></div>
+      <div id="fig-milestone"></div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card"><h4><span class="en">Ring-fenced client money</span><span class="zh">客户资金专户</span></h4><p class="small"><span class="en">Cash for undelivered milestones sits in a designated account — advertised. The anti-天道 product.</span><span class="zh">未交付里程碑的款项存放于独立账户——并公开宣传。这就是「反天道」产品。</span></p></div>
+      <div class="card"><h4><span class="en">Fast early exits</span><span class="zh">早期快速退出</span></h4><p class="small"><span class="en">Defined exit points, no-quibble early-stage refunds resolved in days. Occasional refunds are marketing spend.</span><span class="zh">明确的退出节点，早期无条件退款、数日内到账。偶发退款就是营销费用。</span></p></div>
+      <div class="card warn"><h4><span class="en">Never guarantees</span><span class="zh">绝不做担保</span></h4><p class="small"><span class="en">No 保录取, no "full refund if unsuccessful" — guarantees are debt (太傻) that drifts into fraud (AdmitWrite, in court records). Optional contingent success payment only.</span><span class="zh">不做保录取、不做「不成功全退」——担保是负债（太傻），并会滑向欺诈（AdmitWrite，已入判决书）。至多设或有成功付款。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- S11 · REC 4 UK DELIVERY -->
+<section class="slide" data-t="Rec4">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">10</span><span class="en">Move 4 · The proof layer</span><span class="zh">第四步 · 证明层</span></div>
+    <h2><span class="en">Make "actually in the UK" impossible to fake</span><span class="zh">让「真正在英国」无法被伪造</span></h2>
+    <p class="dek"><span class="en">优越 monetises a London HQ at commodity prices; UKEC's Manchester heritage fronts a commission machine. Everyone sells the story — nobody ships the substance. We productise it:</span><span class="zh">优越把伦敦总部按大众价变现；UKEC 的曼城血统包装的是佣金机器。人人都在卖故事——没人交付实质。我们把它产品化：</span></p>
+    <div class="grid4">
+      <div class="card"><h4><span class="en">UK academics on calls</span><span class="zh">英国学者参与咨询</span></h4><p class="small"><span class="en">Real UK-side specialists in strategy sessions — on camera, named, checkable.</span><span class="zh">真实的英方专家参与选校策略——出镜、署名、可查证。</span></p></div>
+      <div class="card"><h4><span class="en">Campus presence</span><span class="zh">校园在场</span></h4><p class="small"><span class="en">Visit content, in-UK onboarding, arrival services — filmed where rivals can't film.</span><span class="zh">校园探访内容、在英迎新、落地服务——在对手拍不到的地方拍。</span></p></div>
+      <div class="card"><h4><span class="en">Enroly mastery</span><span class="zh">吃透 Enroly</span></h4><p class="small"><span class="en">~50% of UK universities issue CAS through Enroly. Coaching clients through its document, financial-evidence and interview stages faster than anyone is a concrete service edge.</span><span class="zh">约一半英国大学经 Enroly 发放 CAS。带客户比任何人更快通过其材料、资金证明与可信度面试环节，是具体可感的服务优势。</span></p></div>
+      <div class="card"><h4><span class="en">In-UK interception</span><span class="zh">在英拦截</span></h4><p class="small"><span class="en">Chinese undergrads already at UK universities applying onward: highest intent, near-zero CAC, reachable through campus presence — the channel Downton proved.</span><span class="zh">已在英国读本科、要继续申硕博的中国学生：意向最高、获客成本趋零，靠校园在场即可触达——唐顿验证过的渠道。</span></p></div>
+    </div>
+    <p class="foot"><span class="en">Also the trust artefacts rivals' filings can't match: UK company registration public, every client-facing person a named, insured employee — vs 澳际's "700+ consultants, 359 insured".</span><span class="zh">还有对手的备案数据比不了的信任凭证：英国公司注册信息公开、每位客户接触者都是署名参保的正式员工——对照澳际「宣称 700+ 顾问、参保 359 人」。</span></p>
+  </div>
+</section>
+
+<!-- S12 · REC 5 XHS ARCHITECTURE -->
+<section class="slide" data-t="Rec5">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">11</span><span class="en">Move 5 · Brand & channel</span><span class="zh">第五步 · 品牌与渠道</span></div>
+    <h2><span class="en">Founder in front, institution underneath</span><span class="zh">创始人在前台，机构在底座</span></h2>
+    <p class="dek"><span class="en">The trust unit moved from logos to people — 启德's biggest weakness is literally having no founder story. But the studios die with their accounts, and ShunShun proved consultants walk with clients. So we run both layers:</span><span class="zh">信任单位已从机构标志转移到个人——启德最大的软肋就是没有创始人故事。但工作室与账号共存亡，顺顺证明了顾问会带着客户出走。所以我们两层并行：</span></p>
+    <div class="figbox">
+      <div class="ft"><span class="en">The account architecture</span><span class="zh">账号架构</span></div>
+      <div id="fig-arch"></div>
+    </div>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card"><h4><span class="en">Cadence</span><span class="zh">内容节奏</span></h4><p class="small"><span class="en">4–7 notes/week: offer 晒单 (Nov–Mar), 案例复盘, 避雷 analysis — the highest-engagement formats. Everything re-cut into 视频号.</span><span class="zh">每周 4–7 篇：offer 晒单（11–3 月）、案例复盘、避雷分析——互动率最高的格式。全部二剪进视频号。</span></p></div>
+      <div class="card"><h4><span class="en">知乎 as due-diligence surface</span><span class="zh">知乎作为尽调界面</span></h4><p class="small"><span class="en">Two founder-authored pillar answers a month, kept updated — the backstop referred clients check before paying. Years-long half-life.</span><span class="zh">每月两篇创始人署名的支柱长文并持续更新——被转介客户付款前必查的底稿。半衰期以年计。</span></p></div>
+      <div class="card warn"><h4><span class="en">Never</span><span class="zh">绝不</span></h4><p class="small"><span class="en">Undeclared 素人矩阵 (bannable overnight, collateral 机构号 bans), bought reviews, Baidu SEM beyond brand terms, Douyin livestream funnels.</span><span class="zh">未报备素人矩阵（一夜封光、连坐机构号）、买评价、品牌词以外的百度 SEM、抖音直播漏斗。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- S13 · REC 6 REFERRAL ENGINE -->
+<section class="slide" data-t="Rec6">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">12</span><span class="en">Move 6 · Acquisition economics</span><span class="zh">第六步 · 获客经济学</span></div>
+    <h2><span class="en">Engineer referrals — the only CAC that compounds</span><span class="zh">把转介绍工程化——唯一会复利的获客成本</span></h2>
+    <div class="grid2" style="grid-template-columns:1.3fr 1fr; align-items:start">
+      <div class="figbox">
+        <div class="ft"><span class="en">Cost per signed client, by route (RMB, est. ranges)</span><span class="zh">每签约客户成本（人民币，估算区间）</span></div>
+        <div class="fs"><span class="en">The ordering is the decision-grade finding — validate exact numbers with small test budgets.</span><span class="zh">排序才是决策级结论——精确数字用小额投放验证。</span></div>
+        <div id="fig-cac"></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px"><h4><span class="en">The referral SOP</span><span class="zh">转介绍 SOP</span></h4><p class="small"><span class="en">① Offer-day ritual (engineered wow moment) · ② formal asks at the two peak-gratitude moments — offer received, visa granted · ③ ¥800–1,500 老带新 rewards · ④ incentivised alumni 申请总结 seeded into 知乎 search — permanent testimonial infrastructure (the 世毕盟 mechanism, run honestly).</span><span class="zh">① offer 日仪式感（设计出来的高光时刻）· ② 在两个感恩峰值正式提出请求——拿到 offer、获得签证 · ③ 800–1500 元老带新奖励 · ④ 有激励的校友申请总结沉淀进知乎搜索——永久的口碑基础设施（世毕盟机制的诚实版）。</span></p></div>
+        <div class="card dark"><h4><span class="en">Targets</span><span class="zh">目标</span></h4><p class="small"><span class="en">Referral ≥40% of signings by year 2 (category best: 40–70%) · referred leads close at 50–80% · blended CAC under ¥2,500 vs a ¥50k ticket — 5% of revenue where mega-agencies burn 15–25%.</span><span class="zh">第二年转介绍占签约 ≥40%（行业最优 40–70%）· 被转介线索签约率 50–80% · 综合获客成本压在 2,500 元内、对 5 万客单价——营收占比 5%，而大机构烧 15–25%。</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S14 · REC 7 PHD LINE -->
+<section class="slide" data-t="Rec7">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">13</span><span class="en">Move 7 · The second product</span><span class="zh">第七步 · 第二产品线</span></div>
+    <h2><span class="en">Take the PhD whitespace by month six</span><span class="zh">第六个月，拿下博士申请空白区</span></h2>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card stat"><div class="v" style="font-size:38px">¥60–90k</div><div class="k"><span class="en">price band, justified</span><span class="zh">可支撑的价格带</span></div><div class="s"><span class="en">supervisor mapping · proposal coaching (never writing) · outreach · funding strategy</span><span class="zh">导师匹配 · 研究计划辅导（绝不代写）· 套磁 · 奖学金策略</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:38px">~0</div><div class="k"><span class="en">credible competitors</span><span class="zh">可信的竞争者</span></div><div class="s"><span class="en">Compass has "almost no PhD capability"; GGU and Valeon — who served research applicants — are dead or damaged</span><span class="zh">指南者「几乎没有博士能力」；曾服务研究型申请者的世毕盟、再来人已死或受损</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:38px"><span class="en">Built-in</span><span class="zh">自带</span></div><div class="k"><span class="en">feeder pipeline</span><span class="zh">客源管道</span></div><div class="s"><span class="en">our own Masters cohort in the UK, at peak trust, at near-zero CAC — Masters→PhD progression as a productised add-on</span><span class="zh">我们自己在英国的硕士客户，在信任峰值、以趋零成本转化——「硕转博」做成标准化增值产品</span></div></div>
+    </div>
+    <p class="dek" style="margin-top:24px; margin-bottom:0"><span class="en">This is exactly the work that needs senior, same-field judgment a boutique can staff and a factory cannot — and it deepens the UK-genuine story: supervisor relationships are built on the ground.</span><span class="zh">这正是需要「资深 + 同领域判断力」的工作——精品店配得出，工厂配不出。它还加深了「真正在英国」的故事：导师关系就是在英国本地建立的。</span></p>
+    <p class="foot"><span class="en">Note: PhDs were not exempted from the UK's £925 levy in the government's final consultation position (sector lobbying continues) — price the line on value, not policy.</span><span class="zh">注：英国政府在征费技术咨询的最终立场中并未豁免博士（高校团体仍在游说）——该产品线按价值定价，不押政策。</span></p>
+  </div>
+</section>
+<!-- S15 · DELIVERY POD -->
+<section class="slide" data-t="Pod">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">14</span><span class="en">Operating model</span><span class="zh">运营模型</span></div>
+    <h2><span class="en">The pod: how quality survives growth</span><span class="zh">小组制：让质量扛得住增长</span></h2>
+    <div class="grid2" style="grid-template-columns:1.15fr 1fr; align-items:start">
+      <div class="figbox">
+        <div class="ft"><span class="en">One client, one accountable team</span><span class="zh">一个客户，一个可问责的小组</span></div>
+        <div id="fig-pod"></div>
+      </div>
+      <div>
+        <div class="figbox" style="margin-bottom:12px">
+          <div class="ft"><span class="en">Gross margin: us vs the tier that died</span><span class="zh">毛利率：我们 vs 死掉的那一档</span></div>
+          <div id="fig-margin"></div>
+        </div>
+        <div class="card"><h4><span class="en">The rules that hold it</span><span class="zh">支撑它的规则</span></h4><p class="small"><span class="en">Hard 35-case cap per consultant — published as policy (scarcity is positioning) · essay rubric with second-reader signoff (kills templating, complaint #4 industry-wide) · 48h response SLA · mid-service NPS (catches "post-signing collapse", complaint #2, before churn) · quarterly QC audits.</span><span class="zh">每顾问硬性 35 案上限——写成公开政策（稀缺即定位）· 文书评分标准 + 二审签核（消灭模板化，全行业第 4 大投诉）· 48 小时响应 SLA · 服务中期 NPS（在流失前捕捉「签约后滑坡」，第 2 大投诉）· 季度质控审计。</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S16 · THE NEVERS -->
+<section class="slide" data-t="Nevers">
+  <div class="stage">
+    <div class="eyebrow" style="color:var(--oxblood)"><span class="n">15</span><span class="en">The constitution</span><span class="zh">公司宪法</span></div>
+    <h2><span class="en">Ten things we never do</span><span class="zh">我们永远不做的十件事</span></h2>
+    <p class="dek"><span class="en">Each one killed somebody in the database. Written down, they are our underwriting rules.</span><span class="zh">每一条都在数据库里杀死过某家公司。写下来，它们就是我们的风控准则。</span></p>
+    <div class="grid2" style="gap:0 40px">
+      <div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never touch the float</b> — prepayments are liabilities, not revenue (天道, 太傻)</span><span class="zh"><b>永不动用预付款浮存</b>——预收是负债不是收入（天道、太傻）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never take university commissions</b> (51offer, IDP, UKEC's conflict)</span><span class="zh"><b>永不收院校佣金</b>（51offer、IDP、UKEC 的利益冲突）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never sell 保录取 or refund guarantees</b> (太傻's debt, AdmitWrite's fraud)</span><span class="zh"><b>永不卖保录取或退款担保</b>（太傻的负债、AdmitWrite 的欺诈）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never build a part-time mentor network</b> at premium prices (GGU, Valeon)</span><span class="zh"><b>永不在高价位建兼职导师网络</b>（世毕盟、再来人）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never pay for signings alone</b> — bonus rides on delivered NPS (金吉列's culture)</span><span class="zh"><b>永不只为签单付薪</b>——奖金挂交付 NPS（金吉列文化的反面）</span></div></div>
+      </div>
+      <div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never raise VC for the consulting core</b> — zero durable winners took it</span><span class="zh"><b>核心咨询业务永不融 VC</b>——拿了的没有一家成为耐久赢家</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never sell to a listed parent</b> (太傻/华闻, 啄木鸟/朴新, 顺顺/好未来)</span><span class="zh"><b>永不卖给上市母公司</b>（太傻/华闻、啄木鸟/朴新、顺顺/好未来）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never run 素人矩阵 or buy reviews</b> — bannable, detectable, brand-fatal</span><span class="zh"><b>永不做素人矩阵、永不买评价</b>——会被封、会被识破、对品牌致命</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never chase the US as the growth engine</b> — premium option only</span><span class="zh"><b>永不把美国当增长引擎</b>——只作为高端选项</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en"><b>Never publish unverifiable numbers</b> — "99%" is the next honest rival's ammunition</span><span class="zh"><b>永不发布无法验证的数字</b>——「99%」就是下一个诚实对手的弹药</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S17 · BUDGET -->
+<section class="slide" data-t="Budget">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">16</span><span class="en">Marketing budget</span><span class="zh">营销预算</span></div>
+    <h2><span class="en">Spend 10–12% of revenue — like this</span><span class="zh">营收的 10–12% ——这样花</span></h2>
+    <div class="figbox">
+      <div class="ft"><span class="en">Allocation by revenue stage</span><span class="zh">分阶段预算分配</span></div>
+      <div class="fs"><span class="en">£100k → £500k → £2M revenue; hover segments for detail</span><span class="zh">£10 万 → £50 万 → £200 万营收阶段；悬停查看明细</span></div>
+      <div id="fig-budget"></div>
+    </div>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card stat"><div class="v" style="font-size:30px">&lt;¥2,500</div><div class="k"><span class="en">blended CAC target, year 1</span><span class="zh">首年综合获客成本目标</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:30px">≥50%</div><div class="k"><span class="en">signings from referral + organic by £2M</span><span class="zh">£200 万阶段转介+自然流量签约占比</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:30px">20%</div><div class="k"><span class="en">of budget into the owned data product at £2M</span><span class="zh">£200 万阶段投入自有数据产品的预算</span></div><div class="s"><span class="en">the 指南者-style compounding asset</span><span class="zh">指南者式的复利资产</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- S18 · HIRING -->
+<section class="slide" data-t="Hiring">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">17</span><span class="en">Team</span><span class="zh">团队</span></div>
+    <h2><span class="en">The first ten hires, triggered by revenue</span><span class="zh">前十名员工，由营收触发</span></h2>
+    <div class="figbox">
+      <div class="ft"><span class="en">Hire when the trigger is hit — not before, not after</span><span class="zh">触发点一到就招——不早也不晚</span></div>
+      <div id="fig-hires"></div>
+    </div>
+    <p class="foot"><span class="en">Rules: everyone client-facing is a named, insured, full-time employee (澳际's 700-claimed/359-insured gap becomes our contrast marketing) · no part-time mentor network at any stage · sales counsellor (#6) bonused on delivered NPS, never signings alone.</span><span class="zh">规则：所有客户接触者都是署名、参保、全职的正式员工（澳际「宣称 700 / 参保 359」的缺口就是我们的对比营销）· 任何阶段都不建兼职导师网络 · 咨询顾问（第 6 号）奖金挂交付 NPS，绝不只挂签单。</span></p>
+  </div>
+</section>
+
+<!-- S19 · BRAND PATH -->
+<section class="slide" data-t="BrandPath">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">18</span><span class="en">Brand</span><span class="zh">品牌</span></div>
+    <h2><span class="en">Founder-led today, institution in 36 months</span><span class="zh">今天靠创始人，36 个月后靠机构</span></h2>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><h4><span class="en">Stage 1 · Months 0–12 · Founder as proof</span><span class="zh">阶段一 · 0–12 月 · 创始人即证明</span></h4><p class="small"><span class="en">The founder's story and casework are the funnel (Crimson's founding lesson). XHS cadence, 知乎 pillars, every outcome documented into a public case ledger from client #1. Founder-attributed leads: >70% — by design.</span><span class="zh">创始人的故事与案例就是漏斗（Crimson 的创业课）。小红书节奏、知乎支柱长文、从第 1 位客户起把每个结果记入公开案例台账。创始人获客占比 >70%——有意为之。</span></p></div>
+      <div class="card"><h4><span class="en">Stage 2 · 12–24 · Institutionalised authority</span><span class="zh">阶段二 · 12–24 月 · 权威机构化</span></h4><p class="small"><span class="en">Consultant sub-IP accounts · alumni-authored retrospectives · the annual bilingual admissions white paper (EIC proved data reports buy years of free authority) · public verified reviews. The client book lives in company-held 企业微信 — consultants leave, clients stay.</span><span class="zh">顾问子 IP 账号 · 校友撰写的申请复盘 · 年度双语申请白皮书（启德证明了数据报告能换来多年的免费权威）· 公开已验证评价。客户资产沉淀在公司企业微信——顾问会走，客户留下。</span></p></div>
+      <div class="card"><h4><span class="en">Stage 3 · 24–36 · Product as brand</span><span class="zh">阶段三 · 24–36 月 · 产品即品牌</span></h4><p class="small"><span class="en">The case-database / school-matcher 小程序 — 指南者's 1.16M-user playbook at boutique scale. People arrive for the asset, not the founder. Founder-attributed leads <40% — the succession hedge in the metrics.</span><span class="zh">案例库/选校匹配小程序——指南者 116 万用户打法的精品版。用户为资产而来，不为创始人而来。创始人获客占比降到 40% 以下——把传承保险写进指标。</span></p></div>
+    </div>
+    <p class="dek" style="margin-top:22px; margin-bottom:0"><span class="en">This is the difference between "not guru-style" and invisible: the founder's face converts, the institution keeps what it earns.</span><span class="zh">这就是「不做网红」与「隐形」的区别：创始人的脸负责转化，机构负责留住成果。</span></p>
+  </div>
+</section>
+
+<!-- S20 · 12-MONTH ROADMAP -->
+<section class="slide" data-t="Roadmap">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">19</span><span class="en">Execution · year one</span><span class="zh">执行 · 第一年</span></div>
+    <h2><span class="en">The next twelve months, by quarter</span><span class="zh">未来十二个月，按季度</span></h2>
+    <div class="grid4" style="margin-top:20px">
+      <div class="card"><h4>Q1</h4><p class="small"><span class="en">Publish price page + refund policy · milestone billing + designated client account live · founder XHS 4–7 notes/week · 机构号 verified · CRM/企业微信 SOP · hires #1–2</span><span class="zh">上线价格页 + 退款政策 · 里程碑计费 + 客户资金专户落地 · 创始人小红书每周 4–7 篇 · 机构号认证 · CRM/企业微信 SOP · 招聘 #1–2</span></p></div>
+      <div class="card"><h4>Q2</h4><p class="small"><span class="en">20 知乎 pillar answers · diagnostic funnel measured · case-documentation protocol from client #1 · referral programme launched · hire #3</span><span class="zh">20 篇知乎支柱长文 · 诊断咨询漏斗可度量 · 从第 1 位客户建立案例档案规范 · 转介绍体系上线 · 招聘 #3</span></p></div>
+      <div class="card"><h4>Q3</h4><p class="small"><span class="en">Offer-season 晒单 · first alumni 申请总结 · 聚光 tests behind organic winners (¥3–10k budgets) · hire #4 · peak-intake delivery</span><span class="zh">Offer 季晒单 · 第一批校友申请总结 · 对自然爆款追加聚光测试（3k–10k 预算）· 招聘 #4 · 旺季交付</span></p></div>
+      <div class="card dark"><h4>Q4</h4><p class="small"><span class="en">Year-1 verified outcome report (however small — the audit trail is the product) · PhD line pilot (5–8 cases) · white paper v1 · hires #5–6</span><span class="zh">首年可验证成果报告（无论多小——可审计本身就是产品）· 博士线试点（5–8 案）· 白皮书第一版 · 招聘 #5–6</span></p></div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card stat"><div class="v" style="font-size:34px">25–35</div><div class="k"><span class="en">clients, year one</span><span class="zh">首年签约客户</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:34px">£120–180k</div><div class="k"><span class="en">revenue, year one</span><span class="zh">首年营收</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:34px">100%</div><div class="k"><span class="en">of funnel measured end-to-end</span><span class="zh">漏斗全链路可度量</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- S21 · 36-MONTH TARGETS -->
+<section class="slide" data-t="Targets">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">20</span><span class="en">Execution · three years</span><span class="zh">执行 · 三年</span></div>
+    <h2><span class="en">Where this goes by year three</span><span class="zh">三年后走到哪里</span></h2>
+    <div class="figbox">
+      <div class="ft"><span class="en">Clients and revenue trajectory</span><span class="zh">客户与营收轨迹</span></div>
+      <div id="fig-traj"></div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card"><h4><span class="en">Year 2 adds</span><span class="zh">第二年新增</span></h4><p class="small"><span class="en">Consultant sub-IPs · campus reps at 5–10 universities · verified-review system public · HK/SG depth delivering · PhD line 15–25 cases · referral ≥35%</span><span class="zh">顾问子 IP · 5–10 所高校校园大使 · 公开已验证评价系统 · 港新线深度交付 · 博士线 15–25 案 · 转介 ≥35%</span></p></div>
+      <div class="card"><h4><span class="en">Year 3 adds</span><span class="zh">第三年新增</span></h4><p class="small"><span class="en">Case-database 小程序 · in-UK services productised · QC + ops institutionalised · founder leads <40% · optionality: HK entity or per-school product extension</span><span class="zh">案例库小程序 · 在英服务产品化 · 质控与运营机构化 · 创始人获客 <40% · 可选项：香港主体或单校产品延伸</span></p></div>
+      <div class="card warn"><h4><span class="en">Explicit non-goals</span><span class="zh">明确不做</span></h4><p class="small"><span class="en">VC funding · sale to a listed parent · US-led expansion · any guaranteed-admission or full-refund product</span><span class="zh">VC 融资 · 卖给上市公司 · 以美国为主线的扩张 · 任何保录取或全额退款产品</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- S22 · KPI DASHBOARD -->
+<section class="slide" data-t="KPIs">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">21</span><span class="en">Instrumentation</span><span class="zh">仪表盘</span></div>
+    <h2><span class="en">Twelve numbers we run the company on</span><span class="zh">经营这家公司只看十二个数字</span></h2>
+    <div class="grid4" style="margin-top:18px">
+      <div class="card stat"><div class="v" style="font-size:26px">&lt;¥2,500</div><div class="k"><span class="en">blended CAC</span><span class="zh">综合获客成本</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">40%+</div><div class="k"><span class="en">referral share</span><span class="zh">转介绍占比</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">30–45%</div><div class="k"><span class="en">consult → sign</span><span class="zh">咨询签约率</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">≤35</div><div class="k"><span class="en">caseload cap</span><span class="zh">个案上限</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">55–65%</div><div class="k"><span class="en">gross margin</span><span class="zh">毛利率</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">&lt;2%</div><div class="k"><span class="en">refund disputes</span><span class="zh">退费纠纷率</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">100%</div><div class="k"><span class="en">deferred-revenue cover</span><span class="zh">递延收入覆盖</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">&lt;40%</div><div class="k"><span class="en">founder-led leads, Y3</span><span class="zh">创始人获客占比（三年）</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">≤55%</div><div class="k"><span class="en">single-destination share</span><span class="zh">单一目的地占比</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px">≥65%</div><div class="k"><span class="en">owned-channel leads</span><span class="zh">自有渠道线索占比</span></div></div>
+      <div class="card stat"><div class="v" style="font-size:26px"><span class="en">mid-svc</span><span class="zh">服务中期</span></div><div class="k">NPS</div></div>
+      <div class="card stat"><div class="v" style="font-size:26px"><span class="en">annual</span><span class="zh">年度</span></div><div class="k"><span class="en">verified outcome report</span><span class="zh">可验证成果报告</span></div></div>
+    </div>
+    <p class="foot"><span class="en">Sourced from category benchmarks: referral 40–70% at top boutiques · consult→sign 25–50% for studios vs 5–15% telesales · Valeon died below 30% GM · mega-agency marketing burn 15–25% of revenue.</span><span class="zh">来自行业基准：头部工作室转介 40–70% · 工作室咨询签约率 25–50% 对电销 5–15% · 再来人死于毛利 30% 以下 · 大机构营销烧掉营收 15–25%。</span></p>
+  </div>
+</section>
+
+<!-- S23 · RISKS -->
+<section class="slide" data-t="Risks">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">22</span><span class="en">Risk register</span><span class="zh">风险清单</span></div>
+    <h2><span class="en">What can hurt us, and the pre-built answer</span><span class="zh">什么能伤到我们，以及预置的答案</span></h2>
+    <table class="dt" style="margin-top:16px">
+      <thead><tr><th style="width:42%"><span class="en">Risk</span><span class="zh">风险</span></th><th><span class="en">Mitigation, built in from day one</span><span class="zh">从第一天就内置的对策</span></th></tr></thead>
+      <tbody>
+        <tr><td><span class="en"><b>UK policy shock</b> — Graduate Route cut to 18 months, £925 levy from 2028</span><span class="zh"><b>英国政策冲击</b>——毕业生签证缩至 18 个月、2028 年起 £925 征费</span></td><td><span class="en">Tri-destination by design: UK ≤55% of revenue; HK TPG (quota-free, +30–50%/cycle) absorbs the overflow</span><span class="zh">三目的地设计：英国 ≤55% 营收；香港授课硕士（无配额、每季 +30–50%）承接溢出</span></td></tr>
+        <tr><td><span class="en"><b>Founder = funnel</b> (key-person risk)</span><span class="zh"><b>创始人=漏斗</b>（关键人风险）</span></td><td><span class="en">Stage-2/3 brand path; founder-lead share tracked down to <40%; owned data product</span><span class="zh">品牌路径第二/三阶段；创始人获客占比指标压降到 <40%；自有数据产品</span></td></tr>
+        <tr><td><span class="en"><b>XHS algorithm or category crackdown</b></span><span class="zh"><b>小红书算法或类目整治</b></span></td><td><span class="en">Compliant-only posture; every follower harvested into company 企业微信; 知乎 SEO as ballast</span><span class="zh">全合规姿态；粉丝尽数沉淀公司企业微信；知乎 SEO 做压舱石</span></td></tr>
+        <tr><td><span class="en"><b>Consultant leaves with clients</b> (the ShunShun failure)</span><span class="zh"><b>顾问带客离职</b>（顺顺式失败）</span></td><td><span class="en">企业微信-held relationships, above-market pay, pods (no single-point ownership), non-solicit terms</span><span class="zh">客户关系存于企业微信、高于市场薪酬、小组制（无单点占有）、限制性条款</span></td></tr>
+        <tr><td><span class="en"><b>指南者 moves upmarket</b> into ¥40–60k</span><span class="zh"><b>指南者上探</b> 4–6 万档</span></td><td><span class="en">Speed now; seniority + UK-genuine delivery + PhD line are what a junior-staff model cannot copy quickly</span><span class="zh">现在就跑；资深团队 + 真实英国交付 + 博士线是初级团队模式难以速成的部分</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- S24 · MONDAY -->
+<section class="slide" data-t="Monday">
+  <div class="stage">
+    <div class="eyebrow"><span class="n">23</span><span class="en">Immediate actions</span><span class="zh">立即行动</span></div>
+    <h2><span class="en">What we do Monday</span><span class="zh">周一就做的事</span></h2>
+    <div class="grid2" style="gap:0 40px; margin-top:10px">
+      <div>
+        <div class="check"><div class="bx"></div><div><span class="en">Draft the public price page + refund policy (the tier-3 anchor at ¥45–60k)</span><span class="zh">起草公开价格页 + 退款政策（¥45–60k 的三档锚点）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Open the designated client account; write milestone billing into the contract template</span><span class="zh">开设客户资金专户；把里程碑计费写进合同模板</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Verify the 机构号 (¥600/yr), set the founder-account content calendar: 4–7 notes/week</span><span class="zh">认证机构号（600 元/年），排定创始人账号内容日历：每周 4–7 篇</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Stand up 企业微信 with channel-tagged QR codes — every lead lands in company-held 私域</span><span class="zh">上线企业微信 + 渠道活码——每条线索落入公司私域</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Start the case ledger with every past client (consented, anonymised where needed)</span><span class="zh">用每一位历史客户启动案例台账（经同意、必要处匿名）</span></div></div>
+      </div>
+      <div>
+        <div class="check"><div class="bx"></div><div><span class="en">Write the first two 知乎 pillar answers (UK/HK Masters evaluative queries)</span><span class="zh">写下前两篇知乎支柱长文（英港硕士评估类问题）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Publish the ethics charter: no ghostwriting, no fabricated materials, no guarantees</span><span class="zh">发布操守章程：不代写、不造假、不担保</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Post the senior-consultant JD (hire #1: UK-based, Chinese-native, UK Masters/PhD alum)</span><span class="zh">发布资深顾问 JD（1 号员工：英国本地、中文母语、英硕/博背景）</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Set the referral programme: ¥800–1,500 rewards, asks scripted for offer day + visa day</span><span class="zh">设定转介绍机制：800–1500 元奖励，offer 日与获签日的请求话术成稿</span></div></div>
+        <div class="check"><div class="bx"></div><div><span class="en">Recruit 2–3 displaced senior counsellors (IDP/pathway layoffs) into the interview pipeline</span><span class="zh">把 2–3 名被裁的资深顾问（IDP/预科系）纳入面试管道</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S25 · CLOSE -->
+<section class="slide" data-t="Close">
+  <div class="stage" style="text-align:left">
+    <div class="eyebrow"><span class="en">The thesis, in one line</span><span class="zh">一句话论点</span></div>
+    <h1 style="font-size:clamp(34px,4.2vw,56px); max-width:24ch; line-height:1.15"><span class="en">We win by operationalising every trust failure in this market as a published, verifiable product feature.</span><span class="zh">把这个市场的每一次信任失败，变成我们公开、可验证的产品条款——这就是我们的赢法。</span></h1>
+    <hr class="gold-rule">
+    <p class="dek"><span class="en">Not louder marketing. Not lower prices. The inverse of the graveyard, in writing, at ¥40–80k, in the corridor where demand is growing fastest.</span><span class="zh">不是更响的营销，不是更低的价格。是白纸黑字写下墓园的反面，定价 4–8 万，站在需求增长最快的走廊上。</span></p>
+    <p class="small" style="margin-top:26px"><span class="en">Evidence base: The Masters Market Atlas — 141 companies, 22 chapters, interactive database. Companion to this deck.</span><span class="zh">证据底座：《硕士申请市场全景图》——141 家公司、22 章、交互数据库。本汇报的姊妹篇。</span></p>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- chrome -->
+<div class="chrome" id="brand">Academia<em>One</em><span class="sub"><span class="en">The Next Moves</span><span class="zh">下一步棋</span></span></div>
+<div class="chrome" id="langbar"><button data-l="en" class="on">EN</button><button data-l="zh">中文</button></div>
+<div class="chrome" id="progress"></div>
+<div class="chrome" id="counter">01 / 25</div>
+<div class="chrome" id="dots"></div>
+<div class="chrome" id="navbtns"><button id="prev" aria-label="Previous">←</button><button id="next" aria-label="Next">→</button></div>
+<div id="tip"></div>
+<script>
+/* ===== language + tooltip + chart kit ===== */
+var LANG = 'en';
+try { LANG = localStorage.getItem('ao-deck-lang') || 'en'; } catch(e){}
+var __renders = [];
+function L(en, zh){ return LANG === 'zh' ? (zh || en) : en; }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtN(n){ return Number(n).toLocaleString('en-US'); }
+function setLang(l){
+  LANG = l;
+  document.body.classList.toggle('zh', l === 'zh');
+  document.querySelectorAll('#langbar button').forEach(function(b){ b.classList.toggle('on', b.dataset.l === l); });
+  try { localStorage.setItem('ao-deck-lang', l); } catch(e){}
+  __renders.forEach(function(fn){ try { fn(); } catch(e){ console.error(e); } });
+}
+document.querySelectorAll('#langbar button').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.dataset.l); }); });
+
+(function(){
+  var tip = document.getElementById('tip');
+  function move(ev){
+    var x = ev.clientX + 14, y = ev.clientY + 14, r = tip.getBoundingClientRect();
+    if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 12;
+    if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 12;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  document.addEventListener('mouseover', function(ev){
+    var t = ev.target.closest('[data-tip]');
+    if (t){ tip.innerHTML = t.getAttribute('data-tip'); tip.style.display = 'block'; move(ev); }
+    else if (!ev.target.closest('#tip')) tip.style.display = 'none';
+  });
+  document.addEventListener('mousemove', function(ev){ if (tip.style.display === 'block') move(ev); });
+})();
+
+var CH = { ink:'#211C11', ink2:'#5E5540', ink3:'#8C8168', grid:'#E9E1CC', axis:'#CFC3A4', panel:'#FBF8F1',
+  gold:'#A87B24', blue:'#2F63C1', teal:'#0B8A6E', red:'#C74436', goldsoft:'#C9A968' };
+function svgOpen(w, h){ return '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg" style="font-family:var(--sans)">'; }
+
+function vbars(elId, labels, values, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var W = opts.w || 920, H = opts.h || 300, padL = 46, padB = 30, padT = 16, padR = 8;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var max = opts.max || Math.max.apply(null, values) * 1.12;
+    var s = svgOpen(W, H);
+    for (var t = 0; t <= 4; t++){
+      var yv = max / 4 * t, y = padT + ph - yv / max * ph;
+      s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + (t === 0 ? CH.axis : CH.grid) + '"/>';
+      s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="' + CH.ink3 + '">' + (opts.fmt ? opts.fmt(yv) : Math.round(yv)) + '</text>';
+    }
+    var slot = pw / values.length, bw = Math.min(slot * 0.55, 90);
+    values.forEach(function(v, i){
+      var cx = padL + slot * i + slot / 2, bh = Math.max(2, v / max * ph);
+      var lb = labels[i], lbl = L(lb.en, lb.zh);
+      var tipS = '<b>' + esc(lbl) + '</b><br>' + esc(opts.fmt ? opts.fmt(v) : v) + (lb.note ? '<br>' + esc(L(lb.note, lb.noteZh || lb.note)) : '');
+      s += '<rect data-tip="' + esc(tipS) + '" x="' + (cx - bw/2) + '" y="' + (padT + ph - bh) + '" width="' + bw + '" height="' + bh + '" rx="3" fill="' + (lb.color || CH.gold) + '"/>';
+      s += '<text x="' + cx + '" y="' + (padT + ph - bh - 8) + '" text-anchor="middle" font-size="12.5" font-weight="600" fill="' + CH.ink2 + '">' + (opts.fmt ? opts.fmt(v) : v) + '</text>';
+      s += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11.5" fill="' + CH.ink3 + '">' + esc(lbl) + '</text>';
+      if (lb.sub) s += '<text x="' + cx + '" y="' + (padT + ph - bh - 24) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + esc(L(lb.sub, lb.subZh || lb.sub)) + '</text>';
+    });
+    el.innerHTML = s + '</svg>';
+  }
+  __renders.push(render); render();
+}
+
+function lineChart(elId, x, series, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var W = opts.w || 980, H = opts.h || 320, padL = 48, padB = 28, padT = 12, padR = opts.padR || 140;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var all = []; series.forEach(function(sr){ sr.values.forEach(function(v){ if (v != null) all.push(v); }); });
+    var max = opts.max || Math.max.apply(null, all) * 1.1;
+    function X(i){ return padL + pw * i / (x.length - 1); }
+    function Y(v){ return padT + ph - v / max * ph; }
+    var s = svgOpen(W, H);
+    for (var t = 0; t <= 4; t++){
+      var yv = max / 4 * t, y = Y(yv);
+      s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR + 18) + '" y2="' + y + '" stroke="' + (t === 0 ? CH.axis : CH.grid) + '"/>';
+      s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="' + CH.ink3 + '">' + (opts.fmt ? opts.fmt(yv) : Math.round(yv)) + '</text>';
+    }
+    x.forEach(function(xl, i){ s += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="' + CH.ink3 + '">' + esc(xl) + '</text>'; });
+    series.forEach(function(sr){
+      var d = '', started = false;
+      sr.values.forEach(function(v, i){ if (v == null) return; d += (started ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' '; started = true; });
+      s += '<path d="' + d + '" fill="none" stroke="' + sr.color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+      var li = sr.values.length - 1; while (li >= 0 && sr.values[li] == null) li--;
+      s += '<circle cx="' + X(li) + '" cy="' + Y(sr.values[li]) + '" r="4" fill="' + sr.color + '" stroke="' + CH.panel + '" stroke-width="1.6"/>';
+      s += '<text x="' + (X(li) + 10) + '" y="' + (Y(sr.values[li]) + 4 + (sr.dy || 0)) + '" font-size="12.5" font-weight="600" fill="' + sr.color + '">' + esc(L(sr.en, sr.zh)) + '</text>';
+      sr.values.forEach(function(v, i){
+        if (v == null) return;
+        s += '<circle data-tip="' + esc('<b>' + esc(L(sr.en, sr.zh)) + '</b> · ' + esc(x[i]) + '<br>' + (opts.fmt ? opts.fmt(v) : v)) + '" cx="' + X(i) + '" cy="' + Y(v) + '" r="10" fill="transparent"/>';
+      });
+    });
+    el.innerHTML = s + '</svg>';
+  }
+  __renders.push(render); render();
+}
+
+function rangeChart(elId, rows, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var max = opts.max, lw = opts.labelW || 210, bh = 22, gap = 12;
+    var W = opts.w || 980, H = rows.length * (bh + gap) + 28;
+    var bw = W - lw - 24;
+    function X(v){ return lw + v / max * bw; }
+    var s = svgOpen(W, H);
+    if (opts.zone){ s += '<rect x="' + X(opts.zone[0]) + '" y="0" width="' + (X(opts.zone[1]) - X(opts.zone[0])) + '" height="' + (H - 24) + '" fill="' + CH.goldsoft + '" fill-opacity="0.22"/>';
+      s += '<text x="' + ((X(opts.zone[0]) + X(opts.zone[1])) / 2) + '" y="14" text-anchor="middle" font-size="10.5" font-weight="700" letter-spacing="1" fill="' + CH.gold + '">' + esc(L(opts.zoneLbl || '', opts.zoneLblZh || opts.zoneLbl || '')) + '</text>'; }
+    (opts.ticks || []).forEach(function(t){
+      s += '<line x1="' + X(t) + '" y1="0" x2="' + X(t) + '" y2="' + (H - 24) + '" stroke="' + CH.grid + '"/>';
+      s += '<text x="' + X(t) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + (opts.fmt ? opts.fmt(t) : t) + '</text>';
+    });
+    rows.forEach(function(r, i){
+      var y = i * (bh + gap) + 20;
+      var x0 = X(r.lo), x1 = Math.max(X(r.hi), X(r.lo) + 3);
+      var tipS = '<b>' + esc(L(r.en, r.zh)) + '</b><br>' + esc((opts.fmt ? opts.fmt(r.lo) : r.lo) + ' – ' + (opts.fmt ? opts.fmt(r.hi) : r.hi)) + (r.note ? '<br>' + esc(L(r.note, r.noteZh || r.note)) : '');
+      s += '<g data-tip="' + esc(tipS) + '">';
+      s += '<rect x="0" y="' + (y - 4) + '" width="' + W + '" height="' + (bh + 8) + '" fill="transparent"/>';
+      s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="12.5" fill="' + (r.muted ? CH.ink3 : CH.ink2) + '">' + esc(L(r.en, r.zh)) + '</text>';
+      s += '<line x1="' + lw + '" y1="' + (y + bh/2) + '" x2="' + (W - 8) + '" y2="' + (y + bh/2) + '" stroke="' + CH.grid + '"/>';
+      s += '<rect x="' + x0 + '" y="' + y + '" width="' + (x1 - x0) + '" height="' + bh + '" rx="3" fill="' + (r.color || CH.gold) + '"' + (r.muted ? ' opacity="0.45"' : ' fill-opacity="0.88"') + '/>';
+      var lbl = (opts.fmt ? opts.fmt(r.lo) : r.lo) + '–' + (opts.fmt ? opts.fmt(r.hi) : r.hi);
+      if (x1 > W - 96) s += '<text x="' + (x1 - 8) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="11" fill="' + CH.panel + '">' + lbl + '</text>';
+      else s += '<text x="' + (x1 + 7) + '" y="' + (y + bh/2 + 4) + '" font-size="11" fill="' + CH.ink2 + '">' + lbl + '</text>';
+      s += '</g>';
+    });
+    el.innerHTML = s + '</svg>';
+  }
+  __renders.push(render); render();
+}
+
+/* ===== deck charts ===== */
+function buildCharts(){
+  vbars('fig-kaoyan',
+    [{en:'2022',zh:'2022'},{en:'2023',zh:'2023',sub:'peak',subZh:'峰值'},{en:'2024',zh:'2024'},{en:'2025',zh:'2025'},{en:'2026',zh:'2026',color:CH.red}],
+    [4.57,4.74,4.38,3.88,3.43], {h:280, max:5.2, fmt:function(v){ return v.toFixed(1) + 'M'; }});
+
+  lineChart('fig-dest', ['19/20','20/21','21/22','22/23','23/24','24/25'], [
+    {en:'United States', zh:'美国', color:CH.blue, values:[372.5,317.3,290.1,289.5,277.4,265], dy:-6},
+    {en:'United Kingdom', zh:'英国', color:CH.gold, values:[141.6,143.8,151.7,158.3,149.9,null], dy:8}
+  ], {h:330, max:400, fmt:function(v){ return Math.round(v) + 'k'; }});
+
+  rangeChart('fig-price', [
+    {en:'小红书 studios', zh:'小红书工作室', lo:8, hi:50, color:CH.blue, muted:true, note:'fragile, founder-bound', noteZh:'脆弱、绑定创始人'},
+    {en:'Compass 指南者', zh:'指南者留学', lo:18, hi:24, color:CH.teal, note:'transparent factory, junior staff', noteZh:'透明工厂、初级团队'},
+    {en:'PalmDrive 棕榈大道', zh:'棕榈大道', lo:30, hi:60, color:CH.gold, note:'part-time mentor pool', noteZh:'兼职导师池'},
+    {en:'AcademiaOne target', zh:'AcademiaOne 目标档', lo:40, hi:80, color:CH.teal, note:'senior · full-time · capped · published', noteZh:'资深 · 全职 · 限额 · 公开定价'},
+    {en:'GGU 世毕盟', zh:'世毕盟', lo:60, hi:120, color:CH.gold, note:'~15 insured staff; reputation bleeding', noteZh:'约 15 名参保员工；口碑失血'},
+    {en:'Topsedu 托普仕', zh:'托普仕', lo:100, hi:150, color:CH.gold, note:'“refund guarantee” liabilities', noteZh:'「退款担保」负债'},
+    {en:'Valeon 再来人 †', zh:'再来人 †', lo:100, hi:200, color:CH.red, note:'defunct Dec 2025 · GM <30%', noteZh:'2025 年 12 月倒闭 · 毛利 <30%'}
+  ], {max:205, ticks:[0,25,50,75,100,150,200], fmt:function(v){ return '¥' + v + 'k'; },
+      zone:[40,80], zoneLbl:'OUR BAND', zoneLblZh:'我们的价格带', labelW:220});
+
+  rangeChart('fig-cac', [
+    {en:'Referral (engineered)', zh:'转介绍（工程化）', lo:500, hi:2000, color:CH.teal, note:'close rate 50–80%', noteZh:'签约率 50–80%'},
+    {en:'Studio content blend', zh:'工作室内容组合', lo:500, hi:2500, color:CH.teal, note:'XHS + 知乎 + 私域', noteZh:'小红书 + 知乎 + 私域'},
+    {en:'Campus ambassadors', zh:'校园大使', lo:500, hi:3000, color:CH.teal},
+    {en:'Mega-agency paid blend', zh:'大机构付费组合', lo:3000, hi:8000, color:CH.gold, note:'15–25% of revenue burned', noteZh:'烧掉营收 15–25%'},
+    {en:'抖音 livestream funnel', zh:'抖音直播漏斗', lo:3000, hi:8000, color:CH.red, note:'telesales close 5–15%', noteZh:'电销签约 5–15%'},
+    {en:'Baidu SEM', zh:'百度 SEM', lo:5000, hi:15000, color:CH.red, note:'head keywords ¥100–300+/click', noteZh:'头部词点击 100–300 元+'}
+  ], {max:15500, ticks:[0,2500,5000,10000,15000], fmt:function(v){ return '¥' + fmtN(v); }, labelW:225, w:900});
+
+  /* milestone 30/40/30 */
+  (function(){
+    function render(){
+      var el = document.getElementById('fig-milestone'); if (!el) return;
+      var W = 940, H = 150, y = 34, h = 46;
+      var segs = [
+        {p:30, c:CH.gold, en:'On signing', zh:'签约时', dEn:'strategy + school list delivered', dZh:'交付策略与选校清单'},
+        {p:40, c:CH.teal, en:'On submission', zh:'递交申请时', dEn:'all applications filed', dZh:'全部申请递交完成'},
+        {p:30, c:CH.blue, en:'On first offer', zh:'首个 offer 时', dEn:'outcome delivered', dZh:'结果交付'}
+      ];
+      var s = svgOpen(W, H), x = 20, tw = W - 40;
+      segs.forEach(function(g, i){
+        var w = tw * g.p / 100;
+        s += '<rect x="' + x + '" y="' + y + '" width="' + (w - 4) + '" height="' + h + '" rx="5" fill="' + g.c + '" fill-opacity="0.9"/>';
+        s += '<text x="' + (x + (w - 4)/2) + '" y="' + (y + h/2 + 6) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + CH.panel + '">' + g.p + '%</text>';
+        s += '<text x="' + (x + (w - 4)/2) + '" y="' + (y + h + 24) + '" text-anchor="middle" font-size="12.5" font-weight="600" fill="' + CH.ink2 + '">' + esc(L(g.en, g.zh)) + '</text>';
+        s += '<text x="' + (x + (w - 4)/2) + '" y="' + (y + h + 42) + '" text-anchor="middle" font-size="11" fill="' + CH.ink3 + '">' + esc(L(g.dEn, g.dZh)) + '</text>';
+        x += w;
+      });
+      s += '<text x="20" y="20" font-size="11.5" fill="' + CH.ink3 + '">' + esc(L('Client money for undelivered milestones sits in a designated account — advertised, not hidden.', '未交付里程碑的客户款项存放于独立专户——公开宣传，而非隐藏。')) + '</text>';
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* account architecture */
+  (function(){
+    function render(){
+      var el = document.getElementById('fig-arch'); if (!el) return;
+      var W = 940, H = 250;
+      var s = svgOpen(W, H);
+      function box(x, y, w, h, fill, stroke, tEn, tZh, dEn, dZh, tc){
+        s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" fill="' + fill + '" stroke="' + stroke + '"/>';
+        s += '<text x="' + (x + w/2) + '" y="' + (y + 24) + '" text-anchor="middle" font-size="13.5" font-weight="700" fill="' + (tc || CH.ink) + '">' + esc(L(tEn, tZh)) + '</text>';
+        if (dEn) s += '<text x="' + (x + w/2) + '" y="' + (y + 42) + '" text-anchor="middle" font-size="10.5" fill="' + (tc ? CH.goldsoft : CH.ink3) + '">' + esc(L(dEn, dZh)) + '</text>';
+      }
+      box(20, 20, 280, 56, '#F6EEDA', CH.goldsoft, 'Founder account 创始人 IP', '创始人 IP 账号', 'the face: cases, 避雷, method', '门面：案例、避雷、方法论');
+      box(330, 20, 280, 56, CH.panel, '#CFC3A4', 'Flagship 机构号 (verified)', '旗舰机构号（认证）', 'offer walls, guides, ads-capable', 'offer 墙、攻略、可投聚光');
+      box(640, 20, 280, 56, CH.panel, '#CFC3A4', '2–4 consultant sub-IPs', '2–4 个顾问子 IP', 'real names, real casework', '实名顾问、真实案例');
+      ['160','470','780'].forEach(function(cx){ s += '<path d="M' + cx + ' 76 L' + cx + ' 118" stroke="' + CH.axis + '" stroke-width="1.6" marker-end="none"/><path d="M' + (cx-5) + ' 112 L' + cx + ' 120 L' + (+cx+5) + ' 112" fill="none" stroke="' + CH.axis + '" stroke-width="1.6"/>'; });
+      box(240, 122, 460, 56, CH.ink, CH.ink, '企业微信 · company-held 私域', '企业微信 · 公司持有的私域', 'channel-tagged QRs · drip SOPs · the client book stays when people leave', '渠道活码 · SOP 触达 · 人走客户留', CH.panel);
+      s += '<path d="M470 178 L470 208" stroke="' + CH.axis + '" stroke-width="1.6"/><path d="M465 202 L470 210 L475 202" fill="none" stroke="' + CH.axis + '" stroke-width="1.6"/>';
+      s += '<text x="470" y="234" text-anchor="middle" font-size="13" font-weight="600" fill="' + CH.ink2 + '">' + esc(L('Paid diagnostic → proposal → signed client', '付费诊断 → 方案 → 签约客户')) + '</text>';
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* pod diagram */
+  (function(){
+    function render(){
+      var el = document.getElementById('fig-pod'); if (!el) return;
+      var W = 520, H = 300, cx = W/2, cy = 150;
+      var s = svgOpen(W, H);
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="52" fill="' + CH.ink + '"/>';
+      s += '<text x="' + cx + '" y="' + (cy - 2) + '" text-anchor="middle" font-size="13.5" font-weight="700" fill="' + CH.panel + '">' + esc(L('Client', '客户')) + '</text>';
+      s += '<text x="' + cx + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" fill="' + CH.goldsoft + '">' + esc(L('one team, no handovers', '一个小组，零交接')) + '</text>';
+      var roles = [
+        {a:-90, en:'Senior consultant', zh:'资深顾问', d:'cap 35 · named · insured', dZh:'35 案上限 · 署名 · 参保', c:CH.gold},
+        {a:150, en:'Full-time editor', zh:'全职文书', d:'rubric + second reader', dZh:'评分标准 + 二审', c:CH.teal},
+        {a:30, en:'Success manager', zh:'服务经理', d:'企业微信 · milestones · SLA', dZh:'企业微信 · 里程碑 · SLA', c:CH.blue}
+      ];
+      roles.forEach(function(r){
+        var rad = r.a * Math.PI / 180, x = cx + Math.cos(rad) * 118, y = cy + Math.sin(rad) * 100;
+        s += '<line x1="' + (cx + Math.cos(rad) * 54) + '" y1="' + (cy + Math.sin(rad) * 54) + '" x2="' + (x - Math.cos(rad) * 46) + '" y2="' + (y - Math.sin(rad) * 34) + '" stroke="' + CH.axis + '" stroke-width="1.6"/>';
+        s += '<circle cx="' + x + '" cy="' + y + '" r="8" fill="' + r.c + '"/>';
+        var ty = y < cy ? y - 34 : y + 26;
+        s += '<text x="' + x + '" y="' + ty + '" text-anchor="middle" font-size="12.5" font-weight="700" fill="' + CH.ink + '">' + esc(L(r.en, r.zh)) + '</text>';
+        s += '<text x="' + x + '" y="' + (ty + 16) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + esc(L(r.d, r.dZh)) + '</text>';
+      });
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* margin comparison */
+  (function(){
+    function render(){
+      var el = document.getElementById('fig-margin'); if (!el) return;
+      var W = 460, H = 130, lw = 170, bw = W - lw - 70;
+      var rows = [
+        {en:'AcademiaOne target', zh:'AcademiaOne 目标', v:60, lbl:'55–65%', c:CH.teal},
+        {en:'Valeon 再来人 †', zh:'再来人 †', v:28, lbl:'<30%', c:CH.red}
+      ];
+      var s = svgOpen(W, H);
+      rows.forEach(function(r, i){
+        var y = 18 + i * 48, w = bw * r.v / 100;
+        s += '<text x="' + (lw - 10) + '" y="' + (y + 15) + '" text-anchor="end" font-size="12.5" fill="' + CH.ink2 + '">' + esc(L(r.en, r.zh)) + '</text>';
+        s += '<rect x="' + lw + '" y="' + y + '" width="' + bw + '" height="24" rx="3" fill="' + CH.grid + '"/>';
+        s += '<rect x="' + lw + '" y="' + y + '" width="' + w + '" height="24" rx="3" fill="' + r.c + '"/>';
+        s += '<text x="' + (lw + w + 8) + '" y="' + (y + 16) + '" font-size="12.5" font-weight="700" fill="' + CH.ink2 + '">' + r.lbl + '</text>';
+      });
+      s += '<text x="' + lw + '" y="' + (H - 6) + '" font-size="10.5" fill="' + CH.ink3 + '">' + esc(L('gross margin on the core full-service tier', '核心全服务档的毛利率')) + '</text>';
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* budget stacked bars */
+  (function(){
+    var stages = [
+      {en:'£100k revenue', zh:'£10 万营收', total:'£10–12k',
+        segs:[['XHS + founder content','小红书+创始人内容',55,CH.gold],['知乎/SEO','知乎/SEO',15,CH.blue],['私域 tooling','私域工具',10,CH.teal],['Referral','转介绍',10,'#8A4FA3'],['Brand defence','品牌词防守',5,CH.ink3],['Partnerships','合作渠道',5,'#6B8A22']]},
+      {en:'£500k revenue', zh:'£50 万营收', total:'£50–60k',
+        segs:[['XHS ecosystem','小红书生态',40,CH.gold],['知乎/SEO/site','知乎/SEO/官网',15,CH.blue],['私域 + webinars','私域+讲座',15,CH.teal],['Referral + alumni','转介绍+校友',15,'#8A4FA3'],['Campus reps','校园大使',10,'#6B8A22'],['Partnerships','合作渠道',5,CH.ink3]]},
+      {en:'£2M revenue', zh:'£200 万营收', total:'£220–260k',
+        segs:[['XHS ecosystem','小红书生态',35,CH.gold],['Owned data product','自有数据产品',20,CH.red],['私域/community','私域/社群',12,CH.teal],['Referral + alumni','转介绍+校友',15,'#8A4FA3'],['Campus + B2B','校园+B2B',10,'#6B8A22'],['SEO + defence','SEO+防守',8,CH.blue]]}
+    ];
+    function render(){
+      var el = document.getElementById('fig-budget'); if (!el) return;
+      var W = 940, H = 220, lw = 150, bw = W - lw - 90, bh = 40, gap = 26;
+      var s = svgOpen(W, H);
+      stages.forEach(function(st, i){
+        var y = 14 + i * (bh + gap), x = lw;
+        s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 - 4) + '" text-anchor="end" font-size="12.5" font-weight="600" fill="' + CH.ink2 + '">' + esc(L(st.en, st.zh)) + '</text>';
+        s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 + 13) + '" text-anchor="end" font-size="10.5" fill="' + CH.ink3 + '">' + st.total + '</text>';
+        st.segs.forEach(function(g){
+          var w = bw * g[2] / 100;
+          s += '<rect data-tip="' + esc('<b>' + esc(L(g[0], g[1])) + '</b><br>' + g[2] + '%') + '" x="' + x + '" y="' + y + '" width="' + Math.max(w - 2, 2) + '" height="' + bh + '" rx="2.5" fill="' + g[3] + '" fill-opacity="0.9"/>';
+          if (w > 56) s += '<text x="' + (x + w/2) + '" y="' + (y + bh/2 + 4) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="' + CH.panel + '" pointer-events="none">' + g[2] + '%</text>';
+          x += w;
+        });
+      });
+      var legendY = H - 12, lx = lw;
+      [['XHS','小红书',CH.gold],['知乎/SEO','知乎/SEO',CH.blue],['私域','私域',CH.teal],['Referral','转介绍','#8A4FA3'],['Campus/B2B','校园/B2B','#6B8A22'],['Data product','数据产品',CH.red]].forEach(function(g){
+        s += '<circle cx="' + lx + '" cy="' + (legendY - 4) + '" r="5" fill="' + g[2] + '"/>';
+        s += '<text x="' + (lx + 10) + '" y="' + legendY + '" font-size="10.5" fill="' + CH.ink2 + '">' + esc(L(g[0], g[1])) + '</text>';
+        lx += 12 + 9 * Math.max(L(g[0], g[1]).length, 5) + 26;
+      });
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* hires timeline */
+  (function(){
+    var hires = [
+      {t:'£0', en:'#1 Senior consultant', zh:'#1 资深顾问'},
+      {t:'£100k', en:'#2 Content/XHS', zh:'#2 内容运营'},
+      {t:'£150k', en:'#3 Essay editor', zh:'#3 全职文书'},
+      {t:'£200k', en:'#4 Success manager', zh:'#4 服务经理'},
+      {t:'£300k', en:'#5 Consultant (HK/SG)', zh:'#5 二号顾问（港新）'},
+      {t:'£400k', en:'#6 Sales counsellor', zh:'#6 咨询顾问'},
+      {t:'£500k', en:'#7 PhD specialist', zh:'#7 博士专家'},
+      {t:'£650k', en:'#8 Editor + QC lead', zh:'#8 文书+质控'},
+      {t:'£800k', en:'#9 Ops/finance', zh:'#9 运营财务'},
+      {t:'£1M', en:'#10 3rd consultant / data', zh:'#10 三号顾问/数据'}
+    ];
+    function render(){
+      var el = document.getElementById('fig-hires'); if (!el) return;
+      var W = 940, H = 210, pad = 50, y = 105;
+      var s = svgOpen(W, H);
+      s += '<line x1="' + pad + '" y1="' + y + '" x2="' + (W - pad) + '" y2="' + y + '" stroke="' + CH.axis + '" stroke-width="2"/>';
+      hires.forEach(function(h, i){
+        var x = pad + (W - 2 * pad) * i / (hires.length - 1);
+        var up = i % 2 === 0;
+        s += '<circle cx="' + x + '" cy="' + y + '" r="7" fill="' + (i < 4 ? CH.gold : i < 7 ? CH.teal : CH.blue) + '" stroke="' + CH.panel + '" stroke-width="2"/>';
+        var ty = up ? y - 48 : y + 34;
+        s += '<text x="' + x + '" y="' + ty + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + CH.ink + '">' + esc(L(h.en, h.zh)) + '</text>';
+        s += '<text x="' + x + '" y="' + (ty + 15) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + h.t + '</text>';
+        s += '<line x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + (up ? y - 30 : y + 16) + '" stroke="' + CH.grid + '"/>';
+      });
+      s += '<text x="' + pad + '" y="' + (H - 6) + '" font-size="10.5" fill="' + CH.ink3 + '">' + esc(L('Colour = phase: gold months 0–12 · teal 12–24 · blue 24–36. Trigger = revenue run-rate.', '颜色 = 阶段：金 0–12 月 · 青 12–24 月 · 蓝 24–36 月。触发点 = 营收运行率。')) + '</text>';
+      el.innerHTML = s + '</svg>';
+    }
+    __renders.push(render); render();
+  })();
+
+  /* trajectory */
+  vbars('fig-traj',
+    [{en:'Year 1', zh:'第一年', sub:'25–35 clients', subZh:'25–35 单', color:CH.gold},
+     {en:'Year 2', zh:'第二年', sub:'110–140 clients', subZh:'110–140 单', color:CH.teal},
+     {en:'Year 3', zh:'第三年', sub:'250–350 clients', subZh:'250–350 单', color:CH.blue}],
+    [150, 600, 1500], {h:290, max:1700, fmt:function(v){ return '£' + (v >= 1000 ? (v/1000) + 'M' : v + 'k'); }});
+}
+
+/* ===== slide framework ===== */
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var cur = 0, N = slides.length;
+  var dots = document.getElementById('dots');
+  slides.forEach(function(_, i){
+    var b = document.createElement('button');
+    b.addEventListener('click', function(){ go(i); });
+    dots.appendChild(b);
+  });
+  var dotBtns = dots.querySelectorAll('button');
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function go(i){
+    if (i < 0 || i >= N) return;
+    slides[cur].classList.remove('on');
+    slides[cur].classList.toggle('back', i > cur);
+    cur = i;
+    slides.forEach(function(s, j){ s.classList.toggle('back', j < cur); });
+    slides[cur].classList.add('on');
+    document.getElementById('counter').textContent = pad(cur + 1) + ' / ' + pad(N);
+    document.getElementById('progress').style.width = ((cur + 1) / N * 100) + '%';
+    dotBtns.forEach(function(d, j){ d.classList.toggle('on', j === cur); });
+    try { history.replaceState(null, '', '#s' + pad(cur + 1)); } catch(e){}
+  }
+  window.deckGo = go;
+  document.getElementById('next').addEventListener('click', function(){ go(cur + 1); });
+  document.getElementById('prev').addEventListener('click', function(){ go(cur - 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(N - 1);
+  });
+  var tx = null;
+  document.addEventListener('touchstart', function(e){ tx = e.changedTouches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if (tx == null) return;
+    var dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 60) go(cur + (dx < 0 ? 1 : -1));
+    tx = null;
+  }, {passive:true});
+  var m = (location.hash || '').match(/^#s(\d+)$/);
+  var start = m ? Math.min(N - 1, Math.max(0, parseInt(m[1], 10) - 1)) : 0;
+  document.body.classList.toggle('zh', LANG === 'zh');
+  document.querySelectorAll('#langbar button').forEach(function(b){ b.classList.toggle('on', b.dataset.l === LANG); });
+  buildCharts();
+  go(start);
+})();
+</script>
+</body>
+</html>
