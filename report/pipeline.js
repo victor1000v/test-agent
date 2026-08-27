@@ -33,12 +33,23 @@ function classifyBatch(companies) {
 
 let all = [];
 const dives = {}, synth = {};
+function classifyOne(c) {
+  const name = c.name_en + ' ' + (c.name_zh || '');
+  for (const cat of CATS) if (cat.key !== 'failed' && cat.markers.some(m => m.test(name))) return cat.key;
+  return 'failed';
+}
 for (const r of results) {
   if (!r) continue;
   if (r.companies) {
-    const key = classifyBatch(r.companies);
+    const names = r.companies.map(c => c.name_en + ' ' + (c.name_zh || '')).join(' | ');
+    const isFailedBatch = /xiaozhan|小站/i.test(names) && /taisha|太傻/i.test(names);
+    const key = isFailedBatch ? 'failed' : classifyBatch(r.companies);
     if (!key) { console.error('UNCLASSIFIED BATCH:', r.companies.slice(0,3).map(c => c.name_en)); continue; }
-    for (const c of r.companies) { if (c && c.name_en) { c.category_key = key; all.push(c); } }
+    for (const c of r.companies) {
+      if (!c || !c.name_en) continue;
+      c.category_key = key === 'failed' ? classifyOne(c) : key;
+      all.push(c);
+    }
   } else if (r.title && r.summary_md) {
     const t = r.title.toLowerCase();
     const k = /crimson/.test(t) ? 'crimson' : /market|outbound|数据|中国/.test(t) ? 'market'
@@ -66,16 +77,17 @@ const ALIASES = [
   [/applyboard/i, 'applyboard'],
   [/^idp education(?!.*(china|noahs|noris|诺思))/i, 'idp'],
   [/leverage edu/i, 'leverage'],
+  [/puxin|朴新/i, 'puxin'],
   [/liucheng|柳橙/i, 'liucheng'],
   [/crimson education/i, 'crimson'],
 ];
 const STOP = /(education|edu|consulting|consultancy|international|group|overseas|study|abroad|liuxue|教育|留学|国际|集团)/g;
 function enKey(c) {
-  const stripParens = s => String(s || '').replace(/[（(][^）)]*[）)]/g, ' ');
+  const stripParens = s => String(s || '').replace(/[（(][^）)]*[）)]/g, ' ').replace(/\[[^\]]*\]/g, ' ');
   const full = stripParens(c.name_en) + ' ' + stripParens(c.name_zh);
   const isMeta = /excl|除外|ecosystem|生态|archetype/i.test(full);
   if (!isMeta) for (const [re, k] of ALIASES) if (re.test(full)) return 'alias:' + k;
-  return c.name_en.toLowerCase().replace(/\(.*?\)/g, '').replace(STOP, '').replace(/[^a-z0-9]/g, '').slice(0, 24);
+  return c.name_en.toLowerCase().replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(STOP, '').replace(/[^a-z0-9]/g, '').slice(0, 24);
 }
 function zhKey(c) {
   const z = (c.name_zh || '').replace(/[^一-鿿]/g, '').replace(/留学|教育|国际|集团|咨询/g, '');
@@ -115,13 +127,19 @@ function parseTeam(s) {
   return null;
 }
 function parseFund(s, ownership) {
-  const str = String(s || '');
+  let str = String(s || '');
   if (!str || /no disclosed|none|bootstrapped|未披露|无/i.test(str) && !/[$¥€£]|RMB|USD/i.test(str)) return null;
+  if (/^(no |none|n\/a|not |self|state|parent|internally|未|无)/i.test(str.trim())) return null;
+  // keep currency attached across hyphenated ranges: "RMB 100-200M" -> "RMB 200M"
+  str = str.replace(/(US?\$|C\$|A\$|NZ\$|S\$|HK\$|RMB|[£€¥$])\s?([\d.]+)\s*[-–~]\s?([\d.]+)/g, '$1$3');
   // find amounts like $114M, US$40M, RMB 3亿, ¥300M, £20M, 亿元
   let best = null;
-  const re = /(US?\$|\$|£|€|¥|RMB\s?|HK\$)?\s?([\d.]+)\s*(billion|bn|B\b|million|mn|M\b|亿|万)/gi;
+  const re = /(US?\$|C\$|A\$|NZ\$|S\$|\$|£|€|¥|RMB\s?|HK\$)?\s?([\d.]+)\s*(billion|bn|B\b|million|mn|M\b|亿|万)/gi;
   let m;
   while ((m = re.exec(str)) !== null) {
+    const ctx = str.slice(Math.max(0, m.index - 80), m.index + m[0].length + 30);
+    // skip figures that are not capital raised (revenue, market caps, goodwill, tuition...)
+    if (/revenue|market cap|goodwill|tuition|收入|市值|营收|商誉|GMV|sales|est\. ~?US?\$|failed|终止|acquired|acquisition|bought|收购|paid|buyout|taken private|earn-out|valuation|估值|valuing|worth/i.test(ctx)) continue;
     let v = parseFloat(m[2]);
     const unit = (m[3] || '').toLowerCase();
     if (/^b|billion|bn/.test(unit)) v *= 1000;
@@ -132,7 +150,11 @@ function parseFund(s, ownership) {
     else if (cur === '£') v = v * 1.28;
     else if (cur === '€') v = v * 1.09;
     else if (cur === 'HK$') v = v / 7.8;
-    if (/total|累计|raised|共/.test(str.slice(Math.max(0, m.index - 30), m.index + 30)) || best == null) {
+    else if (cur === 'C$') v = v * 0.73;
+    else if (cur === 'A$') v = v * 0.66;
+    else if (cur === 'NZ$') v = v * 0.6;
+    else if (cur === 'S$') v = v * 0.75;
+    if (/total|累计|raised|共/.test(ctx) || best == null) {
       best = Math.max(best || 0, v);
     }
   }

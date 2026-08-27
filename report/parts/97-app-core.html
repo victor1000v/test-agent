@@ -232,7 +232,9 @@ function rangeChart(elId, rows, opts){
       s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="12" fill="' + (r.muted ? CH.ink3 : CH.ink2) + '">' + esc(L(r.en, r.zh)) + '</text>';
       s += '<line x1="' + lw + '" y1="' + (y + bh/2) + '" x2="' + (W - 8) + '" y2="' + (y + bh/2) + '" stroke="' + CH.grid + '" stroke-width="1"/>';
       s += '<rect x="' + x0 + '" y="' + y + '" width="' + (x1 - x0) + '" height="' + bh + '" rx="3" fill="' + c + '"' + (r.muted ? ' opacity="0.4"' : ' fill-opacity="0.85"') + '/>';
-      s += '<text x="' + (x1 + 7) + '" y="' + (y + bh/2 + 4) + '" font-size="11" fill="' + CH.ink2 + '" style="font-variant-numeric:tabular-nums">' + esc(r.label || ((opts.fmt ? opts.fmt(r.lo) : r.lo) + '–' + (opts.fmt ? opts.fmt(r.hi) : r.hi))) + '</text>';
+      var lblTxt = esc(r.label || ((opts.fmt ? opts.fmt(r.lo) : r.lo) + '–' + (opts.fmt ? opts.fmt(r.hi) : r.hi)));
+      if (x1 > W - 96) s += '<text x="' + (x1 - 8) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="11" fill="' + CH.panel + '" style="font-variant-numeric:tabular-nums">' + lblTxt + '</text>';
+      else s += '<text x="' + (x1 + 7) + '" y="' + (y + bh/2 + 4) + '" font-size="11" fill="' + CH.ink2 + '" style="font-variant-numeric:tabular-nums">' + lblTxt + '</text>';
       s += '</g>';
     });
     s += '</svg>';

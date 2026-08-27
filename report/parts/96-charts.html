@@ -48,6 +48,86 @@ function buildCharts(){
     {en:'ApplySquare', zh:'申请方', v:11, vLabel:'~$8–15M', color:GOLD, tip:'<b>申请方</b><br>$5M Series A 2016 (TAL-linked) · pivoted to B2B data · 13 employees by 2026'}
   ], {labelW: 230});
 
+  /* CH03: destination reshuffle (thousands of Chinese students) */
+  if (document.getElementById('fig-ch03-dest')) lineChart('fig-ch03-dest',
+    ['19/20','20/21','21/22','22/23','23/24','24/25'],
+    [
+      {en:'United States', zh:'美国', color:BLUE, values:[372.5,317.3,290.1,289.5,277.4,265], dy:-6},
+      {en:'United Kingdom', zh:'英国', color:GOLD, values:[141.6,143.8,151.7,158.3,149.9,null], dy:6}
+    ],
+    {h:300, max:400, fmt:function(v){ return Math.round(v) + 'k'; }, padR:150});
+
+  /* CH03: kaoyan registrations (millions) */
+  if (document.getElementById('fig-ch03-kaoyan')) vbarChart('fig-ch03-kaoyan',
+    [{en:'2022',zh:'2022'},{en:'2023 (peak)',zh:'2023（峰值）'},{en:'2024',zh:'2024'},{en:'2025',zh:'2025'},{en:'2026',zh:'2026'}],
+    [{en:'考研 registrations', zh:'考研报名人数', color:GOLD, values:[4.57,4.74,4.38,3.88,3.43]}],
+    {h:260, max:5, fmt:function(v){ return v.toFixed(1) + 'M'; }});
+
+  /* CH04: companies per archetype, computed live from the database */
+  if (document.getElementById('fig-ch04-count') && window.DATA){
+    var rows = DATA.cats.map(function(c){
+      var n = DATA.companies.filter(function(x){ return x.category_key === c.key; }).length;
+      var col = c.key === 'failed' ? RED : (c.key.indexOf('cn-') === 0 ? GOLD : BLUE);
+      return {en:c.en, zh:c.zh, v:n, vLabel:String(n), color:col};
+    }).sort(function(a,b){ return b.v - a.v; });
+    hbarChart('fig-ch04-count', rows, {labelW:210});
+  }
+
+  /* CH12: the 2024-26 correction */
+  if (document.getElementById('fig-ch12-crash')) hbarChart('fig-ch12-crash', [
+    {en:'Adventus.io', zh:'Adventus.io', v:100, vLabel:'−100% · dead', color:RED, tip:'<b>Adventus.io</b><br>Voluntary administration late 2024, owing sub-agents their commissions'},
+    {en:'Puxin (NYSE: NEW)', zh:'朴新教育', v:97, vLabel:'−95%+ · OTC shell', color:RED, tip:'<b>朴新</b><br>US$1.7B 2018 IPO → delisted to OTC 2022; never profitable as a listed group'},
+    {en:'IDP Education (ASX)', zh:'IDP 教育', v:90, vLabel:'≈−90% from peak', color:RED, tip:'<b>IDP</b><br>~A$10B+ (2021) → ~A$1B; −48% in one session on 3 Jun 2025 guidance cut'},
+    {en:'ApplyBoard', zh:'ApplyBoard', v:80, vLabel:'>−80% write-down', color:RED, tip:'<b>ApplyBoard</b><br>C$4B Series D mark (2021) cut >80% by Fidelity; rolling layoffs 2023–25'}
+  ], {labelW:210, max:105});
+
+  /* CH14: MBA published per-school pricing (US$k) */
+  if (document.getElementById('fig-ch14-mba')) rangeChart('fig-ch14-mba', [
+    {en:'ARINGO', zh:'ARINGO', lo:4.65, hi:10.65, color:TEAL, note:'audited outcomes + partial-refund options', noteZh:'审计成果 + 部分退款选项'},
+    {en:'mbaMission', zh:'mbaMission', lo:4.9, hi:10.7, color:TEAL, note:'category leader; acquired Accepted 2025', noteZh:'品类领导者；2025 收购 Accepted'},
+    {en:'Personal MBA Coach', zh:'Personal MBA Coach', lo:4.9, hi:17, color:TEAL, note:'two-tier founder/team pricing', noteZh:'创始人档/团队档双层定价'},
+    {en:'Stratus', zh:'Stratus', lo:4.95, hi:12.45, color:TEAL, note:'team-of-four delivery; service-credit guarantee', noteZh:'四人小组交付；服务补偿型保障'},
+    {en:'Fortuna', zh:'Fortuna', lo:5.15, hi:10, color:TEAL, note:'+$1,400 for an ex-Director-of-Admissions coach', noteZh:'前招生总监档加价 1400 美元'},
+    {en:'Stacy Blackman', zh:'Stacy Blackman', lo:7.3, hi:18.5, color:TEAL, note:'flat-fee unlimited hours', noteZh:'固定价格不限时'},
+    {en:'Sam Weeks', zh:'Sam Weeks', lo:9.15, hi:12.35, color:GOLD, note:'upper bound = contingent interview-triggered payment', noteZh:'上限含面试触发的或有付款'},
+    {en:'Menlo Coaching', zh:'Menlo Coaching', lo:18, hi:25, color:GOLD, note:'most expensive; capped caseloads as positioning', noteZh:'全类最贵；限额接案即定位'}
+  ], {labelW:200, max:26, ticks:[0,5,10,15,20,25], fmt:function(v){ return '$' + v + 'k'; }});
+
+  /* CH15: Crimson valuation staircase (US$M, reported) */
+  if (document.getElementById('fig-ch15-val')) lineChart('fig-ch15-val',
+    ['2016','2017','2022','2024'],
+    [{en:'Reported valuation', zh:'报道估值', color:GOLD, values:[50,190,554,1000]}],
+    {h:280, max:1100, fmt:function(v){ return '$' + Math.round(v) + 'M'; }, padR:150});
+
+  /* CH16: cost per signed client by route (RMB) */
+  if (document.getElementById('fig-ch16-cac')) rangeChart('fig-ch16-cac', [
+    {en:'Referral (engineered)', zh:'转介绍（工程化运营）', lo:500, hi:2000, color:TEAL, note:'50–80% close; 40–70% of top boutiques’ signings', noteZh:'签约率 50–80%；头部工作室 40–70% 签约来源'},
+    {en:'Studio content blend (XHS+知乎+私域)', zh:'工作室内容组合（小红书+知乎+私域）', lo:500, hi:2500, color:TEAL, note:'consult→sign 25–50%', noteZh:'咨询→签约 25–50%'},
+    {en:'Campus ambassadors', zh:'校园大使', lo:500, hi:3000, color:TEAL, note:'per signed referral or 5–10% commission', noteZh:'按签约计酬或 5–10% 提成'},
+    {en:'Mega-agency paid blend', zh:'大机构付费组合', lo:3000, hi:8000, color:GOLD, note:'marketing+sales eats 15–25% of revenue', noteZh:'营销+销售吞掉营收 15–25%'},
+    {en:'抖音 livestream funnel', zh:'抖音直播漏斗', lo:3000, hi:8000, color:RED, note:'telesales close 5–15%; low lead quality', noteZh:'电销签约 5–15%；线索质量低'},
+    {en:'Baidu SEM', zh:'百度 SEM', lo:5000, hi:15000, color:RED, note:'head keywords ¥100–300+/click; parent-facing', noteZh:'头部词单次点击 100–300 元+；面向家长'}
+  ], {labelW:250, max:15500, ticks:[0,2500,5000,10000,15000], fmt:function(v){ return '¥' + fmtN(v); }});
+
+  /* CH17: capital raised vs outcome (US$M) */
+  if (document.getElementById('fig-ch17-money')) hbarChart('fig-ch17-money', [
+    {en:'upGrad (parent)', zh:'upGrad（母公司）', v:600, vLabel:'$600M+', color:GOLD, tip:'<b>upGrad</b><br>EBITDA-positive FY25 after heavy cuts; study-abroad arm strategically subordinate'},
+    {en:'ApplyBoard', zh:'ApplyBoard', v:475, vLabel:'~$475M', color:RED, tip:'<b>ApplyBoard</b><br>C$4B mark written down >80%; serial layoffs'},
+    {en:'Leap (incl. Yocket)', zh:'Leap（含 Yocket）', v:218, vLabel:'$218M', color:GOLD, tip:'<b>Leap</b><br>fintech-anchored; counselling is CAC for the loan book'},
+    {en:'Crimson Education', zh:'Crimson', v:144, vLabel:'~$144M', color:TEAL, tip:'<b>Crimson</b><br>~US$1B valuation; the lone compounding premium unicorn — cash-generative early'},
+    {en:'Keystone (bond)', zh:'Keystone（债券）', v:108, vLabel:'€100M debt', color:RED, tip:'<b>Keystone</b><br>EBITDA margin 11%→3% while carrying a €100M senior secured bond'},
+    {en:'Taisha (acquisition)', zh:'太傻（收购对价）', v:104, vLabel:'~$104M → 0', color:RED, tip:'<b>太傻</b><br>RMB 780M A-share acquisition + VAM → collapse 2019–20'},
+    {en:'Xiaozhan', zh:'小站教育', v:100, vLabel:'~$100M+', color:RED, tip:'<b>小站</b><br>missed the IPO window; retreated to a profitable niche'},
+    {en:'Puxin (IPO)', zh:'朴新（IPO）', v:100, vLabel:'~$100M+', color:RED, tip:'<b>朴新</b><br>48-school roll-up; never profitable; delisted to OTC'},
+    {en:'Leverage Edu', zh:'Leverage Edu', v:85, vLabel:'~$70–90M', color:GOLD, tip:'<b>Leverage</b><br>layoffs, culture allegations; IPO-motivated turnaround claims'},
+    {en:'Shorelight', zh:'Shorelight', v:68, vLabel:'~$68M + debt', color:RED, tip:'<b>Shorelight</b><br>US-only exposure; investor carrying credit-loss allowance on its stake'},
+    {en:'51offer', zh:'51offer', v:50, vLabel:'$50M', color:RED, tip:'<b>51offer</b><br>the largest-funded pure platform of its cohort; now a content site'},
+    {en:'Valeon', zh:'再来人', v:40, vLabel:'~$40M+ est.', color:RED, tip:'<b>再来人</b><br>premium mentor model; defunct Dec 2025'},
+    {en:'Unibuddy', zh:'Unibuddy', v:39, vLabel:'$38.8M', color:GOLD, tip:'<b>Unibuddy</b><br>no round since 2021; squeezed by free AI chat'},
+    {en:'Empowerly', zh:'Empowerly', v:30, vLabel:'$30M', color:GOLD, tip:'<b>Empowerly</b><br>mid-market VC model; refund complaints under a 4.8 Trustpilot'},
+    {en:'ShunShun', zh:'顺顺留学', v:25, vLabel:'~$25M', color:RED, tip:'<b>顺顺</b><br>partner-equity model; absorbed by TAL, marginalised'}
+  ], {labelW:200});
+
   /* later chapters' charts hook in below */
   if (window.buildCharts2) buildCharts2();
 }
