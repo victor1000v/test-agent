@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AO留学 · 名校申请深度规划自查表 | AcademiaOne</title>
-<meta name="description" content="AcademiaOne Education — AO留学 · 名校申请深度规划自查表">
+<meta name="description" content="AcademiaOne Education · AO留学 · 名校申请深度规划自查表">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Noto+Serif+SC:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -209,6 +209,37 @@
     margin-bottom:14px;font-weight:600;
   }
   .section-tag::before{content:'';width:18px;height:1px;background:var(--gold-dim);}
+
+  /* One small rotating sketch icon per question — see SKETCH_ICONS in JS */
+  .q-header-row{display:flex;gap:16px;align-items:flex-start;}
+  .q-header-text{flex:1;min-width:0;}
+  .sketch-chip{
+    flex:none;width:58px;height:58px;border-radius:14px;
+    background:linear-gradient(160deg,var(--card-2),var(--card));
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+    animation:sketchPop .5s var(--ease) both;
+  }
+  .sketch-chip svg{width:28px;height:28px;color:var(--gold-2);position:relative;z-index:1;}
+  .sketch-chip::after{
+    content:'';position:absolute;inset:0;
+    background-image:radial-gradient(rgba(201,162,75,.22) 1px, transparent 1px);
+    background-size:8px 8px;opacity:.5;
+  }
+  @keyframes sketchPop{
+    0%{opacity:0;transform:scale(.6) rotate(-8deg);}
+    60%{opacity:1;transform:scale(1.08) rotate(2deg);}
+    100%{opacity:1;transform:scale(1) rotate(0deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sketch-chip{animation:none;}
+  }
+  @media (max-width:480px){
+    .sketch-chip{width:46px;height:46px;border-radius:11px;}
+    .sketch-chip svg{width:22px;height:22px;}
+    .q-header-row{gap:12px;}
+  }
 
   h1.q-title{
     font-family:var(--serif-en);font-weight:600;
@@ -524,7 +555,7 @@ var UI = {
   otherPlaceholder: {zh:"请填写…", en:"Please specify…"},
   stepOf: {zh:function(a,b){return "第 " + a + " / " + b + " 步";}, en:function(a,b){return "Step " + a + " of " + b;}},
   reviewTitle: {zh:"确认信息", en:"Review Your Answers"},
-  reviewBody: {zh:"以下是你的关键信息摘要，确认无误后即可提交。你的全部作答内容会一并安全发送给 Victor 博士团队。", en:"Here is a quick summary of your key details. Once confirmed, submit — your full answers are sent securely to Dr. Victor's team."},
+  reviewBody: {zh:"以下是你的关键信息摘要，确认无误后即可提交。你的全部作答内容会一并安全发送给 Victor 博士团队。", en:"Here is a quick summary of your key details. Once confirmed, submit. Your full answers are sent securely to Dr. Victor's team."},
   successTitle: {zh:"提交成功！", en:"Submitted!"},
   successBody: {zh:"感谢你认真填写这份问卷。Victor博士团队会在1v1咨询前仔细阅读你的每一个答案，我们很快与你联系。", en:"Thank you for completing this so thoughtfully. Dr. Victor's team will review every answer before your 1:1 consultation and will be in touch soon."},
   errorTitle: {zh:"提交遇到问题", en:"Something went wrong"},
@@ -620,13 +651,13 @@ var SECTIONS = [
   { id:"why", zh:"你为什么来找我们？", en:"Why Are You Here?", questions:[
     { id:"why_major", type:"textarea", required:true,
       zh:{q:"你为什么想读这个专业？有没有一个转折/契机让你下定决心？", help:"可以讲真实故事，Victor博士会认真看"},
-      en:{q:"Why do you want to study this subject? Was there a turning point that led to this decision?", help:"Feel free to share a real story — Dr. Victor reads every word."} },
+      en:{q:"Why do you want to study this subject? Was there a turning point that led to this decision?", help:"Feel free to share a real story. Dr. Victor reads every word."} },
     { id:"bg_course", type:"single", required:true,
       zh:{q:"是否有目标专业相关的背景课？", help:""}, en:{q:"Do you have coursework related to your target major?", help:""},
       options:[
         {v:"yes", zh:"有", en:"Yes"},
         {v:"no", zh:"无", en:"No"},
-        {v:"self-study", zh:"自学中，请在下一问题中备注教材或课程", en:"Self-studying — please note the materials/courses in the next question"}
+        {v:"self-study", zh:"自学中，请在下一问题中备注教材或课程", en:"Self-studying (please note the materials/courses in the next question)"}
       ] },
     { id:"current_situation", type:"textarea", required:true, zh:{q:"你目前的情况是什么？", help:""}, en:{q:"What is your current situation?", help:""} },
     { id:"desired_goal", type:"textarea", required:true, zh:{q:"你希望达到的目标是什么？", help:""}, en:{q:"What goal are you hoping to reach?", help:""} },
@@ -649,7 +680,7 @@ var SECTIONS = [
       en:{q:"How were the results and overall experience with that agency? What's the key thing you want to get right this time?", help:""} },
     { id:"future_self", type:"textarea", required:true,
       zh:{q:"如果我们这次帮你规划得特别好，你希望未来会变成一个什么样的人？生活会有什么变化？", help:"不是目标院校，而是状态"},
-      en:{q:"If this planning goes really well, who do you hope to become? What would change in your life?", help:"Not the target school — the state of your life"} }
+      en:{q:"If this planning goes really well, who do you hope to become? What would change in your life?", help:"Not the target school, but the state of your life"} }
   ]},
   { id:"goals", zh:"关于你的目标", en:"About Your Goals", questions:[
     { id:"target_schools", type:"group", required:true,
@@ -775,9 +806,10 @@ var SECTIONS = [
 var NON_QUESTION_TYPES = ["intro","review","success"];
 var STEPS = [];
 STEPS.push({type:"intro"});
+var __qCounter = 0;
 SECTIONS.forEach(function(sec, si){
   sec.questions.forEach(function(q, qi){
-    STEPS.push({type:q.type, q:q, section:sec, sectionIndex:si, isSectionStart: qi===0});
+    STEPS.push({type:q.type, q:q, section:sec, sectionIndex:si, isSectionStart: qi===0, iconIndex: __qCounter++});
   });
 });
 STEPS.push({type:"review"});
@@ -829,10 +861,13 @@ function currentQuestionNumber(){
 
 // Duolingo-style pacing: big visible jumps early on, smaller ones as you go,
 // so the bar always *feels* like it's moving faster than the raw count would.
-// Hand-tuned control points (fraction of questions done -> % shown), not a
-// single formula — this is what actually lets the very first answer or two
-// leap the bar forward while the last stretch still creeps rather than
-// freezing outright. Piecewise-linear between points.
+// Hand-tuned control points (fraction of questions done -> % shown) describe
+// the overall *trend* — fast start, slow finish — but the actual per-question
+// jump size is deliberately irregular on top of that (see PCT_BY_N below):
+// most questions nudge the bar a little, some questions — especially right
+// after finishing a whole section — nudge it a lot, on no fixed schedule.
+// That unpredictability is what keeps the back half from reading as "slow",
+// even though the average pace really is slower there.
 var PROGRESS_CURVE = [
   [0.00, 0],
   [0.02, 14],
@@ -849,7 +884,7 @@ var PROGRESS_CURVE = [
   [0.89, 93],
   [1.00, 97]
 ];
-function easeProgress(ratio){
+function envelopeProgress(ratio){
   ratio = Math.max(0, Math.min(1, ratio));
   for(var i=0;i<PROGRESS_CURVE.length-1;i++){
     var a=PROGRESS_CURVE[i], b=PROGRESS_CURVE[i+1];
@@ -860,13 +895,59 @@ function easeProgress(ratio){
   }
   return PROGRESS_CURVE[PROGRESS_CURVE.length-1][1]/100;
 }
+// Tiny deterministic PRNG (mulberry32) — seeded, so the "irregular" jump
+// pattern is stable across renders/back-nav/resume (same n always gives the
+// same %), while still looking organic rather than hand-typed.
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var x = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// 1-based question number of the first question of every section EXCEPT the
+// very first (that one's just the opening question, not a "finished a
+// section" moment) — these get a little bonus boost on top of their normal jump.
+var SECTION_START_NS = (function(){
+  var ns = [], acc = 0;
+  SECTIONS.forEach(function(sec){ ns.push(acc+1); acc += sec.questions.length; });
+  return ns.slice(1);
+})();
+var PCT_BY_N = (function(){
+  var N = QUESTION_STEP_COUNT;
+  var rnd = mulberry32(20260827);
+  var envelope = [];
+  for(var n=0;n<=N;n++){ envelope.push(envelopeProgress(n/N)*100); }
+  var weights = [], total = 0;
+  for(var n=1;n<=N;n++){
+    var base = Math.max(0.15, envelope[n]-envelope[n-1]);
+    var wobble = 0.5 + rnd()*1.1; // sometimes barely moves, sometimes leaps — never wild
+    var boundaryBoost = SECTION_START_NS.indexOf(n)!==-1 ? 1.5 : 1;
+    var w = base * wobble * boundaryBoost;
+    weights.push(w); total += w;
+  }
+  var target = envelope[N] - envelope[0];
+  var scale = total>0 ? target/total : 0;
+  var out = [0], acc = 0;
+  for(var i=0;i<weights.length;i++){ acc += weights[i]*scale; out.push(acc); }
+  // Round to whole percent, but guarantee every question moves the bar by at
+  // least 1 point — an exact tie would read as "nothing happened".
+  var rounded = [0];
+  for(var i=1;i<out.length;i++){
+    var v = Math.round(out[i]);
+    if(v<=rounded[i-1]) v = rounded[i-1]+1;
+    rounded.push(Math.min(97, v));
+  }
+  return rounded;
+})();
 function progressPercent(){
   var step = STEPS[state.index];
   if(step.type==="intro") return 0;
   if(step.type==="success") return 100;
   if(step.type==="review") return 98;
-  var ratio = currentQuestionNumber()/QUESTION_STEP_COUNT;
-  return Math.round(easeProgress(ratio)*100);
+  var n = Math.max(0, Math.min(PCT_BY_N.length-1, currentQuestionNumber()));
+  return PCT_BY_N[n];
 }
 
 /* --------------------------------- Render --------------------------------- */
@@ -910,7 +991,7 @@ function renderIntro(){
   c.appendChild(el("h2", "hero-title", state.lang==="zh" ? "名校申请深度规划自查表" : "Application Deep-Dive Questionnaire"));
   var body = state.lang==="zh"
     ? "Hi 亲爱的，恭喜恭喜！！我知道你现在激动得不得了！终于可以正式走入这一段更清醒、也更有力量的申请旅程。我想告诉你的是你做了一个很棒的决定，我会尽我所能的帮助你前进！\n\n你不是来听一段泛泛而谈的建议，而是来开启一个关于选择、天赋、热爱与坚持的思考系统。\n\n为了确保我们的1v1沟通真正有深度、对你当下最有帮助，我需要你先认真完成这份问卷。请用心作答，每一个答案，都是你通向名校和内在成长的起点。\n\n你提供的信息越详细，未来我能为你提供的帮助就越到位。请至少花20分钟时间填写。"
-    : "Hi there — congratulations! I know how excited you must be to finally step into this clearer, more empowered application journey. You've made a wonderful decision, and I'll do everything I can to help you move forward.\n\nYou're not here for generic advice — you're here to begin a real system of thinking about choice, talent, passion, and persistence.\n\nTo make sure our 1:1 conversation is genuinely deep and useful to you right now, I need you to complete this questionnaire thoughtfully first. Every answer is a starting point toward both a great offer and real inner growth.\n\nThe more detail you give, the more precisely I can help. Please set aside at least 20 minutes.";
+    : "Hi there, congratulations! I know how excited you must be to finally step into this clearer, more empowered application journey. You've made a wonderful decision, and I'll do everything I can to help you move forward.\n\nYou're not here for generic advice. You're here to begin a real system of thinking about choice, talent, passion, and persistence.\n\nTo make sure our 1:1 conversation is genuinely deep and useful to you right now, I need you to complete this questionnaire thoughtfully first. Every answer is a starting point toward both a great offer and real inner growth.\n\nThe more detail you give, the more precisely I can help. Please set aside at least 20 minutes.";
   c.appendChild(el("p", "hero-body", esc(body)));
   var note = el("div", "hero-note");
   note.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>'+esc(t(UI.autosave))+'</span>';
@@ -928,17 +1009,51 @@ function renderIntro(){
 // never as a separate click-through screen.
 var SECTION_DESC_ZH = {
   lead:"先了解一些基础信息。", basic:"帮助我们认识你，量身定制沟通方式。",
-  why:"这是整份问卷的核心 —— 请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
+  why:"这是整份问卷的核心，请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
   self:"从你自己的视角，谈谈你是谁。", pace:"了解你的时间与节奏，帮你规划下一步。",
   final:"最后几个问题，帮助我们确认这是一次真正匹配的合作。"
 };
 var SECTION_DESC_EN = {
   lead:"A few basics to start with.", basic:"Helping us get to know you, so we can tailor how we communicate.",
-  why:"The heart of this questionnaire — please answer as honestly as you can.",
+  why:"The heart of this questionnaire. Please answer as honestly as you can.",
   goals:"Let's talk about your target schools and direction.",
   self:"Tell us who you are, in your own words.", pace:"Understanding your time and pace helps us plan your next step.",
   final:"A few last questions to help us confirm this is a genuine fit."
 };
+
+// A first pass at "something changes every question" — a small rotating set
+// of simple sketchbook-style line icons (academic/journey/nature themes),
+// one per question, each with a gentle pop-in. Purely decorative, easy to
+// remove (just stop calling renderSketchIcon) if it doesn't earn its keep.
+var SKETCH_ICONS = [
+  { en:"Knowledge", zh:"知识", svg:'<path d="M4 5c3-1.5 6-1.5 8 0v13c-2-1.5-5-1.5-8 0V5Z"/><path d="M20 5c-3-1.5-6-1.5-8 0v13c2-1.5 5-1.5 8 0V5Z"/>' },
+  { en:"Inspiration", zh:"灵感", svg:'<path d="M12 3c-3.5 0-6 2.5-6 5.8 0 2.2 1.3 3.6 2.3 4.7.6.6 1 1.1 1 1.8v1.2h5.4v-1.2c0-.7.4-1.2 1-1.8 1-1.1 2.3-2.5 2.3-4.7C18 5.5 15.5 3 12 3Z"/><path d="M9.5 19.5h5M10 22h4"/>' },
+  { en:"Direction", zh:"方向", svg:'<circle cx="12" cy="12" r="8.5"/><path d="M15 9l-2 6-6 2 2-6 6-2Z"/>' },
+  { en:"The World", zh:"世界", svg:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.4 4 5.3 4 8.5s-1.5 6.1-4 8.5c-2.5-2.4-4-5.3-4-8.5s1.5-6.1 4-8.5Z"/>' },
+  { en:"Wisdom", zh:"智慧", svg:'<circle cx="9" cy="11" r="2"/><circle cx="15" cy="11" r="2"/><path d="M12 3C7 3 4 6.5 4 11c0 2 .8 3.6 2 5l-1 4 3.6-1.8c1 .5 2.2.8 3.4.8 5 0 8-3.5 8-8S17 3 12 3Z"/>' },
+  { en:"Honour", zh:"荣誉", svg:'<path d="M6 4c1.5 4 1.5 8-1 12M18 4c-1.5 4-1.5 8 1 12M12 6v13"/><path d="M9 21c1-1 4-1 6 0"/>' },
+  { en:"Discovery", zh:"探索", svg:'<circle cx="10" cy="10" r="6"/><path d="M14.3 14.3L20 20"/>' },
+  { en:"Timing", zh:"时机", svg:'<path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/>' },
+  { en:"The Summit", zh:"高峰", svg:'<path d="M3 19l6-10 4 6 2-3 6 7H3Z"/><circle cx="9" cy="6" r="1.6"/>' },
+  { en:"Growth", zh:"成长", svg:'<path d="M12 21V10M12 10c0-3 2-5 5-5-1 3-2 5-5 5ZM12 13c0-3-2-5-5-5 1 3 2 5 5 5Z"/>' },
+  { en:"The Key", zh:"钥匙", svg:'<circle cx="7" cy="12" r="3.5"/><path d="M10.3 12H20M16.5 12v3M20 12v3"/>' },
+  { en:"Balance", zh:"权衡", svg:'<path d="M12 3v18M5 8h14M5 8l-2.5 5h5L5 8ZM19 8l-2.5 5h5L19 8ZM7 21h10"/>' },
+  { en:"Setting Sail", zh:"启航", svg:'<path d="M12 3v11M12 3c3 1 4 3 4 6h-4M4 20c2-2.5 5-2.5 8-2.5s6 0 8 2.5H4Z"/>' },
+  { en:"Crossing Over", zh:"跨越", svg:'<path d="M3 16c2-3 5-4 9-4s7 1 9 4M5 16v4M19 16v4M9 16v4M15 16v4"/>' },
+  { en:"Commencement", zh:"学成", svg:'<path d="M2 9l10-4 10 4-10 4-10-4Z"/><path d="M6 11v4c0 1.5 3 3 6 3s6-1.5 6-3v-4M22 9v6"/>' },
+  { en:"Focus", zh:"专注", svg:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3L21 21"/>' },
+  { en:"Guidance", zh:"指引", svg:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M6 18l2-2M16 8l2-2"/><circle cx="12" cy="12" r="2.4"/>' },
+  { en:"A Small Light", zh:"微光", svg:'<path d="M8 20h8M9 20v-3c0-1-.7-1.6-1.4-2.3A6 6 0 1 1 16.4 14.7c-.7.7-1.4 1.3-1.4 2.3v3"/>' },
+  { en:"Anchor", zh:"停泊", svg:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14M6 13a6 6 0 0 0 12 0M4 13h4M16 13h4"/>' },
+  { en:"A New Page", zh:"翻篇", svg:'<path d="M4 5c3-1.5 6-1.5 8 0v13c-2-1.5-5-1.5-8 0V5Z"/><path d="M12 5v13M12 5c1-1 2-1.5 3-1.8"/>' }
+];
+function renderSketchIcon(step){
+  var icon = SKETCH_ICONS[step.iconIndex % SKETCH_ICONS.length];
+  var chip = el("div", "sketch-chip");
+  chip.title = state.lang==="zh" ? icon.zh : icon.en;
+  chip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+icon.svg+'</svg>';
+  return chip;
+}
 
 function renderChapterBanner(step){
   var sec = step.section;
@@ -984,15 +1099,21 @@ function fieldValid(q){
 function renderQuestion(step){
   var q = step.q;
   var wrap = el("div");
+
+  var headerRow = el("div", "q-header-row");
+  headerRow.appendChild(renderSketchIcon(step));
+  var textCol = el("div", "q-header-text");
   if(step.isSectionStart){
-    wrap.appendChild(renderChapterBanner(step));
+    textCol.appendChild(renderChapterBanner(step));
   } else {
     var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
-    wrap.appendChild(tag);
+    textCol.appendChild(tag);
   }
   var titleHtml = esc(qStr(q,"q")) + (q.required ? '<span class="required-mark">*</span>' : "");
-  wrap.appendChild(el("h1", "q-title", titleHtml));
-  if(qStr(q,"help")) wrap.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
+  textCol.appendChild(el("h1", "q-title", titleHtml));
+  if(qStr(q,"help")) textCol.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
+  headerRow.appendChild(textCol);
+  wrap.appendChild(headerRow);
 
   var fieldBox = el("div", "field", "");
   fieldBox.id = "fieldBox";
@@ -1140,12 +1261,12 @@ function attemptNext(q){
 }
 
 function answerSummaryLabel(q, v){
-  if(v===undefined || v===null || v==="") return "—";
+  if(v===undefined || v===null || v==="") return "-";
   if(q.type==="single"){
     var opt = (q.options||[]).filter(function(o){return o.v===v.value;})[0];
     var label = opt ? (state.lang==="zh"?opt.zh:opt.en) : v.value;
     if(opt && opt.other && v.other) label += " ("+v.other+")";
-    return label || "—";
+    return label || "-";
   }
   if(q.type==="multi"){
     var labels = (v.values||[]).map(function(val){
@@ -1153,7 +1274,7 @@ function answerSummaryLabel(q, v){
       return o ? (state.lang==="zh"?o.zh:o.en) : val;
     });
     if((v.values||[]).indexOf("other")!==-1 && v.other) labels.push(v.other);
-    return labels.length ? labels.join("、") : "—";
+    return labels.length ? labels.join("、") : "-";
   }
   if(q.type==="scale") return String(v);
   if(q.type==="group") return "✓";
@@ -1210,9 +1331,9 @@ function renderSuccess(){
 // roughly a quarter / half / three-quarters of the way through, and once
 // more right as you land on the final review. Each fires once per session.
 var MILESTONES = [
-  {frac:0.25, zh:"不错的开始，继续保持！", en:"Nice start — keep it up!"},
-  {frac:0.50, zh:"太棒了，已经过半啦！", en:"Halfway there — great pace!"},
-  {frac:0.75, zh:"就快完成了，加油！", en:"Almost there — you've got this!"}
+  {frac:0.25, zh:"不错的开始，继续保持！", en:"Nice start, keep it up!"},
+  {frac:0.50, zh:"节奏很好，别停下！", en:"Great momentum, keep going!"},
+  {frac:0.75, zh:"就快完成了，加油！", en:"Almost there, you've got this!"}
 ];
 function showMilestoneToast(msg){
   var toast = el("div", "milestone-toast");
@@ -1287,7 +1408,7 @@ function buildSummaryText(){
       lines.push("- " + q.zh.q + " / " + q.en.q + ":");
       if(q.type==="group"){
         q.fields.forEach(function(f){
-          lines.push("    " + f.zh + "/" + f.en + ": " + ((v && v[f.id]) || "—"));
+          lines.push("    " + f.zh + "/" + f.en + ": " + ((v && v[f.id]) || "-"));
         });
       } else {
         lines.push("    " + answerSummaryLabelFull(q, v));
@@ -1297,7 +1418,7 @@ function buildSummaryText(){
   return lines.join("\n");
 }
 function answerSummaryLabelFull(q, v){
-  if(v===undefined||v===null||v==="") return "—";
+  if(v===undefined||v===null||v==="") return "-";
   if(q.type==="single"){
     var opt = (q.options||[]).filter(function(o){return o.v===v.value;})[0];
     var lab = opt ? (opt.zh + "/" + opt.en) : v.value;
@@ -1310,7 +1431,7 @@ function answerSummaryLabelFull(q, v){
       return o ? (o.zh+"/"+o.en) : val;
     });
     if((v.values||[]).indexOf("other")!==-1 && v.other) labs.push(v.other);
-    return labs.join("; ") || "—";
+    return labs.join("; ") || "-";
   }
   return String(v);
 }
@@ -1324,7 +1445,7 @@ function submitForm(){
   submitBtn.textContent = t(UI.submitting);
 
   var fd = new FormData();
-  fd.append("_subject", "AO1 新问卷提交 / New AO1 Questionnaire — " + (state.answers.name || state.answers.email || ""));
+  fd.append("_subject", "AO1 新问卷提交 / New AO1 Questionnaire: " + (state.answers.name || state.answers.email || ""));
   fd.append("_replyto", state.answers.email || "");
   fd.append("language_used", state.lang);
   fd.append("submitted_name", state.answers.name || "");
