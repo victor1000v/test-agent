@@ -143,21 +143,21 @@ function buildCharts(){
   ], {h:330, max:400, fmt:function(v){ return Math.round(v) + 'k'; }});
 
   rangeChart('fig-price', [
-    {en:'小红书 studios', zh:'小红书工作室', lo:8, hi:50, color:CH.blue, muted:true, note:'fragile, founder-bound', noteZh:'脆弱、绑定创始人'},
-    {en:'Compass 指南者', zh:'指南者留学', lo:18, hi:24, color:CH.teal, note:'transparent factory, junior staff', noteZh:'透明工厂、初级团队'},
+    {en:'小红书 studios', zh:'小红书工作室', lo:8, hi:50, color:CH.blue, muted:true, note:'depends on one person', noteZh:'脆弱、绑定创始人'},
+    {en:'Compass 指南者', zh:'指南者留学', lo:18, hi:24, color:CH.teal, note:'published price, junior staff', noteZh:'透明工厂、初级团队'},
     {en:'PalmDrive 棕榈大道', zh:'棕榈大道', lo:30, hi:60, color:CH.gold, note:'part-time mentor pool', noteZh:'兼职导师池'},
     {en:'AcademiaOne target', zh:'AcademiaOne 目标档', lo:40, hi:80, color:CH.teal, note:'senior · full-time · capped · published', noteZh:'资深 · 全职 · 限额 · 公开定价'},
-    {en:'GGU 世毕盟', zh:'世毕盟', lo:60, hi:120, color:CH.gold, note:'~15 insured staff; reputation bleeding', noteZh:'约 15 名参保员工；口碑失血'},
+    {en:'GGU 世毕盟', zh:'世毕盟', lo:60, hi:120, color:CH.gold, note:'~15 insured staff; many complaints', noteZh:'约 15 名参保员工；口碑失血'},
     {en:'Topsedu 托普仕', zh:'托普仕', lo:100, hi:150, color:CH.gold, note:'“refund guarantee” liabilities', noteZh:'「退款担保」负债'},
-    {en:'Valeon 再来人 †', zh:'再来人 †', lo:100, hi:200, color:CH.red, note:'defunct Dec 2025 · GM <30%', noteZh:'2025 年 12 月倒闭 · 毛利 <30%'}
+    {en:'Valeon 再来人 †', zh:'再来人 †', lo:100, hi:200, color:CH.red, note:'closed Dec 2025 · margin under 30%', noteZh:'2025 年 12 月倒闭 · 利润率低于 30%'}
   ], {max:205, ticks:[0,25,50,75,100,150,200], fmt:function(v){ return '¥' + v + 'k'; },
       zone:[40,80], zoneLbl:'OUR BAND', zoneLblZh:'我们的价格带', labelW:220});
 
   rangeChart('fig-cac', [
-    {en:'Referral (engineered)', zh:'转介绍（工程化）', lo:500, hi:2000, color:CH.teal, note:'close rate 50–80%', noteZh:'签约率 50–80%'},
+    {en:'Referral (managed process)', zh:'转介绍（有计划地管理）', lo:500, hi:2000, color:CH.teal, note:'close rate 50–80%', noteZh:'签约率 50–80%'},
     {en:'Studio content blend', zh:'工作室内容组合', lo:500, hi:2500, color:CH.teal, note:'XHS + 知乎 + 私域', noteZh:'小红书 + 知乎 + 私域'},
     {en:'Campus ambassadors', zh:'校园大使', lo:500, hi:3000, color:CH.teal},
-    {en:'Mega-agency paid blend', zh:'大机构付费组合', lo:3000, hi:8000, color:CH.gold, note:'15–25% of revenue burned', noteZh:'烧掉营收 15–25%'},
+    {en:'Mega-agency paid blend', zh:'大机构付费组合', lo:3000, hi:8000, color:CH.gold, note:'15–25% of revenue spent', noteZh:'花掉营收 15–25%'},
     {en:'抖音 livestream funnel', zh:'抖音直播漏斗', lo:3000, hi:8000, color:CH.red, note:'telesales close 5–15%', noteZh:'电销签约 5–15%'},
     {en:'Baidu SEM', zh:'百度 SEM', lo:5000, hi:15000, color:CH.red, note:'head keywords ¥100–300+/click', noteZh:'头部词点击 100–300 元+'}
   ], {max:15500, ticks:[0,2500,5000,10000,15000], fmt:function(v){ return '¥' + fmtN(v); }, labelW:225, w:900});
