@@ -440,12 +440,15 @@
       inbox should receive submissions.
    ========================================================================= */
 var CONFIG = {
-  FORMSPREE_ENDPOINT: "https://formspree.io/f/YOUR_FORM_ID", // TODO: set your real Formspree endpoint
-  DESTINATION_EMAIL: "you@example.com" // TODO: only used for the mailto fallback if the network request fails
+  // Formspree's no-signup endpoint: posting straight to an email address.
+  // The FIRST real submission triggers a one-time confirmation email to
+  // this inbox — someone needs to click "Confirm" in it once, after which
+  // every submission after that is delivered automatically. Free tier caps
+  // at 50 submissions/month; for higher volume, create a real Formspree
+  // account/form and swap this for its https://formspree.io/f/xxxxxxx URL.
+  FORMSPREE_ENDPOINT: "https://formspree.io/josie@academiaone.co.uk",
+  DESTINATION_EMAIL: "josie@academiaone.co.uk" // used for the mailto fallback if the network request ever fails
 };
-if (CONFIG.FORMSPREE_ENDPOINT.indexOf("YOUR_FORM_ID") !== -1) {
-  console.warn("[AO1 form] Formspree endpoint is still a placeholder — submissions will not send until CONFIG.FORMSPREE_ENDPOINT is set.");
-}
 
 /* ---------------------------- i18n shell strings ------------------------ */
 var UI = {

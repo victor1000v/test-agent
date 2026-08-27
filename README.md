@@ -7,34 +7,24 @@ animated transitions, autosaving progress, and email delivery on submit.
 Everything lives in a single self-contained file: **`index.html`**. No build
 step, no framework, no dependencies to install.
 
-## Before this goes live
+## Email delivery
 
-Open `index.html` and find the `CONFIG` block near the top of the `<script>`
-tag:
+Submissions are wired to send to **josie@academiaone.co.uk** via Formspree's
+no-signup endpoint (`https://formspree.io/josie@academiaone.co.uk` — see the
+`CONFIG` block near the top of `index.html`'s `<script>` tag).
 
-```js
-var CONFIG = {
-  FORMSPREE_ENDPOINT: "https://formspree.io/f/YOUR_FORM_ID",
-  DESTINATION_EMAIL: "you@example.com"
-};
-```
+**One-time step:** the *first* real submission triggers a confirmation email
+from Formspree to josie@academiaone.co.uk. Someone needs to open it and click
+"Confirm" once — after that, every submission delivers automatically with no
+further action needed. The free tier caps at 50 submissions/month; if that's
+ever a limit, create a proper account at [formspree.io](https://formspree.io),
+create a form there (it'll give you an endpoint like
+`https://formspree.io/f/xxxxabcd`), and swap that into `FORMSPREE_ENDPOINT` —
+it also unlocks spam filtering and a custom auto-reply to the applicant.
 
-1. **Create a Formspree endpoint** (free tier is fine): go to
-   [formspree.io](https://formspree.io), sign up, create a new form, and set
-   its notification email to whichever inbox should receive submissions.
-   Formspree gives you an endpoint like `https://formspree.io/f/xxxxabcd` —
-   paste that into `FORMSPREE_ENDPOINT`.
-2. **Set `DESTINATION_EMAIL`** to the same inbox. It's only used to build the
-   "Send via email instead" fallback link that appears if the network
-   request to Formspree ever fails — the primary send still goes through
-   Formspree straight to the inbox you configured there.
-3. Optional: in the Formspree dashboard you can add reCAPTCHA / spam
-   filtering, and customize the auto-reply sent back to the applicant.
-
-Until step 1 is done, the page still works end-to-end (fill it out, hit
-submit) but the browser console will warn that the endpoint is a placeholder,
-and submissions will fall back to the "send via email" link instead of
-sending automatically.
+If the network request to Formspree ever fails for a visitor, the page falls
+back to a "Send via email instead" button that opens their own email client
+pre-filled with all their answers, addressed to `DESTINATION_EMAIL`.
 
 ## What's on the form
 
