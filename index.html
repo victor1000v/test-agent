@@ -110,15 +110,83 @@
 
   /* ---------- Progress ---------- */
   .progress-wrap{padding:0;position:sticky;top:83px;z-index:19;}
-  .progress-track{height:3px;width:100%;background:var(--ink-3);overflow:hidden;}
+  .progress-track{height:6px;width:100%;background:var(--ink-3);overflow:hidden;position:relative;}
   .progress-fill{
-    height:100%;width:0%;
-    background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-3));
-    transition:width .5s var(--ease);
+    height:100%;width:0%;position:relative;overflow:hidden;
+    background:linear-gradient(90deg,var(--gold-dim),var(--gold) 30%,var(--gold-3) 50%,var(--gold) 70%,var(--gold-dim));
+    background-size:220% 100%;
+    transition:width .55s var(--ease);
+    animation:barFlow 3.4s linear infinite;
+  }
+  /* a brighter highlight continuously sweeping the length of the filled bar */
+  .progress-fill::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,247,222,.85) 8%, transparent 16%);
+    background-size:60% 100%;
+    animation:barSweep 2.1s linear infinite;
+  }
+  @keyframes barFlow{ to{ background-position:-220% 0; } }
+  @keyframes barSweep{ from{ background-position:-60% 0; } to{ background-position:160% 0; } }
+  @media (prefers-reduced-motion: reduce){
+    .progress-fill, .progress-fill::after{ animation:none; }
   }
   .progress-meta{
     display:flex;justify-content:space-between;align-items:center;
     padding:8px 20px 0;font-size:11.5px;color:var(--muted-2);letter-spacing:.03em;
+  }
+
+  /* ---------- Chapter banner (replaces the old click-through section screens) ---------- */
+  .chapter-banner{
+    border:1px solid var(--border);border-radius:14px;
+    background:linear-gradient(135deg,rgba(201,162,75,.08),rgba(201,162,75,.02));
+    padding:16px 18px;margin-bottom:24px;
+    animation:bannerIn .5s var(--ease) both;
+  }
+  @keyframes bannerIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+  .chapter-banner .cb-eyebrow{
+    font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-2);
+    font-weight:700;margin-bottom:4px;
+  }
+  .chapter-banner h3{
+    font-family:var(--serif-en);font-weight:600;font-size:17px;color:var(--cream);margin:0 0 4px;
+  }
+  body.lang-zh .chapter-banner h3{font-family:var(--serif-zh);}
+  .chapter-banner p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0;}
+  .chapter-banner .cb-stats{display:grid;gap:8px;margin-top:12px;}
+  .chapter-banner .cb-stat{
+    display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;color:#e6dabf;
+  }
+  .chapter-banner .cb-stat svg{flex:none;margin-top:2px;color:var(--gold);}
+
+  /* ---------- Milestone toast (Duolingo-style encouragement) ---------- */
+  .milestone-toast{
+    position:fixed;top:96px;left:50%;z-index:60;
+    transform:translate(-50%,-14px);opacity:0;
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));color:var(--ink);
+    border-radius:999px;padding:11px 22px;font-weight:700;font-size:13.5px;
+    box-shadow:0 10px 30px rgba(201,162,75,.35);
+    pointer-events:none;white-space:nowrap;
+    animation:toastPop 2.6s var(--ease) both;
+  }
+  body.lang-zh .milestone-toast{font-family:'Noto Sans SC',var(--sans);}
+  @keyframes toastPop{
+    0%{opacity:0;transform:translate(-50%,-14px) scale(.92);}
+    12%{opacity:1;transform:translate(-50%,0) scale(1);}
+    82%{opacity:1;transform:translate(-50%,0) scale(1);}
+    100%{opacity:0;transform:translate(-50%,-10px) scale(.97);}
+  }
+  .milestone-toast .spark{
+    position:absolute;width:5px;height:5px;border-radius:50%;background:var(--ink);
+    opacity:0;animation:sparkBurst 1.1s var(--ease) both;
+  }
+  @keyframes sparkBurst{
+    0%{opacity:.9;transform:translate(0,0) scale(1);}
+    100%{opacity:0;transform:translate(var(--sx,20px),var(--sy,-20px)) scale(.3);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .milestone-toast{animation:none;opacity:1;transform:translate(-50%,0);}
+    .milestone-toast .spark{display:none;}
   }
 
   /* ---------- Stage ---------- */
@@ -270,26 +338,6 @@
   .hero-note{font-size:12.5px;color:var(--muted);margin-top:18px;display:flex;gap:8px;align-items:flex-start;}
   .hero-note svg{flex:none;margin-top:2px;}
 
-  .stat-list{display:grid;gap:12px;margin-top:20px;}
-  .stat-item{
-    display:flex;align-items:flex-start;gap:12px;
-    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
-    padding:14px 16px;font-size:14px;line-height:1.6;color:#e6dabf;
-  }
-  .stat-item svg{flex:none;margin-top:2px;color:var(--gold);}
-
-  .section-divider{text-align:center;padding:50px 10px;}
-  .section-divider .num{
-    font-family:var(--serif-en);font-size:13px;color:var(--gold-dim);letter-spacing:.3em;
-    text-transform:uppercase;margin-bottom:16px;
-  }
-  .section-divider h2{
-    font-family:var(--serif-en);font-weight:600;font-size:clamp(24px,5vw,32px);
-    color:var(--cream);margin:0 0 12px;
-  }
-  body.lang-zh .section-divider h2{font-family:var(--serif-zh);}
-  .section-divider .rule{width:60px;height:1px;background:var(--gold-dim);margin:18px auto;}
-  .section-divider p{color:var(--muted);font-size:13.5px;max-width:420px;margin:0 auto;}
 
   .review-list{display:grid;gap:10px;margin:22px 0;}
   .review-item{
@@ -721,13 +769,16 @@ var SECTIONS = [
 ];
 
 /* --------------------------------- Build steps --------------------------- */
-var NON_QUESTION_TYPES = ["intro","section","stats","review","success"];
+// No more click-through "section divider" screens — each new section's first
+// question just carries a small inline banner instead, so nothing costs the
+// visitor an extra tap.
+var NON_QUESTION_TYPES = ["intro","review","success"];
 var STEPS = [];
 STEPS.push({type:"intro"});
 SECTIONS.forEach(function(sec, si){
-  STEPS.push({type:"section", section:sec, index:si});
-  if(sec.stats) STEPS.push({type:"stats", section:sec});
-  sec.questions.forEach(function(q){ STEPS.push({type:q.type, q:q, section:sec}); });
+  sec.questions.forEach(function(q, qi){
+    STEPS.push({type:q.type, q:q, section:sec, sectionIndex:si, isSectionStart: qi===0});
+  });
 });
 STEPS.push({type:"review"});
 STEPS.push({type:"success"});
@@ -744,11 +795,11 @@ function loadState(){
     if(raw){
       var parsed = JSON.parse(raw);
       if(parsed && typeof parsed === "object"){
-        return { index: parsed.index||0, answers: parsed.answers||{}, lang: parsed.lang||"zh" };
+        return { index: parsed.index||0, answers: parsed.answers||{}, lang: parsed.lang||"zh", milestones: parsed.milestones||[] };
       }
     }
   }catch(e){}
-  return { index:0, answers:{}, lang:"zh" };
+  return { index:0, answers:{}, lang:"zh", milestones:[] };
 }
 function saveState(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
@@ -778,9 +829,36 @@ function currentQuestionNumber(){
 
 // Duolingo-style pacing: big visible jumps early on, smaller ones as you go,
 // so the bar always *feels* like it's moving faster than the raw count would.
+// Hand-tuned control points (fraction of questions done -> % shown), not a
+// single formula — this is what actually lets the very first answer or two
+// leap the bar forward while the last stretch still creeps rather than
+// freezing outright. Piecewise-linear between points.
+var PROGRESS_CURVE = [
+  [0.00, 0],
+  [0.02, 14],
+  [0.05, 24],
+  [0.09, 34],
+  [0.14, 43],
+  [0.20, 51],
+  [0.27, 58],
+  [0.36, 65],
+  [0.46, 71],
+  [0.57, 77],
+  [0.68, 83],
+  [0.79, 88],
+  [0.89, 93],
+  [1.00, 97]
+];
 function easeProgress(ratio){
-  var k = 1.8; // >1 = fast start, slow finish — higher k = more dramatic early jumps
-  return 1 - Math.pow(1-ratio, k);
+  ratio = Math.max(0, Math.min(1, ratio));
+  for(var i=0;i<PROGRESS_CURVE.length-1;i++){
+    var a=PROGRESS_CURVE[i], b=PROGRESS_CURVE[i+1];
+    if(ratio<=b[0]){
+      var t = (b[0]-a[0])<=0 ? 0 : (ratio-a[0])/(b[0]-a[0]);
+      return (a[1] + t*(b[1]-a[1]))/100;
+    }
+  }
+  return PROGRESS_CURVE[PROGRESS_CURVE.length-1][1]/100;
 }
 function progressPercent(){
   var step = STEPS[state.index];
@@ -788,7 +866,7 @@ function progressPercent(){
   if(step.type==="success") return 100;
   if(step.type==="review") return 98;
   var ratio = currentQuestionNumber()/QUESTION_STEP_COUNT;
-  return Math.min(97, Math.round(easeProgress(ratio)*100));
+  return Math.round(easeProgress(ratio)*100);
 }
 
 /* --------------------------------- Render --------------------------------- */
@@ -803,8 +881,6 @@ function render(direction){
   if(direction === "back") wrap.style.animationName = "enter";
 
   if(step.type === "intro") wrap.appendChild(renderIntro());
-  else if(step.type === "section") wrap.appendChild(renderSectionDivider(step));
-  else if(step.type === "stats") wrap.appendChild(renderStats(step));
   else if(step.type === "review") wrap.appendChild(renderReview());
   else if(step.type === "success") wrap.appendChild(renderSuccess());
   else wrap.appendChild(renderQuestion(step));
@@ -848,70 +924,39 @@ function renderIntro(){
   return c;
 }
 
-function renderSectionDivider(step){
-  var wrap = el("div");
-  var d = el("div", "section-divider");
-  var num = el("div", "num", (state.lang==="zh"?"第 ":"Part ") + (step.index+1) + (state.lang==="zh"?" 部分 · 共 "+SECTIONS.length+" 部分":" of "+SECTIONS.length));
-  d.appendChild(num);
-  d.appendChild(el("h2", "", esc(state.lang==="zh" ? step.section.zh : step.section.en)));
-  d.appendChild(el("div", "rule"));
-  var descZh = {
-    lead:"先了解一些基础信息。", basic:"帮助我们认识你，量身定制沟通方式。",
-    why:"这是整份问卷的核心 —— 请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
-    self:"从你自己的视角，谈谈你是谁。", pace:"了解你的时间与节奏，帮你规划下一步。",
-    final:"最后几个问题，帮助我们确认这是一次真正匹配的合作。"
-  };
-  var descEn = {
-    lead:"A few basics to start with.", basic:"Helping us get to know you, so we can tailor how we communicate.",
-    why:"The heart of this questionnaire — please answer as honestly as you can.",
-    goals:"Let's talk about your target schools and direction.",
-    self:"Tell us who you are, in your own words.", pace:"Understanding your time and pace helps us plan your next step.",
-    final:"A few last questions to help us confirm this is a genuine fit."
-  };
-  d.appendChild(el("p", "", esc(state.lang==="zh" ? descZh[step.section.id] : descEn[step.section.id])));
-  wrap.appendChild(d);
+// One-line context for the first question of each section — shown inline,
+// never as a separate click-through screen.
+var SECTION_DESC_ZH = {
+  lead:"先了解一些基础信息。", basic:"帮助我们认识你，量身定制沟通方式。",
+  why:"这是整份问卷的核心 —— 请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
+  self:"从你自己的视角，谈谈你是谁。", pace:"了解你的时间与节奏，帮你规划下一步。",
+  final:"最后几个问题，帮助我们确认这是一次真正匹配的合作。"
+};
+var SECTION_DESC_EN = {
+  lead:"A few basics to start with.", basic:"Helping us get to know you, so we can tailor how we communicate.",
+  why:"The heart of this questionnaire — please answer as honestly as you can.",
+  goals:"Let's talk about your target schools and direction.",
+  self:"Tell us who you are, in your own words.", pace:"Understanding your time and pace helps us plan your next step.",
+  final:"A few last questions to help us confirm this is a genuine fit."
+};
 
-  var actions = el("div", "actions");
-  var contBtn = el("button", "btn btn-primary btn-wide", esc(t(UI.continue)) + " →");
-  contBtn.onclick = function(){ goTo(state.index+1, "fwd"); };
-  actions.appendChild(contBtn);
-  wrap.appendChild(actions);
-
-  if(step.index>0){
-    var back = el("button", "btn btn-ghost btn-wide", "← " + esc(t(UI.back)));
-    back.style.marginTop = "10px";
-    back.onclick = function(){ goTo(state.index-1, "back"); };
-    wrap.appendChild(back);
-  }
-  return wrap;
-}
-
-function renderStats(step){
+function renderChapterBanner(step){
   var sec = step.section;
-  var wrap = el("div");
-  var c = el("div", "hero-card");
-  c.appendChild(el("span", "hero-eyebrow", state.lang==="zh" ? "实绩 · Track Record" : "Track Record"));
-  c.appendChild(el("h2", "hero-title", esc(state.lang==="zh" ? sec.stats.title.zh : sec.stats.title.en)));
-  var list = el("div", "stat-list");
-  sec.stats.items.forEach(function(item){
-    var row = el("div", "stat-item");
-    row.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><span></span>';
-    row.querySelector("span").textContent = state.lang==="zh" ? item.zh : item.en;
-    list.appendChild(row);
-  });
-  c.appendChild(list);
-  wrap.appendChild(c);
-
-  var actions = el("div", "actions");
-  var contBtn = el("button", "btn btn-primary btn-wide", esc(t(UI.continue)) + " →");
-  contBtn.onclick = function(){ goTo(state.index+1, "fwd"); };
-  actions.appendChild(contBtn);
-  var back = el("button", "btn btn-ghost btn-wide", "← " + esc(t(UI.back)));
-  back.style.marginTop = "10px";
-  back.onclick = function(){ goTo(state.index-1, "back"); };
-  wrap.appendChild(actions);
-  wrap.appendChild(back);
-  return wrap;
+  var banner = el("div", "chapter-banner");
+  banner.appendChild(el("div", "cb-eyebrow", state.lang==="zh" ? "新篇章" : "New chapter"));
+  banner.appendChild(el("h3", "", esc(state.lang==="zh" ? sec.zh : sec.en)));
+  banner.appendChild(el("p", "", esc(state.lang==="zh" ? SECTION_DESC_ZH[sec.id] : SECTION_DESC_EN[sec.id])));
+  if(sec.stats){
+    var list = el("div", "cb-stats");
+    sec.stats.items.forEach(function(item){
+      var row = el("div", "cb-stat");
+      row.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg><span></span>';
+      row.querySelector("span").textContent = state.lang==="zh" ? item.zh : item.en;
+      list.appendChild(row);
+    });
+    banner.appendChild(list);
+  }
+  return banner;
 }
 
 function fieldValid(q){
@@ -939,8 +984,12 @@ function fieldValid(q){
 function renderQuestion(step){
   var q = step.q;
   var wrap = el("div");
-  var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
-  wrap.appendChild(tag);
+  if(step.isSectionStart){
+    wrap.appendChild(renderChapterBanner(step));
+  } else {
+    var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
+    wrap.appendChild(tag);
+  }
   var titleHtml = esc(qStr(q,"q")) + (q.required ? '<span class="required-mark">*</span>' : "");
   wrap.appendChild(el("h1", "q-title", titleHtml));
   if(qStr(q,"help")) wrap.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
@@ -1157,16 +1206,62 @@ function renderSuccess(){
 }
 
 /* ------------------------------- Navigation -------------------------------- */
+// Duolingo-style encouragement: a friendly toast the moment you cross
+// roughly a quarter / half / three-quarters of the way through, and once
+// more right as you land on the final review. Each fires once per session.
+var MILESTONES = [
+  {frac:0.25, zh:"不错的开始，继续保持！", en:"Nice start — keep it up!"},
+  {frac:0.50, zh:"太棒了，已经过半啦！", en:"Halfway there — great pace!"},
+  {frac:0.75, zh:"就快完成了，加油！", en:"Almost there — you've got this!"}
+];
+function showMilestoneToast(msg){
+  var toast = el("div", "milestone-toast");
+  var icon = document.createElement("span");
+  icon.textContent = "✨";
+  toast.appendChild(icon);
+  var label = document.createElement("span");
+  label.textContent = msg;
+  toast.appendChild(label);
+  for(var i=0;i<6;i++){
+    var spark = el("span", "spark");
+    var angle = (Math.PI*2/6)*i + Math.random()*0.4;
+    var dist = 26 + Math.random()*14;
+    spark.style.setProperty("--sx", (Math.cos(angle)*dist)+"px");
+    spark.style.setProperty("--sy", (Math.sin(angle)*dist)+"px");
+    spark.style.left = "18px";
+    spark.style.top = "50%";
+    spark.style.animationDelay = (0.15 + i*0.02)+"s";
+    toast.appendChild(spark);
+  }
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.remove(); }, 2700);
+}
+function checkMilestones(){
+  var step = STEPS[state.index];
+  if(NON_QUESTION_TYPES.indexOf(step.type)!==-1) return;
+  var ratio = currentQuestionNumber()/QUESTION_STEP_COUNT;
+  var fired = false;
+  MILESTONES.forEach(function(m){
+    if(ratio>=m.frac && state.milestones.indexOf(m.frac)===-1){
+      state.milestones.push(m.frac);
+      showMilestoneToast(state.lang==="zh" ? m.zh : m.en);
+      fired = true;
+    }
+  });
+  if(fired) saveState();
+}
+
 function goTo(idx, dir){
   if(idx<0 || idx>=STEPS.length) return;
   state.index = idx;
   render(dir);
+  if(dir==="fwd") checkMilestones();
 }
 
 document.getElementById("restartLink").onclick = function(){
   var msg = state.lang==="zh" ? "确定要清空全部作答并重新开始吗？" : "Clear all answers and start over?";
   if(confirm(msg)){
-    state = { index:0, answers:{}, lang: state.lang };
+    state = { index:0, answers:{}, lang: state.lang, milestones:[] };
     saveState();
     render();
   }
