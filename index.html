@@ -179,9 +179,23 @@
     background:var(--card);border:1px solid var(--border);border-radius:12px;
     padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s,transform .12s;
     font-size:14.5px;color:var(--cream);
+    position:relative;overflow:hidden;
   }
   .choice-card:hover{border-color:var(--gold-dim);background:var(--card-2);}
   .choice-card:active{transform:scale(.99);}
+  /* gold light sweep across the card the moment it's picked */
+  .choice-card::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(105deg, transparent 30%, rgba(231,205,138,.32) 50%, transparent 70%);
+    transform:translateX(-120%);
+  }
+  .choice-card.selected::after{
+    transition:transform .6s ease;
+    transform:translateX(120%);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .choice-card.selected::after{transition:none;}
+  }
   .choice-card .mark{
     width:20px;height:20px;flex:none;border-radius:50%;border:1.5px solid var(--muted-2);
     display:flex;align-items:center;justify-content:center;transition:all .18s;
@@ -955,6 +969,30 @@ function renderQuestion(step){
   else if(q.type==="single" || q.type==="multi"){
     var box = el("div", "choices");
     var cur = state.answers[q.id] || (q.type==="single" ? {value:null, other:""} : {values:[], other:""});
+    var otherWrap = null;
+
+    // Updates the DOM in place (rather than re-rendering the whole step) so the
+    // gold "sweep" transition on .selected actually gets to play on each click.
+    function syncOtherField(){
+      var needsOther = q.type==="single"
+        ? (q.options.filter(function(o){return o.other && o.v===cur.value;}).length>0)
+        : (q.options.some(function(o){return o.other;}) && (cur.values||[]).indexOf("other")!==-1);
+      if(needsOther && !otherWrap){
+        otherWrap = el("div", "other-input");
+        var otherInput = el("input");
+        otherInput.type = "text";
+        otherInput.placeholder = esc(t(UI.otherPlaceholder));
+        otherInput.value = cur.other || "";
+        otherInput.oninput = function(){ cur.other = otherInput.value; state.answers[q.id]=cur; clearError(fieldBox); };
+        otherWrap.appendChild(otherInput);
+        box.insertAdjacentElement("afterend", otherWrap);
+        setTimeout(function(){ otherInput.focus(); }, 150);
+      } else if(!needsOther && otherWrap){
+        otherWrap.remove();
+        otherWrap = null;
+      }
+    }
+
     q.options.forEach(function(opt){
       var card = el("div", "choice-card" + (q.type==="multi" ? " multi" : ""));
       var isSel = q.type==="single" ? cur.value===opt.v : (cur.values||[]).indexOf(opt.v)!==-1;
@@ -964,16 +1002,18 @@ function renderQuestion(step){
       card.appendChild(mark); card.appendChild(label);
       card.onclick = function(){
         if(q.type==="single"){
+          box.querySelectorAll(".choice-card.selected").forEach(function(c){ c.classList.remove("selected"); });
           cur = {value: opt.v, other: opt.other ? cur.other : ""};
+          card.classList.add("selected");
         } else {
           cur.values = cur.values || [];
           var idx = cur.values.indexOf(opt.v);
-          if(idx===-1) cur.values.push(opt.v); else cur.values.splice(idx,1);
-          if(!opt.other && idx!==-1){} // no-op
+          if(idx===-1){ cur.values.push(opt.v); card.classList.add("selected"); }
+          else { cur.values.splice(idx,1); card.classList.remove("selected"); }
         }
         state.answers[q.id] = cur;
         clearError(fieldBox);
-        renderQuestion.__reselect(q, step);
+        syncOtherField();
         // single-choice with no free-text needed: confirm the pick, then glide on automatically
         if(q.type==="single" && !opt.other){
           setTimeout(function(){
@@ -984,20 +1024,7 @@ function renderQuestion(step){
       box.appendChild(card);
     });
     fieldBox.appendChild(box);
-
-    var showOther = q.type==="single" ? (q.options.filter(function(o){return o.other && o.v===cur.value;}).length>0)
-                                       : (q.options.some(function(o){return o.other;}) && (cur.values||[]).indexOf("other")!==-1);
-    if(showOther){
-      var otherWrap = el("div", "other-input");
-      var otherInput = el("input");
-      otherInput.type = "text";
-      otherInput.placeholder = esc(t(UI.otherPlaceholder));
-      otherInput.value = cur.other || "";
-      otherInput.oninput = function(){ cur.other = otherInput.value; state.answers[q.id]=cur; clearError(fieldBox); };
-      otherWrap.appendChild(otherInput);
-      fieldBox.appendChild(otherWrap);
-      setTimeout(function(){ otherInput.focus(); }, 150);
-    }
+    syncOtherField();
   }
   else if(q.type==="scale"){
     var val = state.answers[q.id]!==undefined ? state.answers[q.id] : 5;
@@ -1050,8 +1077,6 @@ function renderQuestion(step){
 
   return wrap;
 }
-// helper to re-render just the question in place after a choice click (keeps everything else stable)
-renderQuestion.__reselect = function(q, step){ render(); };
 
 function clearError(fieldBox){ fieldBox.classList.remove("error"); }
 
