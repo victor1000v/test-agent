@@ -305,11 +305,40 @@
   body.lang-zh .btn{font-family:'Noto Sans SC',var(--sans);}
   .btn:active{transform:scale(.97);}
   .btn-primary{
+    position:relative;isolation:isolate;
     background:linear-gradient(135deg,var(--gold-2),var(--gold));color:var(--ink);
     box-shadow:0 6px 20px rgba(201,162,75,.28);
   }
   .btn-primary:hover{box-shadow:0 8px 26px rgba(201,162,75,.4);}
   .btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .btn-primary:disabled::after{animation-play-state:paused;opacity:.15;}
+  /* subtle light chasing the button's outline — animates the gradient's own
+     angle (not the element's transform), so a wide pill's ring stays put and
+     only the highlight sweeps around it instead of the corners swinging out */
+  @property --ao-ring-angle{
+    syntax:'<angle>';
+    inherits:false;
+    initial-value:0deg;
+  }
+  .btn-primary::after{
+    content:'';
+    position:absolute;inset:-3px;z-index:-1;border-radius:999px;padding:2px;
+    background:conic-gradient(from var(--ao-ring-angle),
+      rgba(138,109,52,.4) 0deg,
+      rgba(244,226,171,.95) 22deg,
+      rgba(138,109,52,.4) 55deg,
+      rgba(138,109,52,.22) 200deg,
+      rgba(138,109,52,.4) 360deg);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    animation:ringSweep 3.2s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes ringSweep{ to{ --ao-ring-angle:360deg; } }
+  @media (prefers-reduced-motion: reduce){
+    .btn-primary::after{animation:none;}
+  }
   .btn-ghost{
     background:transparent;color:var(--muted);border:1px solid var(--border);
   }
@@ -730,12 +759,19 @@ function currentQuestionNumber(){
   return n;
 }
 
+// Duolingo-style pacing: big visible jumps early on, smaller ones as you go,
+// so the bar always *feels* like it's moving faster than the raw count would.
+function easeProgress(ratio){
+  var k = 1.8; // >1 = fast start, slow finish — higher k = more dramatic early jumps
+  return 1 - Math.pow(1-ratio, k);
+}
 function progressPercent(){
   var step = STEPS[state.index];
   if(step.type==="intro") return 0;
   if(step.type==="success") return 100;
   if(step.type==="review") return 98;
-  return Math.min(97, Math.round((currentQuestionNumber()/QUESTION_STEP_COUNT)*100));
+  var ratio = currentQuestionNumber()/QUESTION_STEP_COUNT;
+  return Math.min(97, Math.round(easeProgress(ratio)*100));
 }
 
 /* --------------------------------- Render --------------------------------- */
@@ -761,21 +797,14 @@ function render(direction){
 
   var pct = progressPercent();
   progressFill.style.width = pct + "%";
-  if(step.type==="intro"){
+  // No numbers on purpose — just the section you're in and a bar that always feels close to done.
+  progressPct.textContent = "";
+  if(step.type==="intro" || step.type==="success"){
     progressLabel.textContent = "";
-    progressPct.textContent = "";
-  } else if(step.type==="success"){
-    progressLabel.textContent = "";
-    progressPct.textContent = "";
   } else if(step.type==="review"){
     progressLabel.textContent = t(UI.reviewTitle);
-    progressPct.textContent = pct + "%";
-  } else if(step.type==="section" || step.type==="stats"){
-    progressLabel.textContent = state.lang==="zh" ? step.section.zh : step.section.en;
-    progressPct.textContent = pct + "%";
   } else {
-    progressLabel.textContent = t(UI.stepOf)(currentQuestionNumber(), QUESTION_STEP_COUNT);
-    progressPct.textContent = pct + "%";
+    progressLabel.textContent = state.lang==="zh" ? step.section.zh : step.section.en;
   }
 
   window.scrollTo({top:0, behavior:"smooth"});
@@ -942,6 +971,12 @@ function renderQuestion(step){
         state.answers[q.id] = cur;
         clearError(fieldBox);
         renderQuestion.__reselect(q, step);
+        // single-choice with no free-text needed: confirm the pick, then glide on automatically
+        if(q.type==="single" && !opt.other){
+          setTimeout(function(){
+            if(STEPS[state.index]===step) attemptNext(q);
+          }, 380);
+        }
       };
       box.appendChild(card);
     });
