@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AO留学 · 名校申请深度规划自查表 | AcademiaOne</title>
+<meta name="description" content="AcademiaOne Education — AO留学 · 名校申请深度规划自查表">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Noto+Serif+SC:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#08070a;
+    --ink-2:#111014;
+    --ink-3:#1a181d;
+    --card:#151318;
+    --card-2:#1c1a20;
+    --border:#332c1f;
+    --gold:#c9a24b;
+    --gold-2:#e7cd8a;
+    --gold-3:#f4e2ab;
+    --gold-dim:#8a6d34;
+    --cream:#f3ead6;
+    --muted:#a89a86;
+    --muted-2:#756a5c;
+    --danger:#e0846a;
+    --ok:#8fbf9f;
+    --serif-en:'Playfair Display','Noto Serif SC',serif;
+    --serif-zh:'Noto Serif SC','Playfair Display',serif;
+    --sans:'Inter','Noto Sans SC',-apple-system,sans-serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:var(--sans);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  [lang-zh],[lang-en]{ }
+  body.lang-zh [lang-en]{display:none !important;}
+  body.lang-en [lang-zh]{display:none !important;}
+  body.lang-zh{font-family:'Noto Sans SC',var(--sans);}
+
+  .watermark{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460'%3E%3Ctext x='-40' y='230' font-size='26' letter-spacing='4' fill='%23c9a24b' fill-opacity='0.05' font-family='Georgia,serif' transform='rotate(-32 230 230)'%3EACADEMIAONE %C2%B7 EDUCATION%3C/text%3E%3C/svg%3E");
+    background-repeat:repeat;
+    opacity:.7;
+  }
+  .glow{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(700px 420px at 8% -6%, rgba(201,162,75,.14), transparent 60%),
+      radial-gradient(600px 500px at 105% 15%, rgba(201,162,75,.10), transparent 60%),
+      radial-gradient(900px 600px at 50% 115%, rgba(201,162,75,.08), transparent 60%);
+  }
+
+  .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ---------- Header ---------- */
+  header.site-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 20px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(17,16,20,.9), rgba(17,16,20,.55));
+    backdrop-filter:blur(6px);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:12px;min-width:0;}
+  .logo-mark{width:46px;height:46px;flex:none;filter:drop-shadow(0 0 6px rgba(201,162,75,.25));}
+  .wordmark{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+  .brand-name{
+    font-family:var(--serif-en);
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:.03em;
+    background:linear-gradient(180deg,var(--gold-3),var(--gold));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  body.lang-zh .brand-name{font-family:var(--serif-zh);}
+  .brand-tagline{
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  .lang-toggle{
+    position:relative;display:flex;align-items:center;
+    background:var(--ink-3);border:1px solid var(--border);border-radius:999px;
+    padding:3px;cursor:pointer;flex:none;user-select:none;
+  }
+  .lang-toggle .pill{
+    position:absolute;top:3px;bottom:3px;left:3px;
+    width:calc(50% - 3px);border-radius:999px;
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));
+    transition:transform .32s var(--ease);
+    box-shadow:0 2px 10px rgba(201,162,75,.35);
+  }
+  body.lang-en .lang-toggle .pill{transform:translateX(100%);}
+  .lang-toggle span{
+    position:relative;z-index:1;font-size:12.5px;font-weight:700;padding:6px 14px;
+    color:var(--muted);transition:color .25s;letter-spacing:.02em;
+  }
+  body.lang-zh .lang-toggle span.opt-zh{color:var(--ink);}
+  body.lang-en .lang-toggle span.opt-en{color:var(--ink);}
+
+  /* ---------- Progress ---------- */
+  .progress-wrap{padding:0;position:sticky;top:83px;z-index:19;}
+  .progress-track{height:3px;width:100%;background:var(--ink-3);overflow:hidden;}
+  .progress-fill{
+    height:100%;width:0%;
+    background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-3));
+    transition:width .5s var(--ease);
+  }
+  .progress-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 20px 0;font-size:11.5px;color:var(--muted-2);letter-spacing:.03em;
+  }
+
+  /* ---------- Stage ---------- */
+  main.stage-outer{
+    flex:1;display:flex;align-items:flex-start;justify-content:center;
+    padding:36px 18px 140px;
+  }
+  .stage{width:100%;max-width:640px;}
+  .step{
+    opacity:0;transform:translateY(16px);
+    animation:enter .5s var(--ease) forwards;
+  }
+  .step.leaving{animation:leave .28s var(--ease) forwards;}
+  @keyframes enter{to{opacity:1;transform:translateY(0);}}
+  @keyframes leave{to{opacity:0;transform:translateY(-14px);}}
+
+  .section-tag{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-2);
+    margin-bottom:14px;font-weight:600;
+  }
+  .section-tag::before{content:'';width:18px;height:1px;background:var(--gold-dim);}
+
+  h1.q-title{
+    font-family:var(--serif-en);font-weight:600;
+    font-size:clamp(22px,4vw,30px);line-height:1.35;color:var(--cream);
+    margin:0 0 8px;
+  }
+  body.lang-zh h1.q-title{font-family:var(--serif-zh);}
+  .q-help{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 26px;}
+  .required-mark{color:var(--gold);margin-left:2px;}
+
+  /* Inputs */
+  .field{margin-bottom:18px;}
+  .field label.sub{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;letter-spacing:.02em;}
+  input[type=text],input[type=email],textarea{
+    width:100%;background:var(--card);border:1px solid var(--border);
+    color:var(--cream);border-radius:12px;padding:14px 16px;
+    font-family:var(--sans);font-size:15px;line-height:1.5;
+    transition:border-color .2s,box-shadow .2s,background .2s;
+    resize:vertical;
+  }
+  body.lang-zh input[type=text],body.lang-zh input[type=email],body.lang-zh textarea{font-family:'Noto Sans SC',var(--sans);}
+  textarea{min-height:120px;}
+  input::placeholder,textarea::placeholder{color:var(--muted-2);}
+  input:focus,textarea:focus{
+    outline:none;border-color:var(--gold-dim);background:var(--card-2);
+    box-shadow:0 0 0 3px rgba(201,162,75,.14);
+  }
+  .field.error input,.field.error textarea{border-color:var(--danger);}
+  .error-msg{color:var(--danger);font-size:12.5px;margin-top:6px;display:none;}
+  .field.error .error-msg{display:block;}
+
+  /* Choice cards */
+  .choices{display:grid;gap:10px;}
+  .choice-card{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s,transform .12s;
+    font-size:14.5px;color:var(--cream);
+  }
+  .choice-card:hover{border-color:var(--gold-dim);background:var(--card-2);}
+  .choice-card:active{transform:scale(.99);}
+  .choice-card .mark{
+    width:20px;height:20px;flex:none;border-radius:50%;border:1.5px solid var(--muted-2);
+    display:flex;align-items:center;justify-content:center;transition:all .18s;
+  }
+  .choice-card.multi .mark{border-radius:6px;}
+  .choice-card .mark::after{
+    content:'';width:9px;height:9px;border-radius:50%;background:var(--ink);
+    transform:scale(0);transition:transform .18s;
+  }
+  .choice-card.multi .mark::after{
+    width:11px;height:8px;border-radius:1px;background:none;
+    border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    transform:scale(0) rotate(-45deg) translate(1px,-2px);
+  }
+  .choice-card.selected{border-color:var(--gold);background:linear-gradient(135deg,rgba(201,162,75,.16),rgba(201,162,75,.06));}
+  .choice-card.selected .mark{background:linear-gradient(135deg,var(--gold-2),var(--gold));border-color:var(--gold);}
+  .choice-card.selected .mark::after{transform:scale(1);}
+  .choice-card.multi.selected .mark::after{transform:scale(1) rotate(-45deg) translate(1px,-2px);}
+  .other-input{margin-top:4px;}
+
+  /* Scale (1-10) */
+  .scale-wrap{padding:6px 4px 4px;}
+  .scale-readout{
+    text-align:center;font-family:var(--serif-en);font-weight:700;
+    font-size:52px;color:var(--gold-2);line-height:1;margin-bottom:6px;
+    text-shadow:0 0 24px rgba(201,162,75,.25);
+    transition:color .2s;
+  }
+  input[type=range]{
+    -webkit-appearance:none;width:100%;height:6px;border-radius:999px;
+    background:linear-gradient(90deg,var(--gold-dim),var(--gold) var(--fill,50%),var(--ink-3) var(--fill,50%));
+    margin:18px 0 10px;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%,var(--gold-3),var(--gold));
+    border:2px solid #fff2;box-shadow:0 2px 10px rgba(201,162,75,.55);cursor:grab;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:26px;height:26px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%,var(--gold-3),var(--gold));
+    border:2px solid #fff2;box-shadow:0 2px 10px rgba(201,162,75,.55);cursor:grab;
+  }
+  .scale-caps{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);gap:10px;}
+  .scale-caps span:last-child{text-align:right;}
+  .scale-ticks{display:flex;justify-content:space-between;margin-top:8px;padding:0 2px;}
+  .scale-ticks span{font-size:10px;color:var(--muted-2);width:20px;text-align:center;}
+
+  /* Group (mini multi-field) */
+  .group-row{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;margin-bottom:12px;
+  }
+  .group-row .row-title{font-size:12px;color:var(--gold-2);font-weight:600;margin-bottom:8px;letter-spacing:.03em;}
+
+  /* Intro / Section / Review / Success screens */
+  .hero-card{
+    background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:34px 28px;
+  }
+  .hero-eyebrow{
+    display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--gold-2);border:1px solid var(--gold-dim);border-radius:999px;
+    padding:5px 14px;margin-bottom:18px;
+  }
+  h2.hero-title{
+    font-family:var(--serif-en);font-weight:700;font-size:clamp(24px,5vw,34px);
+    margin:0 0 14px;line-height:1.3;color:var(--cream);
+  }
+  body.lang-zh h2.hero-title{font-family:var(--serif-zh);}
+  .hero-body{font-size:14.5px;line-height:1.85;color:#d9cdb4;white-space:pre-line;margin-bottom:8px;}
+  .hero-note{font-size:12.5px;color:var(--muted);margin-top:18px;display:flex;gap:8px;align-items:flex-start;}
+  .hero-note svg{flex:none;margin-top:2px;}
+
+  .stat-list{display:grid;gap:12px;margin-top:20px;}
+  .stat-item{
+    display:flex;align-items:flex-start;gap:12px;
+    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;font-size:14px;line-height:1.6;color:#e6dabf;
+  }
+  .stat-item svg{flex:none;margin-top:2px;color:var(--gold);}
+
+  .section-divider{text-align:center;padding:50px 10px;}
+  .section-divider .num{
+    font-family:var(--serif-en);font-size:13px;color:var(--gold-dim);letter-spacing:.3em;
+    text-transform:uppercase;margin-bottom:16px;
+  }
+  .section-divider h2{
+    font-family:var(--serif-en);font-weight:600;font-size:clamp(24px,5vw,32px);
+    color:var(--cream);margin:0 0 12px;
+  }
+  body.lang-zh .section-divider h2{font-family:var(--serif-zh);}
+  .section-divider .rule{width:60px;height:1px;background:var(--gold-dim);margin:18px auto;}
+  .section-divider p{color:var(--muted);font-size:13.5px;max-width:420px;margin:0 auto;}
+
+  .review-list{display:grid;gap:10px;margin:22px 0;}
+  .review-item{
+    display:flex;justify-content:space-between;gap:16px;
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:12px 15px;font-size:13.5px;
+  }
+  .review-item .k{color:var(--muted);flex:none;}
+  .review-item .v{color:var(--cream);text-align:right;font-weight:500;overflow-wrap:anywhere;}
+
+  .success-wrap{text-align:center;padding:20px 10px;}
+  .check-circle{width:84px;height:84px;margin:0 auto 24px;}
+  .check-circle circle{fill:none;stroke:var(--gold-dim);stroke-width:2;}
+  .check-circle path{
+    fill:none;stroke:var(--gold-2);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:40;stroke-dashoffset:40;animation:draw .6s .3s var(--ease) forwards;
+  }
+  @keyframes draw{to{stroke-dashoffset:0;}}
+
+  /* Buttons / Nav */
+  .actions{display:flex;gap:12px;margin-top:28px;align-items:center;}
+  .btn{
+    font-family:var(--sans);font-weight:600;font-size:14.5px;letter-spacing:.02em;
+    border-radius:999px;padding:14px 28px;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .2s,opacity .2s;display:inline-flex;align-items:center;gap:8px;
+  }
+  body.lang-zh .btn{font-family:'Noto Sans SC',var(--sans);}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));color:var(--ink);
+    box-shadow:0 6px 20px rgba(201,162,75,.28);
+  }
+  .btn-primary:hover{box-shadow:0 8px 26px rgba(201,162,75,.4);}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .btn-ghost{
+    background:transparent;color:var(--muted);border:1px solid var(--border);
+  }
+  .btn-ghost:hover{color:var(--cream);border-color:var(--gold-dim);}
+  .btn-wide{width:100%;justify-content:center;}
+  .btn svg{flex:none;}
+
+  .hint-key{font-size:11.5px;color:var(--muted-2);margin-top:10px;}
+
+  footer.site-footer{
+    text-align:center;padding:22px 20px 30px;font-size:11.5px;color:var(--muted-2);
+    border-top:1px solid var(--border);
+  }
+  footer.site-footer a{color:var(--gold-dim);}
+
+  .restart-link{
+    position:fixed;bottom:14px;left:14px;z-index:20;font-size:11px;color:var(--muted-2);
+    background:var(--ink-2);border:1px solid var(--border);border-radius:999px;
+    padding:6px 12px;cursor:pointer;opacity:.7;
+  }
+  .restart-link:hover{opacity:1;color:var(--danger);}
+
+  @media (max-width:480px){
+    header.site-header{padding:14px 14px;}
+    main.stage-outer{padding:26px 14px 130px;}
+    .hero-card{padding:24px 18px;}
+    .actions{flex-wrap:wrap;}
+    .btn{padding:13px 22px;}
+  }
+</style>
+</head>
+<body class="lang-zh">
+
+<div class="watermark"></div>
+<div class="glow"></div>
+
+<div class="app">
+  <header class="site-header">
+    <div class="brand">
+      <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f4e2ab"/>
+            <stop offset="0.5" stop-color="#c9a24b"/>
+            <stop offset="1" stop-color="#8a6d34"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="47" fill="#0d0c10" stroke="url(#gGold)" stroke-width="2"/>
+        <circle cx="50" cy="50" r="39" fill="none" stroke="url(#gGold)" stroke-width="1" opacity="0.55"/>
+        <path d="M20 66 C28 50, 30 38, 26 26 C34 32, 38 42, 38 52 L34 66 Z" fill="url(#gGold)" opacity="0.9"/>
+        <path d="M80 66 C72 50, 70 38, 74 26 C66 32, 62 42, 62 52 L66 66 Z" fill="url(#gGold)" opacity="0.9"/>
+        <text x="50" y="60" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-weight="700" font-size="30" fill="url(#gGold)">AO</text>
+      </svg>
+      <div class="wordmark">
+        <span class="brand-name" lang-zh>翰林教育 AcademiaOne</span>
+        <span class="brand-name" lang-en>AcademiaOne Education</span>
+        <span class="brand-tagline" lang-zh>英国学术卓越教育机构</span>
+        <span class="brand-tagline" lang-en>UK's Academic Excellence Institution</span>
+      </div>
+    </div>
+    <button class="lang-toggle" id="langToggle" type="button" aria-label="切换语言 / Toggle language">
+      <span class="pill"></span>
+      <span class="opt-zh">中文</span>
+      <span class="opt-en">EN</span>
+    </button>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-meta">
+      <span id="progressLabel"></span>
+      <span id="progressPct"></span>
+    </div>
+  </div>
+
+  <main class="stage-outer">
+    <div class="stage" id="stage"></div>
+  </main>
+
+  <footer class="site-footer">
+    <span lang-zh>本问卷内容仅用于1v1咨询准备，我们将严格保密 · © AcademiaOne Education</span>
+    <span lang-en>This questionnaire is used solely to prepare your 1:1 consultation and is kept strictly confidential · © AcademiaOne Education</span>
+  </footer>
+</div>
+
+<button class="restart-link" id="restartLink" type="button">
+  <span lang-zh>重新开始</span><span lang-en>Start over</span>
+</button>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================================
+   CONFIGURATION — replace these two values to go live.
+   1) Create a free form at https://formspree.io (takes ~1 min), it gives
+      you an endpoint that looks like https://formspree.io/f/xxxxabcd
+   2) In the Formspree dashboard, set the notification email to whichever
+      inbox should receive submissions.
+   ========================================================================= */
+var CONFIG = {
+  FORMSPREE_ENDPOINT: "https://formspree.io/f/YOUR_FORM_ID", // TODO: set your real Formspree endpoint
+  DESTINATION_EMAIL: "you@example.com" // TODO: only used for the mailto fallback if the network request fails
+};
+if (CONFIG.FORMSPREE_ENDPOINT.indexOf("YOUR_FORM_ID") !== -1) {
+  console.warn("[AO1 form] Formspree endpoint is still a placeholder — submissions will not send until CONFIG.FORMSPREE_ENDPOINT is set.");
+}
+
+/* ---------------------------- i18n shell strings ------------------------ */
+var UI = {
+  next: {zh:"下一步", en:"Next"},
+  back: {zh:"上一步", en:"Back"},
+  start: {zh:"开始填写", en:"Begin"},
+  submit: {zh:"提交问卷", en:"Submit"},
+  submitting: {zh:"提交中…", en:"Submitting…"},
+  continue: {zh:"继续", en:"Continue"},
+  required: {zh:"此项为必填", en:"This field is required"},
+  otherPlaceholder: {zh:"请填写…", en:"Please specify…"},
+  stepOf: {zh:function(a,b){return "第 " + a + " / " + b + " 步";}, en:function(a,b){return "Step " + a + " of " + b;}},
+  reviewTitle: {zh:"确认信息", en:"Review Your Answers"},
+  reviewBody: {zh:"以下是你的关键信息摘要，确认无误后即可提交。你的全部作答内容会一并安全发送给 Victor 博士团队。", en:"Here is a quick summary of your key details. Once confirmed, submit — your full answers are sent securely to Dr. Victor's team."},
+  successTitle: {zh:"提交成功！", en:"Submitted!"},
+  successBody: {zh:"感谢你认真填写这份问卷。Victor博士团队会在1v1咨询前仔细阅读你的每一个答案，我们很快与你联系。", en:"Thank you for completing this so thoughtfully. Dr. Victor's team will review every answer before your 1:1 consultation and will be in touch soon."},
+  errorTitle: {zh:"提交遇到问题", en:"Something went wrong"},
+  errorBody: {zh:"网络提交失败，请点击下方按钮通过邮件直接发送，或稍后重试。", en:"The submission couldn't reach our server. Use the button below to send it by email directly, or try again shortly."},
+  retry: {zh:"重试提交", en:"Retry submission"},
+  emailFallback: {zh:"改用邮件发送", en:"Send via email instead"},
+  autosave: {zh:"你的填写进度会自动保存在此设备上", en:"Your progress is saved automatically on this device"}
+};
+
+/* ------------------------------- Question data --------------------------- */
+// type: intro | section | text | email | textarea | single | multi | scale | group | review | success
+var SECTIONS = [
+  { id:"lead", zh:"开始之前", en:"Before We Begin", questions:[
+    { id:"email", type:"email", required:true,
+      zh:{q:"邮箱", help:""}, en:{q:"Email", help:""} },
+    { id:"relationship", type:"single", required:true,
+      zh:{q:"请问你是为自己填写吗？请选择以下适用的选项", help:""},
+      en:{q:"Are you filling this out for yourself? Please select what applies.", help:""},
+      options:[
+        {v:"self", zh:"本人", en:"Myself"},
+        {v:"sister", zh:"姐妹", en:"Sister"},
+        {v:"brother", zh:"兄弟", en:"Brother"},
+        {v:"friend", zh:"朋友", en:"Friend"},
+        {v:"daughter", zh:"女儿", en:"Daughter"},
+        {v:"son", zh:"儿子", en:"Son"},
+        {v:"boyfriend", zh:"男朋友", en:"Boyfriend"},
+        {v:"girlfriend", zh:"女朋友", en:"Girlfriend"},
+        {v:"wife", zh:"妻子", en:"Wife"},
+        {v:"husband", zh:"丈夫", en:"Husband"},
+        {v:"other", zh:"其他", en:"Other", other:true}
+      ] }
+  ]},
+  { id:"basic", zh:"你的基本信息", en:"Your Basic Information", questions:[
+    { id:"title", type:"single", required:true,
+      zh:{q:"Title 称谓", help:""}, en:{q:"Title", help:""},
+      options:[
+        {v:"mr", zh:"Mr 先生", en:"Mr"},
+        {v:"ms", zh:"Ms/Mrs 女士", en:"Ms/Mrs"},
+        {v:"dr", zh:"Dr 博士", en:"Dr"}
+      ] },
+    { id:"name", type:"text", required:true, zh:{q:"姓名", help:""}, en:{q:"Full Name", help:""} },
+    { id:"wechat", type:"text", required:true, zh:{q:"微信昵称", help:""}, en:{q:"WeChat Nickname", help:""} },
+    { id:"service", type:"multi", required:true,
+      zh:{q:"你希望获得什么服务支持？", help:"可多选"}, en:{q:"What kind of service support are you looking for?", help:"Select all that apply"},
+      options:[
+        {v:"undergrad", zh:"本科申请", en:"Undergraduate Application"},
+        {v:"masters", zh:"硕士申请", en:"Master's Application"},
+        {v:"phd", zh:"博士申请", en:"PhD Application"},
+        {v:"publishing", zh:"期刊出版", en:"Journal Publishing"},
+        {v:"research", zh:"研究项目", en:"Research Program"},
+        {v:"other", zh:"其他", en:"Other", other:true}
+      ] },
+    { id:"overseas_bg", type:"textarea", required:true,
+      zh:{q:"是否有海外经历/实习/研究背景？请简述", help:""}, en:{q:"Do you have overseas experience, internships, or research background? Please describe briefly.", help:""} },
+    { id:"lang_scores", type:"textarea", required:true,
+      zh:{q:"雅思/托福/GRE 等语言成绩", help:"如有请附上，如没有则填写“无”"},
+      en:{q:"IELTS / TOEFL / GRE or other scores", help:"Include them if you have them, otherwise write \"none\""} },
+    { id:"commitment", type:"scale", required:true,
+      zh:{q:"请告诉我们你有多想付出全力来准备这次申请？", help:"", lowLabel:"1 完全不想", highLabel:"10 无论如何我都要做"},
+      en:{q:"How much do you want to give this application everything?", help:"", lowLabel:"1 · Not at all", highLabel:"10 · No matter what"} },
+    { id:"urgency", type:"scale", required:true,
+      zh:{q:"这次申请对你来说有多紧急？", help:"", lowLabel:"1 可以再等几年", highLabel:"10 需要尽快行动"},
+      en:{q:"How urgent is this application for you?", help:"", lowLabel:"1 · Can wait years", highLabel:"10 · Need to act now"} },
+    { id:"funding_source", type:"single", required:true,
+      zh:{q:"如果你获得梦想学校（如牛剑、哈佛等）的录取，资金来源将是？", help:""},
+      en:{q:"If admitted to your dream school (e.g. Oxbridge, Harvard), what will your source of funding be?", help:""},
+      options:[
+        {v:"self", zh:"我自己承担", en:"Myself"},
+        {v:"family", zh:"我的家庭承担", en:"My family"}
+      ] },
+    { id:"income", type:"single", required:true,
+      zh:{q:"请问您的家庭年收入是多少？", help:""}, en:{q:"What is your household's annual income?", help:""},
+      options:[
+        {v:"b50", zh:"低于50万人民币 (Below 50K GBP)", en:"Below 50K GBP"},
+        {v:"50-100", zh:"50-100万人民币 (50K-100K GBP)", en:"50K-100K GBP"},
+        {v:"100-500", zh:"100-500万人民币 (100K-500K GBP)", en:"100K-500K GBP"},
+        {v:"500-1000", zh:"500-1000万人民币 (500K-1000K GBP)", en:"500K-1000K GBP"},
+        {v:"1000+", zh:"1000万人民币以上 (1000K GBP +)", en:"1000K GBP +"}
+      ] },
+    { id:"invest_max", type:"single", required:true,
+      zh:{q:"如果您能进入梦想中的大学，您愿意为专业团队投资的最高金额是多少？", help:""},
+      en:{q:"If you receive a dream university offer, what is the maximum you'd invest in a professional team?", help:""},
+      options:[
+        {v:"b2", zh:"低于2万人民币 (Below 2K GBP)", en:"Below 2K GBP"},
+        {v:"2-5", zh:"2-5万人民币 (2K-5K GBP)", en:"2K-5K GBP"},
+        {v:"5-10", zh:"5-10万人民币 (5K-10K GBP)", en:"5K-10K GBP"},
+        {v:"20-30", zh:"20-30万人民币 (20K-30K GBP)", en:"20K-30K GBP"},
+        {v:"30-50", zh:"30-50万人民币 (30K-50K GBP)", en:"30K-50K GBP"},
+        {v:"50-100", zh:"50-100万人民币 (50K-100K GBP)", en:"50K-100K GBP"},
+        {v:"100+", zh:"100万人民币以上 (100K GBP +)", en:"100K GBP +"}
+      ] }
+  ]},
+  { id:"why", zh:"你为什么来找我们？", en:"Why Are You Here?", questions:[
+    { id:"why_major", type:"textarea", required:true,
+      zh:{q:"你为什么想读这个专业？有没有一个转折/契机让你下定决心？", help:"可以讲真实故事，Victor博士会认真看"},
+      en:{q:"Why do you want to study this subject? Was there a turning point that led to this decision?", help:"Feel free to share a real story — Dr. Victor reads every word."} },
+    { id:"bg_course", type:"single", required:true,
+      zh:{q:"是否有目标专业相关的背景课？", help:""}, en:{q:"Do you have coursework related to your target major?", help:""},
+      options:[
+        {v:"yes", zh:"有", en:"Yes"},
+        {v:"no", zh:"无", en:"No"},
+        {v:"self-study", zh:"自学中，请在下一问题中备注教材或课程", en:"Self-studying — please note the materials/courses in the next question"}
+      ] },
+    { id:"current_situation", type:"textarea", required:true, zh:{q:"你目前的情况是什么？", help:""}, en:{q:"What is your current situation?", help:""} },
+    { id:"desired_goal", type:"textarea", required:true, zh:{q:"你希望达到的目标是什么？", help:""}, en:{q:"What goal are you hoping to reach?", help:""} },
+    { id:"obstacles", type:"textarea", required:true, zh:{q:"你面临什么障碍？", help:""}, en:{q:"What obstacles are you facing?", help:""} },
+    { id:"core_problem", type:"textarea", required:true,
+      zh:{q:"你真正想借助这次申请解决的核心问题是什么？", help:"越真实越好"},
+      en:{q:"What core problem do you really want this application to solve?", help:"The more honest, the better"} },
+    { id:"problem_duration", type:"textarea", required:true, zh:{q:"这个问题你已经处理了多长时间？", help:""}, en:{q:"How long have you been dealing with this problem?", help:""} },
+    { id:"estimated_loss", type:"textarea", required:true,
+      zh:{q:"如果你需要估算这个问题给你带来了多少损失，你会怎么估算？", help:""},
+      en:{q:"If you had to estimate the cost this problem has had on you, how would you estimate it?", help:""} },
+    { id:"five_year_risk", type:"textarea", required:true,
+      zh:{q:"如果这个问题持续五年，会变得多糟糕？", help:""}, en:{q:"If this problem continued for five more years, how bad would it get?", help:""} },
+    { id:"used_agency", type:"single", required:true,
+      zh:{q:"过去的本/硕/其他申请你是否尝试过找中介/机构？", help:""},
+      en:{q:"For past undergrad/master's/other applications, have you used an agency before?", help:""},
+      options:[ {v:"yes", zh:"是", en:"Yes"}, {v:"no", zh:"否", en:"No"} ] },
+    { id:"agency_experience", type:"textarea", required:true,
+      zh:{q:"过去由中介/机构负责申请的院校结果和整体经验如何？这次你想“做对”的关键点是什么？", help:""},
+      en:{q:"How were the results and overall experience with that agency? What's the key thing you want to get right this time?", help:""} },
+    { id:"future_self", type:"textarea", required:true,
+      zh:{q:"如果我们这次帮你规划得特别好，你希望未来会变成一个什么样的人？生活会有什么变化？", help:"不是目标院校，而是状态"},
+      en:{q:"If this planning goes really well, who do you hope to become? What would change in your life?", help:"Not the target school — the state of your life"} }
+  ]},
+  { id:"goals", zh:"关于你的目标", en:"About Your Goals", questions:[
+    { id:"target_schools", type:"group", required:true,
+      zh:{q:"你目前最想申请的目标院校 Top 3 是：", help:""}, en:{q:"Your current Top 3 target institutions are:", help:""},
+      fields:[
+        {id:"top1", type:"text", zh:"Top 1", en:"Top 1"},
+        {id:"top2", type:"text", zh:"Top 2", en:"Top 2"},
+        {id:"top3", type:"text", zh:"Top 3", en:"Top 3"}
+      ] },
+    { id:"research_field", type:"textarea", required:true,
+      zh:{q:"你最想进入的研究领域/方向是？", help:"如不清楚请写“不确定”"}, en:{q:"What research field/direction do you most want to pursue?", help:"Write \"not sure\" if unclear"} },
+    { id:"mentor", type:"textarea", required:true,
+      zh:{q:"你是否有特别想进的导师？", help:"如有请写明姓名/学校"}, en:{q:"Is there a specific supervisor you want to work with?", help:"Name and institution if so"} },
+    { id:"consult_goals", type:"multi", required:true,
+      zh:{q:"你最希望通过这次咨询解决哪些核心问题？", help:"可多选"}, en:{q:"Which core problems do you most want this consultation to solve?", help:"Select all that apply"},
+      options:[
+        {v:"can_i_get_in", zh:"我的背景是否能上梦校？", en:"Can my background get me into my dream school?"},
+        {v:"whats_missing", zh:"我的学术/经历还差什么？", en:"What's missing from my academics/experience?"},
+        {v:"how_to_fix", zh:"没有相关背景怎么“补救”？", en:"How to make up for having no relevant background?"},
+        {v:"publishing", zh:"如何能够出版增强学术背景？", en:"How can I publish to strengthen my academic profile?"},
+        {v:"other", zh:"其他", en:"Other", other:true}
+      ] }
+  ]},
+  { id:"self", zh:"关于你自己", en:"About Yourself", questions:[
+    { id:"top_traits", type:"group", required:true,
+      zh:{q:"你觉得自己身上最有价值的 3 个特质/经历是什么？", help:"请填写特质/经历名称，并在详情中简述"},
+      en:{q:"What are the 3 most valuable traits/experiences you bring?", help:"Name each one, then briefly describe it"},
+      fields:[
+        {id:"trait1", type:"text", zh:"特质/经历 1", en:"Trait/Experience 1"},
+        {id:"detail1", type:"textarea", zh:"详情", en:"Details"},
+        {id:"trait2", type:"text", zh:"特质/经历 2", en:"Trait/Experience 2"},
+        {id:"detail2", type:"textarea", zh:"详情", en:"Details"},
+        {id:"trait3", type:"text", zh:"特质/经历 3", en:"Trait/Experience 3"},
+        {id:"detail3", type:"textarea", zh:"详情", en:"Details"}
+      ] },
+    { id:"highlight", type:"textarea", required:true,
+      zh:{q:"你内心觉得“最希望被别人看见的闪光点”是什么？", help:""}, en:{q:"What's the highlight you most wish others could see in you?", help:""} },
+    { id:"worry_short", type:"textarea", required:true,
+      zh:{q:"你最担心的短板或困扰是什么？", help:""}, en:{q:"What's your biggest concern about a weak point or struggle?", help:""} },
+    { id:"worry_risk", type:"textarea", required:true,
+      zh:{q:"你最担心的申请风险是什么？", help:""}, en:{q:"What's your biggest worry about application risk?", help:""} },
+    { id:"ideal_offer", type:"textarea", required:true,
+      zh:{q:"如果让你形容理想中的 offer，它意味着什么？你为什么想要它？", help:""},
+      en:{q:"If you had to describe your ideal offer, what would it mean? Why do you want it?", help:""} }
+  ]},
+  { id:"pace", zh:"关于你的人生节奏", en:"About Your Life Pace", questions:[
+    { id:"life_status", type:"multi", required:true,
+      zh:{q:"你现在的生活状态是：", help:"可多选"}, en:{q:"What is your current life status?", help:"Select all that apply"},
+      options:[
+        {v:"in_school", zh:"学校在读", en:"In school"},
+        {v:"undergrad", zh:"本科在读", en:"Undergraduate student"},
+        {v:"grad", zh:"研究生在读", en:"Graduate student"},
+        {v:"gap_year", zh:"Gap year中", en:"On a gap year"},
+        {v:"full_time", zh:"全职工作", en:"Working full-time"},
+        {v:"part_time", zh:"兼职/自由职业", en:"Part-time/freelance"}
+      ] },
+    { id:"weekly_time", type:"text", required:true,
+      zh:{q:"你平均每周可以用于申请的时间是多少？", help:""}, en:{q:"On average, how many hours per week can you dedicate to your application?", help:""} },
+    { id:"apply_timing", type:"single", required:true,
+      zh:{q:"你准备何时提交申请？", help:""}, en:{q:"When do you plan to submit your application?", help:""},
+      options:[
+        {v:"this_sept", zh:"今年9月", en:"This September"},
+        {v:"next_sept", zh:"明年9月", en:"Next September"},
+        {v:"other", zh:"其他", en:"Other", other:true}
+      ] },
+    { id:"action_timing", type:"single", required:true,
+      zh:{q:"你准备何时付出行动，做出改变？", help:""}, en:{q:"When are you ready to take action and make a change?", help:""},
+      options:[
+        {v:"now", zh:"马上", en:"Right now"},
+        {v:"1-3d", zh:"1-3天", en:"1–3 days"},
+        {v:"3-7d", zh:"3-7天", en:"3–7 days"},
+        {v:"1w+", zh:"1周以上", en:"More than 1 week"},
+        {v:"1m+", zh:"1个月以上", en:"More than 1 month"}
+      ] },
+    { id:"parent_involvement", type:"textarea", required:true,
+      zh:{q:"是否有家长参与决策？是否希望我们参与沟通/汇报？", help:""},
+      en:{q:"Are parents involved in this decision? Would you like us to include them in updates/communication?", help:""} }
+  ]},
+  { id:"final", zh:"最后的问题", en:"Final Questions",
+    stats:{
+      title:{ zh:"我们的牛剑博导团队名校申请体系，平均帮助客户实现：", en:"Our Oxbridge-supervisor-led application system has, on average, helped clients achieve:" },
+      items:[
+        { zh:"七年 1000+ 牛剑常春藤G5 offer（牛津/剑桥/哈佛/普林斯顿/耶鲁/多伦多等）", en:"1,000+ Oxbridge & Ivy League/G5 offers over 7 years (Oxford, Cambridge, Harvard, Princeton, Yale, Toronto, and more)" },
+        { zh:"转专业申请成功率超 80%", en:"80%+ success rate on cross-discipline applications" },
+        { zh:"每年成功客户满意度和转介绍率超 70%", en:"70%+ client satisfaction and referral rate every year" },
+        { zh:"合作牛剑常春藤G5团队 100+ 期刊成功出版", en:"100+ successful journal publications with our Oxbridge/Ivy League/G5 team" }
+      ]
+    },
+    questions:[
+    { id:"why_us", type:"textarea", required:true,
+      zh:{q:"为什么你希望是我们来帮你？", help:""}, en:{q:"Why do you want us, specifically, to help you?", help:""} },
+    { id:"victor_fit", type:"textarea", required:true,
+      zh:{q:"你觉得Victor博士的AO留学团队与你的理想匹配点在哪里？", help:""},
+      en:{q:"Where do you feel Dr. Victor's AcademiaOne team best matches what you're looking for?", help:""} },
+    { id:"top_outcomes", type:"group", required:true,
+      zh:{q:"如果这次合作非常顺利，你希望达成的最重要三个成果是什么？", help:"请在详情中简述"},
+      en:{q:"If this collaboration goes really well, what are the three most important outcomes you want to achieve?", help:"Please describe briefly for each"},
+      fields:[
+        {id:"outcome1", type:"textarea", zh:"成果 1 · 详情", en:"Outcome 1 · Details"},
+        {id:"outcome2", type:"textarea", zh:"成果 2 · 详情", en:"Outcome 2 · Details"},
+        {id:"outcome3", type:"textarea", zh:"成果 3 · 详情", en:"Outcome 3 · Details"}
+      ] },
+    { id:"agreement_terms", type:"single", required:true,
+      zh:{q:"我们不接收负债的人、想要躺着拿offer的人、只想伸手要答案的人，以及期待Victor团队每天来督促你完成任务的人，您同意么？", help:""},
+      en:{q:"We do not take on clients who are in debt, who want an offer handed to them, who only want to be given answers, or who expect our team to chase them daily to complete tasks. Do you agree?", help:""},
+      options:[
+        {v:"agree", zh:"同意", en:"Agree"},
+        {v:"disagree", zh:"不同意", en:"Disagree"}
+      ] },
+    { id:"no_show_understanding", type:"multi", required:true,
+      zh:{q:"你是否理解：如果你没有出席这次通话，你将无法再安排（预约）另一场咨询？", help:"Do you understand if you don't show up to this call you will no longer be able to schedule another?"},
+      en:{q:"Do you understand: if you don't show up to this call, you will no longer be able to schedule another consultation?", help:""},
+      options:[
+        {v:"yes", zh:"是的，我理解", en:"Yes, I understand"}
+      ] }
+  ]}
+];
+
+/* --------------------------------- Build steps --------------------------- */
+var NON_QUESTION_TYPES = ["intro","section","stats","review","success"];
+var STEPS = [];
+STEPS.push({type:"intro"});
+SECTIONS.forEach(function(sec, si){
+  STEPS.push({type:"section", section:sec, index:si});
+  if(sec.stats) STEPS.push({type:"stats", section:sec});
+  sec.questions.forEach(function(q){ STEPS.push({type:q.type, q:q, section:sec}); });
+});
+STEPS.push({type:"review"});
+STEPS.push({type:"success"});
+
+var QUESTION_STEP_COUNT = STEPS.filter(function(s){ return NON_QUESTION_TYPES.indexOf(s.type)===-1; }).length;
+
+/* --------------------------------- State ---------------------------------- */
+var STORAGE_KEY = "ao1_intake_v1";
+var state = loadState();
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === "object"){
+        return { index: parsed.index||0, answers: parsed.answers||{}, lang: parsed.lang||"zh" };
+      }
+    }
+  }catch(e){}
+  return { index:0, answers:{}, lang:"zh" };
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+document.body.className = "lang-" + state.lang;
+
+/* --------------------------------- Helpers -------------------------------- */
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html!==undefined) e.innerHTML = html;
+  return e;
+}
+function t(pair){ return pair[state.lang]; }
+function qStr(q, key){ return q[state.lang][key] || ""; }
+function esc(s){ return (s===undefined||s===null) ? "" : String(s).replace(/[&<>"]/g, function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+function currentQuestionNumber(){
+  var n = 0;
+  for(var i=0;i<=state.index;i++){
+    var s = STEPS[i];
+    if(NON_QUESTION_TYPES.indexOf(s.type)===-1) n++;
+  }
+  return n;
+}
+
+function progressPercent(){
+  var step = STEPS[state.index];
+  if(step.type==="intro") return 0;
+  if(step.type==="success") return 100;
+  if(step.type==="review") return 98;
+  return Math.min(97, Math.round((currentQuestionNumber()/QUESTION_STEP_COUNT)*100));
+}
+
+/* --------------------------------- Render --------------------------------- */
+var stageEl = document.getElementById("stage");
+var progressFill = document.getElementById("progressFill");
+var progressLabel = document.getElementById("progressLabel");
+var progressPct = document.getElementById("progressPct");
+
+function render(direction){
+  var step = STEPS[state.index];
+  var wrap = el("div", "step");
+  if(direction === "back") wrap.style.animationName = "enter";
+
+  if(step.type === "intro") wrap.appendChild(renderIntro());
+  else if(step.type === "section") wrap.appendChild(renderSectionDivider(step));
+  else if(step.type === "stats") wrap.appendChild(renderStats(step));
+  else if(step.type === "review") wrap.appendChild(renderReview());
+  else if(step.type === "success") wrap.appendChild(renderSuccess());
+  else wrap.appendChild(renderQuestion(step));
+
+  stageEl.innerHTML = "";
+  stageEl.appendChild(wrap);
+
+  var pct = progressPercent();
+  progressFill.style.width = pct + "%";
+  if(step.type==="intro"){
+    progressLabel.textContent = "";
+    progressPct.textContent = "";
+  } else if(step.type==="success"){
+    progressLabel.textContent = "";
+    progressPct.textContent = "";
+  } else if(step.type==="review"){
+    progressLabel.textContent = t(UI.reviewTitle);
+    progressPct.textContent = pct + "%";
+  } else if(step.type==="section" || step.type==="stats"){
+    progressLabel.textContent = state.lang==="zh" ? step.section.zh : step.section.en;
+    progressPct.textContent = pct + "%";
+  } else {
+    progressLabel.textContent = t(UI.stepOf)(currentQuestionNumber(), QUESTION_STEP_COUNT);
+    progressPct.textContent = pct + "%";
+  }
+
+  window.scrollTo({top:0, behavior:"smooth"});
+  saveState();
+}
+
+function renderIntro(){
+  var c = el("div", "hero-card");
+  c.appendChild(el("span", "hero-eyebrow", state.lang==="zh" ? "AO 留学 · 深度规划自查表" : "AcademiaOne · Deep-Dive Questionnaire"));
+  c.appendChild(el("h2", "hero-title", state.lang==="zh" ? "名校申请深度规划自查表" : "Application Deep-Dive Questionnaire"));
+  var body = state.lang==="zh"
+    ? "Hi 亲爱的，恭喜恭喜！！我知道你现在激动得不得了！终于可以正式走入这一段更清醒、也更有力量的申请旅程。我想告诉你的是你做了一个很棒的决定，我会尽我所能的帮助你前进！\n\n你不是来听一段泛泛而谈的建议，而是来开启一个关于选择、天赋、热爱与坚持的思考系统。\n\n为了确保我们的1v1沟通真正有深度、对你当下最有帮助，我需要你先认真完成这份问卷。请用心作答，每一个答案，都是你通向名校和内在成长的起点。\n\n你提供的信息越详细，未来我能为你提供的帮助就越到位。请至少花20分钟时间填写。"
+    : "Hi there — congratulations! I know how excited you must be to finally step into this clearer, more empowered application journey. You've made a wonderful decision, and I'll do everything I can to help you move forward.\n\nYou're not here for generic advice — you're here to begin a real system of thinking about choice, talent, passion, and persistence.\n\nTo make sure our 1:1 conversation is genuinely deep and useful to you right now, I need you to complete this questionnaire thoughtfully first. Every answer is a starting point toward both a great offer and real inner growth.\n\nThe more detail you give, the more precisely I can help. Please set aside at least 20 minutes.";
+  c.appendChild(el("p", "hero-body", esc(body)));
+  var note = el("div", "hero-note");
+  note.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>'+esc(t(UI.autosave))+'</span>';
+  c.appendChild(note);
+
+  var actions = el("div", "actions");
+  var startBtn = el("button", "btn btn-primary btn-wide", esc(t(UI.start)) + " →");
+  startBtn.onclick = function(){ goTo(state.index+1, "fwd"); };
+  actions.appendChild(startBtn);
+  c.appendChild(actions);
+  return c;
+}
+
+function renderSectionDivider(step){
+  var wrap = el("div");
+  var d = el("div", "section-divider");
+  var num = el("div", "num", (state.lang==="zh"?"第 ":"Part ") + (step.index+1) + (state.lang==="zh"?" 部分 · 共 "+SECTIONS.length+" 部分":" of "+SECTIONS.length));
+  d.appendChild(num);
+  d.appendChild(el("h2", "", esc(state.lang==="zh" ? step.section.zh : step.section.en)));
+  d.appendChild(el("div", "rule"));
+  var descZh = {
+    lead:"先了解一些基础信息。", basic:"帮助我们认识你，量身定制沟通方式。",
+    why:"这是整份问卷的核心 —— 请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
+    self:"从你自己的视角，谈谈你是谁。", pace:"了解你的时间与节奏，帮你规划下一步。",
+    final:"最后几个问题，帮助我们确认这是一次真正匹配的合作。"
+  };
+  var descEn = {
+    lead:"A few basics to start with.", basic:"Helping us get to know you, so we can tailor how we communicate.",
+    why:"The heart of this questionnaire — please answer as honestly as you can.",
+    goals:"Let's talk about your target schools and direction.",
+    self:"Tell us who you are, in your own words.", pace:"Understanding your time and pace helps us plan your next step.",
+    final:"A few last questions to help us confirm this is a genuine fit."
+  };
+  d.appendChild(el("p", "", esc(state.lang==="zh" ? descZh[step.section.id] : descEn[step.section.id])));
+  wrap.appendChild(d);
+
+  var actions = el("div", "actions");
+  var contBtn = el("button", "btn btn-primary btn-wide", esc(t(UI.continue)) + " →");
+  contBtn.onclick = function(){ goTo(state.index+1, "fwd"); };
+  actions.appendChild(contBtn);
+  wrap.appendChild(actions);
+
+  if(step.index>0){
+    var back = el("button", "btn btn-ghost btn-wide", "← " + esc(t(UI.back)));
+    back.style.marginTop = "10px";
+    back.onclick = function(){ goTo(state.index-1, "back"); };
+    wrap.appendChild(back);
+  }
+  return wrap;
+}
+
+function renderStats(step){
+  var sec = step.section;
+  var wrap = el("div");
+  var c = el("div", "hero-card");
+  c.appendChild(el("span", "hero-eyebrow", state.lang==="zh" ? "实绩 · Track Record" : "Track Record"));
+  c.appendChild(el("h2", "hero-title", esc(state.lang==="zh" ? sec.stats.title.zh : sec.stats.title.en)));
+  var list = el("div", "stat-list");
+  sec.stats.items.forEach(function(item){
+    var row = el("div", "stat-item");
+    row.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><span></span>';
+    row.querySelector("span").textContent = state.lang==="zh" ? item.zh : item.en;
+    list.appendChild(row);
+  });
+  c.appendChild(list);
+  wrap.appendChild(c);
+
+  var actions = el("div", "actions");
+  var contBtn = el("button", "btn btn-primary btn-wide", esc(t(UI.continue)) + " →");
+  contBtn.onclick = function(){ goTo(state.index+1, "fwd"); };
+  actions.appendChild(contBtn);
+  var back = el("button", "btn btn-ghost btn-wide", "← " + esc(t(UI.back)));
+  back.style.marginTop = "10px";
+  back.onclick = function(){ goTo(state.index-1, "back"); };
+  wrap.appendChild(actions);
+  wrap.appendChild(back);
+  return wrap;
+}
+
+function fieldValid(q){
+  if(!q.required) return true;
+  var v = state.answers[q.id];
+  if(q.type==="single"){
+    if(!v || !v.value) return false;
+    var opt = (q.options||[]).filter(function(o){return o.v===v.value;})[0];
+    if(opt && opt.other && !(v.other||"").trim()) return false;
+    return true;
+  }
+  if(q.type==="multi"){
+    if(!v || !v.values || !v.values.length) return false;
+    var hasOther = v.values.indexOf("other")!==-1;
+    if(hasOther && !(v.other||"").trim()) return false;
+    return true;
+  }
+  if(q.type==="scale") return v!==undefined && v!==null;
+  if(q.type==="group"){
+    return (q.fields||[]).every(function(f){ return v && (v[f.id]||"").trim(); });
+  }
+  return !!(v && String(v).trim());
+}
+
+function renderQuestion(step){
+  var q = step.q;
+  var wrap = el("div");
+  var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
+  wrap.appendChild(tag);
+  var titleHtml = esc(qStr(q,"q")) + (q.required ? '<span class="required-mark">*</span>' : "");
+  wrap.appendChild(el("h1", "q-title", titleHtml));
+  if(qStr(q,"help")) wrap.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
+
+  var fieldBox = el("div", "field", "");
+  fieldBox.id = "fieldBox";
+
+  if(q.type==="text" || q.type==="email"){
+    var input = el("input");
+    input.type = q.type;
+    input.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
+    input.value = state.answers[q.id] || "";
+    input.oninput = function(){ state.answers[q.id] = input.value; clearError(fieldBox); };
+    input.onkeydown = function(e){ if(e.key==="Enter"){ e.preventDefault(); attemptNext(q); } };
+    fieldBox.appendChild(input);
+    setTimeout(function(){ input.focus(); }, 200);
+  }
+  else if(q.type==="textarea"){
+    var ta = el("textarea");
+    ta.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
+    ta.value = state.answers[q.id] || "";
+    ta.oninput = function(){ state.answers[q.id] = ta.value; clearError(fieldBox); };
+    fieldBox.appendChild(ta);
+    setTimeout(function(){ ta.focus(); }, 200);
+  }
+  else if(q.type==="single" || q.type==="multi"){
+    var box = el("div", "choices");
+    var cur = state.answers[q.id] || (q.type==="single" ? {value:null, other:""} : {values:[], other:""});
+    q.options.forEach(function(opt){
+      var card = el("div", "choice-card" + (q.type==="multi" ? " multi" : ""));
+      var isSel = q.type==="single" ? cur.value===opt.v : (cur.values||[]).indexOf(opt.v)!==-1;
+      if(isSel) card.classList.add("selected");
+      var mark = el("div", "mark");
+      var label = el("div", "", esc(state.lang==="zh" ? opt.zh : opt.en));
+      card.appendChild(mark); card.appendChild(label);
+      card.onclick = function(){
+        if(q.type==="single"){
+          cur = {value: opt.v, other: opt.other ? cur.other : ""};
+        } else {
+          cur.values = cur.values || [];
+          var idx = cur.values.indexOf(opt.v);
+          if(idx===-1) cur.values.push(opt.v); else cur.values.splice(idx,1);
+          if(!opt.other && idx!==-1){} // no-op
+        }
+        state.answers[q.id] = cur;
+        clearError(fieldBox);
+        renderQuestion.__reselect(q, step);
+      };
+      box.appendChild(card);
+    });
+    fieldBox.appendChild(box);
+
+    var showOther = q.type==="single" ? (q.options.filter(function(o){return o.other && o.v===cur.value;}).length>0)
+                                       : (q.options.some(function(o){return o.other;}) && (cur.values||[]).indexOf("other")!==-1);
+    if(showOther){
+      var otherWrap = el("div", "other-input");
+      var otherInput = el("input");
+      otherInput.type = "text";
+      otherInput.placeholder = esc(t(UI.otherPlaceholder));
+      otherInput.value = cur.other || "";
+      otherInput.oninput = function(){ cur.other = otherInput.value; state.answers[q.id]=cur; clearError(fieldBox); };
+      otherWrap.appendChild(otherInput);
+      fieldBox.appendChild(otherWrap);
+      setTimeout(function(){ otherInput.focus(); }, 150);
+    }
+  }
+  else if(q.type==="scale"){
+    var val = state.answers[q.id]!==undefined ? state.answers[q.id] : 5;
+    var scaleWrap = el("div", "scale-wrap");
+    var readout = el("div", "scale-readout", String(val));
+    scaleWrap.appendChild(readout);
+    var range = el("input");
+    range.type = "range"; range.min = "1"; range.max = "10"; range.step = "1"; range.value = String(val);
+    var setFill = function(v){ range.style.setProperty("--fill", ((v-1)/9*100)+"%"); };
+    setFill(val);
+    range.oninput = function(){ val = parseInt(range.value,10); readout.textContent = String(val); setFill(val); state.answers[q.id]=val; clearError(fieldBox); };
+    scaleWrap.appendChild(range);
+    var ticks = el("div", "scale-ticks");
+    for(var i=1;i<=10;i++) ticks.appendChild(el("span","",String(i)));
+    scaleWrap.appendChild(ticks);
+    var caps = el("div", "scale-caps");
+    caps.appendChild(el("span","",esc(qStr(q,"lowLabel"))));
+    caps.appendChild(el("span","",esc(qStr(q,"highLabel"))));
+    scaleWrap.appendChild(caps);
+    fieldBox.appendChild(scaleWrap);
+    state.answers[q.id] = val;
+  }
+  else if(q.type==="group"){
+    var cur2 = state.answers[q.id] || {};
+    q.fields.forEach(function(f){
+      var row = el("div", "group-row");
+      row.appendChild(el("div", "row-title", esc(state.lang==="zh" ? f.zh : f.en)));
+      var fInput = f.type==="textarea" ? el("textarea") : el("input");
+      if(f.type!=="textarea") fInput.type = "text";
+      fInput.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
+      fInput.value = cur2[f.id] || "";
+      fInput.oninput = function(){ cur2[f.id] = fInput.value; state.answers[q.id]=cur2; clearError(fieldBox); };
+      row.appendChild(fInput);
+      fieldBox.appendChild(row);
+    });
+  }
+
+  wrap.appendChild(fieldBox);
+  var errMsg = el("div", "error-msg", esc(t(UI.required)));
+  fieldBox.appendChild(errMsg);
+
+  var actions = el("div", "actions");
+  var backBtn = el("button", "btn btn-ghost", "← " + esc(t(UI.back)));
+  backBtn.onclick = function(){ goTo(state.index-1, "back"); };
+  var nextBtn = el("button", "btn btn-primary", esc(t(UI.next)) + " →");
+  nextBtn.onclick = function(){ attemptNext(q); };
+  actions.appendChild(backBtn);
+  actions.appendChild(nextBtn);
+  wrap.appendChild(actions);
+
+  return wrap;
+}
+// helper to re-render just the question in place after a choice click (keeps everything else stable)
+renderQuestion.__reselect = function(q, step){ render(); };
+
+function clearError(fieldBox){ fieldBox.classList.remove("error"); }
+
+function attemptNext(q){
+  var fieldBox = document.getElementById("fieldBox");
+  if(!fieldValid(q)){
+    fieldBox.classList.add("error");
+    fieldBox.scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+  goTo(state.index+1, "fwd");
+}
+
+function answerSummaryLabel(q, v){
+  if(v===undefined || v===null || v==="") return "—";
+  if(q.type==="single"){
+    var opt = (q.options||[]).filter(function(o){return o.v===v.value;})[0];
+    var label = opt ? (state.lang==="zh"?opt.zh:opt.en) : v.value;
+    if(opt && opt.other && v.other) label += " ("+v.other+")";
+    return label || "—";
+  }
+  if(q.type==="multi"){
+    var labels = (v.values||[]).map(function(val){
+      var o = (q.options||[]).filter(function(oo){return oo.v===val;})[0];
+      return o ? (state.lang==="zh"?o.zh:o.en) : val;
+    });
+    if((v.values||[]).indexOf("other")!==-1 && v.other) labels.push(v.other);
+    return labels.length ? labels.join("、") : "—";
+  }
+  if(q.type==="scale") return String(v);
+  if(q.type==="group") return "✓";
+  return String(v).slice(0,60) + (String(v).length>60 ? "…" : "");
+}
+
+function renderReview(){
+  var wrap = el("div");
+  wrap.appendChild(el("span", "hero-eyebrow", state.lang==="zh"?"最后一步":"Final Step"));
+  wrap.appendChild(el("h1", "q-title", esc(t(UI.reviewTitle))));
+  wrap.appendChild(el("p", "q-help", esc(t(UI.reviewBody))));
+
+  var keyIds = ["name","email","wechat","service","commitment","urgency"];
+  var list = el("div", "review-list");
+  SECTIONS.forEach(function(sec){
+    sec.questions.forEach(function(q){
+      if(keyIds.indexOf(q.id)===-1) return;
+      var item = el("div", "review-item");
+      item.appendChild(el("div","k",esc(qStr(q,"q"))));
+      item.appendChild(el("div","v",esc(answerSummaryLabel(q, state.answers[q.id]))));
+      list.appendChild(item);
+    });
+  });
+  wrap.appendChild(list);
+
+  var errBox = el("div", "field", "");
+  errBox.id = "submitErrBox";
+  wrap.appendChild(errBox);
+
+  var actions = el("div", "actions");
+  var backBtn = el("button", "btn btn-ghost", "← " + esc(t(UI.back)));
+  backBtn.onclick = function(){ goTo(state.index-1, "back"); };
+  var submitBtn = el("button", "btn btn-primary", esc(t(UI.submit)) + " ✦");
+  submitBtn.id = "submitBtn";
+  submitBtn.onclick = submitForm;
+  actions.appendChild(backBtn);
+  actions.appendChild(submitBtn);
+  wrap.appendChild(actions);
+  return wrap;
+}
+
+function renderSuccess(){
+  var wrap = el("div", "hero-card success-wrap");
+  var svg = '<svg class="check-circle" viewBox="0 0 84 84"><circle cx="42" cy="42" r="38"/><path d="M25 43l12 12 22-24" stroke-dasharray="70" stroke-dashoffset="70" style="animation:draw .7s .3s cubic-bezier(.22,.61,.36,1) forwards; --tw:0;"/></svg>';
+  var holder = el("div"); holder.innerHTML = svg;
+  wrap.appendChild(holder.firstChild);
+  wrap.appendChild(el("h2", "hero-title", esc(t(UI.successTitle))));
+  wrap.appendChild(el("p", "hero-body", esc(t(UI.successBody))));
+  return wrap;
+}
+
+/* ------------------------------- Navigation -------------------------------- */
+function goTo(idx, dir){
+  if(idx<0 || idx>=STEPS.length) return;
+  state.index = idx;
+  render(dir);
+}
+
+document.getElementById("restartLink").onclick = function(){
+  var msg = state.lang==="zh" ? "确定要清空全部作答并重新开始吗？" : "Clear all answers and start over?";
+  if(confirm(msg)){
+    state = { index:0, answers:{}, lang: state.lang };
+    saveState();
+    render();
+  }
+};
+
+/* ------------------------------- Language toggle ---------------------------- */
+document.getElementById("langToggle").onclick = function(){
+  state.lang = state.lang === "zh" ? "en" : "zh";
+  document.body.className = "lang-" + state.lang;
+  render();
+};
+
+/* --------------------------------- Submit ----------------------------------- */
+function buildSummaryText(){
+  var lines = [];
+  lines.push("AO 留学 · 名校申请深度规划自查表 / AcademiaOne Deep-Dive Questionnaire");
+  lines.push("=".repeat(60));
+  SECTIONS.forEach(function(sec){
+    lines.push("");
+    lines.push("【" + sec.zh + " / " + sec.en + "】");
+    sec.questions.forEach(function(q){
+      var v = state.answers[q.id];
+      lines.push("- " + q.zh.q + " / " + q.en.q + ":");
+      if(q.type==="group"){
+        q.fields.forEach(function(f){
+          lines.push("    " + f.zh + "/" + f.en + ": " + ((v && v[f.id]) || "—"));
+        });
+      } else {
+        lines.push("    " + answerSummaryLabelFull(q, v));
+      }
+    });
+  });
+  return lines.join("\n");
+}
+function answerSummaryLabelFull(q, v){
+  if(v===undefined||v===null||v==="") return "—";
+  if(q.type==="single"){
+    var opt = (q.options||[]).filter(function(o){return o.v===v.value;})[0];
+    var lab = opt ? (opt.zh + "/" + opt.en) : v.value;
+    if(opt && opt.other && v.other) lab += " (" + v.other + ")";
+    return lab;
+  }
+  if(q.type==="multi"){
+    var labs = (v.values||[]).map(function(val){
+      var o = (q.options||[]).filter(function(oo){return oo.v===val;})[0];
+      return o ? (o.zh+"/"+o.en) : val;
+    });
+    if((v.values||[]).indexOf("other")!==-1 && v.other) labs.push(v.other);
+    return labs.join("; ") || "—";
+  }
+  return String(v);
+}
+
+function submitForm(){
+  var submitBtn = document.getElementById("submitBtn");
+  var errBox = document.getElementById("submitErrBox");
+  errBox.className = "field";
+  errBox.innerHTML = "";
+  submitBtn.disabled = true;
+  submitBtn.textContent = t(UI.submitting);
+
+  var fd = new FormData();
+  fd.append("_subject", "AO1 新问卷提交 / New AO1 Questionnaire — " + (state.answers.name || state.answers.email || ""));
+  fd.append("_replyto", state.answers.email || "");
+  fd.append("language_used", state.lang);
+  fd.append("submitted_name", state.answers.name || "");
+  fd.append("submitted_email", state.answers.email || "");
+  fd.append("full_summary", buildSummaryText());
+
+  fetch(CONFIG.FORMSPREE_ENDPOINT, {
+    method: "POST",
+    headers: { "Accept": "application/json" },
+    body: fd
+  }).then(function(res){
+    if(res.ok){
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      goTo(state.index+1, "fwd");
+    } else {
+      showSubmitError();
+    }
+  }).catch(function(){
+    showSubmitError();
+  });
+
+  function showSubmitError(){
+    submitBtn.disabled = false;
+    submitBtn.textContent = t(UI.submit) + " ✦";
+    errBox.classList.add("error");
+    var msg = document.createElement("div");
+    msg.className = "error-msg";
+    msg.style.display = "block";
+    msg.textContent = t(UI.errorBody);
+    errBox.appendChild(msg);
+
+    var retryBtn = el("button", "btn btn-ghost", esc(t(UI.retry)));
+    retryBtn.style.marginTop = "10px";
+    retryBtn.onclick = submitForm;
+
+    var mailBody = encodeURIComponent(buildSummaryText());
+    var mailtoBtn = el("a", "btn btn-primary", esc(t(UI.emailFallback)));
+    mailtoBtn.href = "mailto:" + CONFIG.DESTINATION_EMAIL + "?subject=" + encodeURIComponent("AO1 问卷提交 / Questionnaire Submission") + "&body=" + mailBody;
+    mailtoBtn.style.marginTop = "10px";
+    mailtoBtn.style.textDecoration = "none";
+
+    var wrap = el("div"); wrap.style.display="flex"; wrap.style.gap="10px"; wrap.style.flexWrap="wrap";
+    wrap.appendChild(retryBtn); wrap.appendChild(mailtoBtn);
+    errBox.appendChild(wrap);
+  }
+}
+
+/* ----------------------------------- Init ------------------------------------ */
+render();
+
+})();
+</script>
+</body>
+</html>
