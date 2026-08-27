@@ -1,0 +1,279 @@
+<div id="tip"></div>
+<script>
+/* ===== core: language, tooltip, reveal, scrollspy, chart helpers ===== */
+var LANG = 'en';
+try { LANG = localStorage.getItem('ao-lang') || 'en'; } catch(e){}
+var __renders = [];
+function L(en, zh){ return LANG === 'zh' ? (zh || en) : en; }
+function setLang(l){
+  LANG = l;
+  document.body.classList.toggle('zh', l === 'zh');
+  document.querySelectorAll('.langbar button').forEach(function(b){ b.classList.toggle('on', b.dataset.l === l); });
+  try { localStorage.setItem('ao-lang', l); } catch(e){}
+  __renders.forEach(function(fn){ try { fn(); } catch(e){ console.error(e); } });
+}
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtN(n){ return n == null || isNaN(n) ? '—' : Number(n).toLocaleString('en-US'); }
+
+/* tooltip */
+(function(){
+  var tip = document.getElementById('tip');
+  function move(ev){
+    var x = ev.clientX + 14, y = ev.clientY + 14;
+    var r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 8) x = ev.clientX - r.width - 12;
+    if (y + r.height > window.innerHeight - 8) y = ev.clientY - r.height - 12;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  document.addEventListener('mouseover', function(ev){
+    var t = ev.target.closest('[data-tip]');
+    if (t){ tip.innerHTML = t.getAttribute('data-tip'); tip.style.display = 'block'; move(ev); }
+    else if (!ev.target.closest('#tip')) tip.style.display = 'none';
+  });
+  document.addEventListener('mousemove', function(ev){ if (tip.style.display === 'block') move(ev); });
+  document.addEventListener('touchstart', function(ev){
+    var t = ev.target.closest && ev.target.closest('[data-tip]');
+    if (t){ tip.innerHTML = t.getAttribute('data-tip'); tip.style.display = 'block';
+      tip.style.left = '16px'; tip.style.top = (window.innerHeight - 120) + 'px'; }
+    else tip.style.display = 'none';
+  }, {passive:true});
+})();
+
+/* reveal + count-up */
+(function(){
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countUp(el){
+    var to = parseFloat(el.getAttribute('data-to') || '0');
+    var suf = el.getAttribute('data-suf') || '', pre = el.getAttribute('data-pre') || '';
+    if (reduced){ el.textContent = pre + fmtN(to) + suf; return; }
+    var t0 = null;
+    function step(ts){
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / 1100); p = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + fmtN(Math.round(to * p)) + suf;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+        e.target.querySelectorAll('.countup:not(.done)').forEach(function(c){ c.classList.add('done'); countUp(c); });
+        io.unobserve(e.target);
+      }
+    });
+  }, {rootMargin:'0px 0px -8% 0px'}) : null;
+  window.__initReveal = function(){
+    document.querySelectorAll('.rv:not(.in)').forEach(function(el){ if (io) io.observe(el); else el.classList.add('in'); });
+  };
+})();
+
+/* scrollspy */
+(function(){
+  window.addEventListener('scroll', function(){
+    var secs = document.querySelectorAll('section.ch[id]');
+    var cur = null, y = window.scrollY + window.innerHeight * 0.25;
+    secs.forEach(function(s){ if (s.offsetTop <= y) cur = s.id; });
+    document.querySelectorAll('.rail a[href^="#"]').forEach(function(a){
+      a.classList.toggle('on', a.getAttribute('href') === '#' + cur);
+    });
+  }, {passive:true});
+})();
+
+/* ===== SVG chart helpers (hand-rolled, palette-validated) ===== */
+var CH = {
+  ink:'#211C11', ink2:'#5E5540', ink3:'#8C8168', grid:'#E9E1CC', axis:'#CFC3A4', panel:'#FBF8F1',
+  s:['#2F63C1','#A87B24','#0B8A6E','#C74436','#8A4FA3','#6B8A22'],
+  seqGold:['#F1E3C2','#E3CD96','#D2B369','#BE9840','#A87B24','#8A6218','#6B4A10']
+};
+function svgOpen(w, h){ return '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:var(--sans)">'; }
+
+/* horizontal bars: rows = [{en,zh,v,vLabel,color,tip,muted}] */
+function hbarChart(elId, rows, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var max = opts.max || Math.max.apply(null, rows.map(function(r){ return r.v; })) * 1.06;
+    var lw = opts.labelW || 190, vw = opts.valueW || 86, bh = opts.barH || 21, gap = 9;
+    var W = opts.w || 980, H = rows.length * (bh + gap) + 8;
+    var bw = W - lw - vw - 24;
+    var s = svgOpen(W, H);
+    rows.forEach(function(r, i){
+      var y = i * (bh + gap) + 4;
+      var w = Math.max(2, r.v / max * bw);
+      var c = r.color || CH.s[0];
+      var tip = r.tip || ('<b>' + esc(L(r.en, r.zh)) + '</b><br>' + esc(r.vLabel || r.v));
+      s += '<g data-tip="' + esc(tip) + '">';
+      s += '<rect x="0" y="' + y + '" width="' + W + '" height="' + bh + '" fill="transparent"/>';
+      s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="12" fill="' + (r.muted ? CH.ink3 : CH.ink2) + '">' + esc(L(r.en, r.zh)) + '</text>';
+      s += '<rect x="' + lw + '" y="' + y + '" width="' + w + '" height="' + bh + '" rx="2.5" fill="' + c + '"' + (r.muted ? ' opacity="0.45"' : '') + '/>';
+      s += '<text x="' + (lw + w + 8) + '" y="' + (y + bh/2 + 4) + '" font-size="11.5" fill="' + CH.ink2 + '" style="font-variant-numeric:tabular-nums">' + esc(r.vLabel != null ? r.vLabel : r.v) + '</text>';
+      s += '</g>';
+    });
+    s += '</svg>';
+    el.innerHTML = s;
+  }
+  __renders.push(render); render();
+}
+
+/* vertical bars (single or grouped): x = [{en,zh}], series = [{en,zh,color,values:[]}] */
+function vbarChart(elId, x, series, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var W = opts.w || 980, H = opts.h || 300, padL = 46, padB = 30, padT = 14, padR = 8;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var all = []; series.forEach(function(sr){ all = all.concat(sr.values); });
+    var max = opts.max || Math.max.apply(null, all) * 1.12;
+    var s = svgOpen(W, H);
+    var ticks = opts.ticks || 4;
+    for (var t = 0; t <= ticks; t++){
+      var yv = max / ticks * t, y = padT + ph - yv / max * ph;
+      s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + (t === 0 ? CH.axis : CH.grid) + '" stroke-width="1"/>';
+      s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10.5" fill="' + CH.ink3 + '" style="font-variant-numeric:tabular-nums">' + (opts.fmt ? opts.fmt(yv) : Math.round(yv)) + '</text>';
+    }
+    var slot = pw / x.length, inner = Math.min(slot * 0.62, series.length * 26);
+    var bw2 = (inner - (series.length - 1) * 2) / series.length;
+    x.forEach(function(xl, i){
+      var cx = padL + slot * i + slot / 2;
+      series.forEach(function(sr, j){
+        var v = sr.values[i]; if (v == null) return;
+        var bh2 = Math.max(1.5, v / max * ph);
+        var bx = cx - inner / 2 + j * (bw2 + 2);
+        var tip = '<b>' + esc(L(xl.en, xl.zh)) + '</b> · ' + esc(L(sr.en, sr.zh)) + '<br>' + esc(opts.fmt ? opts.fmt(v) : v);
+        s += '<rect data-tip="' + esc(tip) + '" x="' + bx + '" y="' + (padT + ph - bh2) + '" width="' + bw2 + '" height="' + bh2 + '" rx="2.5" fill="' + sr.color + '"/>';
+      });
+      s += '<text x="' + cx + '" y="' + (H - 10) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + esc(L(xl.en, xl.zh)) + '</text>';
+    });
+    s += '</svg>';
+    var leg = '';
+    if (series.length > 1){
+      leg = '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">' + series.map(function(sr){
+        return '<span class="small"><span class="tag-dot" style="background:' + sr.color + '"></span>' + esc(L(sr.en, sr.zh)) + '</span>';
+      }).join('') + '</div>';
+    }
+    el.innerHTML = s + leg;
+  }
+  __renders.push(render); render();
+}
+
+/* line chart: x = ['19','20'...], series = [{en,zh,color,values:[null-able]}] */
+function lineChart(elId, x, series, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var W = opts.w || 980, H = opts.h || 320, padL = 48, padB = 28, padT = 12, padR = opts.padR || 130;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var all = []; series.forEach(function(sr){ sr.values.forEach(function(v){ if (v != null) all.push(v); }); });
+    var max = opts.max || Math.max.apply(null, all) * 1.1;
+    var min = opts.min != null ? opts.min : 0;
+    function X(i){ return padL + (x.length === 1 ? pw/2 : pw * i / (x.length - 1)); }
+    function Y(v){ return padT + ph - (v - min) / (max - min) * ph; }
+    var s = svgOpen(W, H);
+    var ticks = opts.ticks || 4;
+    for (var t = 0; t <= ticks; t++){
+      var yv = min + (max - min) / ticks * t, y = Y(yv);
+      s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR + 18) + '" y2="' + y + '" stroke="' + (t === 0 ? CH.axis : CH.grid) + '"/>';
+      s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10.5" fill="' + CH.ink3 + '" style="font-variant-numeric:tabular-nums">' + (opts.fmt ? opts.fmt(yv) : Math.round(yv)) + '</text>';
+    }
+    x.forEach(function(xl, i){
+      if (x.length > 12 && i % 2) return;
+      s += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + esc(xl) + '</text>';
+    });
+    series.forEach(function(sr){
+      var d = '', started = false;
+      sr.values.forEach(function(v, i){
+        if (v == null){ return; }
+        d += (started ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' ';
+        started = true;
+      });
+      s += '<path d="' + d + '" fill="none" stroke="' + sr.color + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"' + (sr.dash ? ' stroke-dasharray="5 4"' : '') + '/>';
+      var li = sr.values.length - 1; while (li >= 0 && sr.values[li] == null) li--;
+      if (li >= 0){
+        s += '<circle cx="' + X(li) + '" cy="' + Y(sr.values[li]) + '" r="3.6" fill="' + sr.color + '" stroke="' + CH.panel + '" stroke-width="1.6"/>';
+        s += '<text x="' + (X(li) + 9) + '" y="' + (Y(sr.values[li]) + 4 + (sr.dy || 0)) + '" font-size="11.5" font-weight="600" fill="' + sr.color + '">' + esc(L(sr.en, sr.zh)) + '</text>';
+      }
+      sr.values.forEach(function(v, i){
+        if (v == null) return;
+        var tip = '<b>' + esc(L(sr.en, sr.zh)) + '</b> · ' + esc(x[i]) + '<br>' + esc(opts.fmt ? opts.fmt(v) : v);
+        s += '<circle data-tip="' + esc(tip) + '" cx="' + X(i) + '" cy="' + Y(v) + '" r="9" fill="transparent"/>';
+      });
+    });
+    s += '</svg>';
+    el.innerHTML = s;
+  }
+  __renders.push(render); render();
+}
+
+/* range bars: rows = [{en,zh,lo,hi,color,note,noteZh,muted}] — horizontal min-max bands */
+function rangeChart(elId, rows, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var max = opts.max || Math.max.apply(null, rows.map(function(r){ return r.hi; })) * 1.06;
+    var lw = opts.labelW || 200, bh = 20, gap = 11;
+    var W = opts.w || 980, H = rows.length * (bh + gap) + 26;
+    var bw = W - lw - 24;
+    function X(v){ return lw + v / max * bw; }
+    var s = svgOpen(W, H);
+    (opts.ticks || []).forEach(function(t){
+      s += '<line x1="' + X(t) + '" y1="0" x2="' + X(t) + '" y2="' + (H - 22) + '" stroke="' + CH.grid + '"/>';
+      s += '<text x="' + X(t) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '" style="font-variant-numeric:tabular-nums">' + (opts.fmt ? opts.fmt(t) : t) + '</text>';
+    });
+    rows.forEach(function(r, i){
+      var y = i * (bh + gap) + 2;
+      var x0 = X(r.lo), x1 = Math.max(X(r.hi), X(r.lo) + 3);
+      var c = r.color || CH.s[1];
+      var note = L(r.note, r.noteZh || r.note) || '';
+      var tip = '<b>' + esc(L(r.en, r.zh)) + '</b><br>' + esc((opts.fmt ? opts.fmt(r.lo) : r.lo) + ' – ' + (opts.fmt ? opts.fmt(r.hi) : r.hi)) + (note ? '<br>' + esc(note) : '');
+      s += '<g data-tip="' + esc(tip) + '">';
+      s += '<rect x="0" y="' + y + '" width="' + W + '" height="' + bh + '" fill="transparent"/>';
+      s += '<text x="' + (lw - 10) + '" y="' + (y + bh/2 + 4) + '" text-anchor="end" font-size="12" fill="' + (r.muted ? CH.ink3 : CH.ink2) + '">' + esc(L(r.en, r.zh)) + '</text>';
+      s += '<line x1="' + lw + '" y1="' + (y + bh/2) + '" x2="' + (W - 8) + '" y2="' + (y + bh/2) + '" stroke="' + CH.grid + '" stroke-width="1"/>';
+      s += '<rect x="' + x0 + '" y="' + y + '" width="' + (x1 - x0) + '" height="' + bh + '" rx="3" fill="' + c + '"' + (r.muted ? ' opacity="0.4"' : ' fill-opacity="0.85"') + '/>';
+      s += '<text x="' + (x1 + 7) + '" y="' + (y + bh/2 + 4) + '" font-size="11" fill="' + CH.ink2 + '" style="font-variant-numeric:tabular-nums">' + esc(r.label || ((opts.fmt ? opts.fmt(r.lo) : r.lo) + '–' + (opts.fmt ? opts.fmt(r.hi) : r.hi))) + '</text>';
+      s += '</g>';
+    });
+    s += '</svg>';
+    el.innerHTML = s;
+  }
+  __renders.push(render); render();
+}
+
+/* scatter: pts = [{x,y,en,zh,g(0-2),tip,r}] — max 3 groups per all-pairs palette cap */
+function scatterChart(elId, pts, opts){
+  opts = opts || {};
+  function render(){
+    var el = document.getElementById(elId); if (!el) return;
+    var W = opts.w || 980, H = opts.h || 380, padL = 52, padB = 34, padT = 12, padR = 16;
+    var pw = W - padL - padR, ph = H - padT - padB;
+    var xmin = opts.xmin, xmax = opts.xmax, ymax = opts.ymax;
+    function X(v){ return padL + (v - xmin) / (xmax - xmin) * pw; }
+    function Y(v){ var t = opts.ylog ? Math.log10(1 + v) / Math.log10(1 + ymax) : v / ymax; return padT + ph - t * ph; }
+    var s = svgOpen(W, H);
+    (opts.yticks || []).forEach(function(yv){
+      var y = Y(yv);
+      s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + (yv === 0 ? CH.axis : CH.grid) + '"/>';
+      s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10.5" fill="' + CH.ink3 + '" style="font-variant-numeric:tabular-nums">' + (opts.fmt ? opts.fmt(yv) : yv) + '</text>';
+    });
+    (opts.xticks || []).forEach(function(xv){
+      s += '<text x="' + X(xv) + '" y="' + (H - 10) + '" text-anchor="middle" font-size="10.5" fill="' + CH.ink3 + '">' + xv + '</text>';
+    });
+    pts.forEach(function(p){
+      var c = CH.s[p.g || 0];
+      s += '<circle data-tip="' + esc(p.tip || ('<b>' + esc(L(p.en, p.zh)) + '</b>')) + '" cx="' + X(p.x) + '" cy="' + Y(p.y) + '" r="' + (p.r || 6) + '" fill="' + c + '" fill-opacity="0.82" stroke="' + CH.panel + '" stroke-width="1.4"/>';
+      if (p.label) s += '<text x="' + (X(p.x) + (p.r || 6) + 5) + '" y="' + (Y(p.y) + 4 + (p.dy || 0)) + '" font-size="10.5" fill="' + CH.ink2 + '">' + esc(L(p.en, p.zh)) + '</text>';
+    });
+    s += '</svg>';
+    var leg = '';
+    if (opts.groups){
+      leg = '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">' + opts.groups.map(function(g, i){
+        return '<span class="small"><span class="tag-dot" style="background:' + CH.s[i] + '"></span>' + esc(L(g.en, g.zh)) + '</span>';
+      }).join('') + '</div>';
+    }
+    el.innerHTML = s + leg;
+  }
+  __renders.push(render); render();
+}
+</script>

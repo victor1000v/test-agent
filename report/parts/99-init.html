@@ -1,0 +1,9 @@
+<script>
+/* init: apply saved language, reveal, first render */
+(function(){
+  document.body.classList.toggle('zh', LANG === 'zh');
+  document.querySelectorAll('.langbar button').forEach(function(b){ b.classList.toggle('on', b.dataset.l === LANG); });
+  if (window.__buildAll) window.__buildAll();
+  window.__initReveal();
+})();
+</script>

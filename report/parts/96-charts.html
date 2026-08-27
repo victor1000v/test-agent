@@ -1,0 +1,54 @@
+<script>
+/* ===== chapter charts (data curated from the research database) ===== */
+function buildCharts(){
+  var GOLD = '#A87B24', BLUE = '#2F63C1', TEAL = '#0B8A6E', RED = '#C74436';
+
+  /* CH06: mega-agency staff scale */
+  if (document.getElementById('fig-ch06-team')) hbarChart('fig-ch06-team', [
+    {en:'EIC Education', zh:'启德教育', v:3000, vLabel:'~3,000', color:GOLD, tip:'<b>启德 EIC</b><br>~3,000+ staff · 59–75 branches · 36+ cities'},
+    {en:'New Oriental Vision Overseas', zh:'新东方前途出国', v:2600, vLabel:'~2,600', color:BLUE, tip:'<b>新东方前途出国</b><br>2,000+ consultants/mentors + branch staff · 43–55 branches · NYSE/HKEX parent'},
+    {en:'JJL Overseas', zh:'金吉列留学', v:2250, vLabel:'1,500–3,000', color:GOLD, tip:'<b>金吉列</b><br>est. 1,500–3,000 (peak ~3,000 · 37–52 branches)'},
+    {en:'Shinyway', zh:'新通教育', v:2250, vLabel:'1,500–3,000', color:GOLD, tip:'<b>新通</b><br>claims 3,000+; realistic est. 1,500–3,000 · East-China stronghold'},
+    {en:'Tiandao (defunct 2022)', zh:'天道教育（2022 倒闭）', v:1500, vLabel:'peak 1,000–2,000', color:RED, muted:true, tip:'<b>天道</b><br>peak ~RMB 500M revenue, 14 branches · collapsed Nov 2022 with RMB 14M+ unrefunded fees'},
+    {en:'Bailitop', zh:'百利天下', v:1000, vLabel:'~1,000', color:GOLD, tip:'<b>百利天下</b><br>~1,000 staff (company claim) · centralized Beijing model, no branch network'},
+    {en:'Aoji', zh:'澳际教育', v:650, vLabel:'400–900', color:GOLD, tip:'<b>澳际</b><br>claims 700+ consultants; social-insurance filings show 359 · est. 400–900'},
+    {en:'New Channel (consulting arm)', zh:'新航道前程留学', v:550, vLabel:'300–800', color:GOLD, tip:'<b>新航道前程留学</b><br>consulting arm est. 300–800 · group (IELTS empire) 5,000–10,000'},
+    {en:'IDP Education China', zh:'IDP诺思留学', v:550, vLabel:'300–800', color:BLUE, tip:'<b>IDP 中国</b><br>13 offices, est. 300–800 · ASX-listed parent hit by 2025 visa caps'},
+    {en:'Woodpecker', zh:'啄木鸟留学', v:400, vLabel:'200–600', color:BLUE, tip:'<b>啄木鸟</b><br>est. 200–600 · parent Puxin in court-ordered restructuring since 2022'},
+    {en:'Wiseway', zh:'威久留学', v:350, vLabel:'200–500', color:BLUE, tip:'<b>威久</b><br>est. 200–500 · ~10 branches · NEEQ-listed parent'},
+    {en:'Jinqiao / Golden Bridge', zh:'津桥国际', v:275, vLabel:'150–400', color:GOLD, tip:'<b>津桥</b><br>est. 150–400 · ~10 branches + immigration/property sidelines'},
+    {en:'Liuxue360', zh:'立思辰留学', v:250, vLabel:'100–400', color:BLUE, tip:'<b>立思辰留学</b><br>est. 100–400 · listed parent (豆神) cut its registered capital 2023'},
+    {en:'JiaHua ShiDa (state-owned)', zh:'嘉华世达', v:41, vLabel:'41 insured', color:GOLD, tip:'<b>嘉华世达</b><br>41 insured staff at HQ vs 38 nominal branches · MOE-affiliated, licence moat deregulated away 2017'}
+  ], {labelW: 230});
+
+  /* CH07: boutique price bands (RMB thousands) */
+  if (document.getElementById('fig-ch07-price')) rangeChart('fig-ch07-price', [
+    {en:'小红书 studios (archetype)', zh:'小红书工作室（原型）', lo:8, hi:50, color:BLUE, muted:true, note:'semi-DIY 8–25k · full 20–50k', noteZh:'半DIY 8–25k · 全服务 20–50k'},
+    {en:'WordSunny (semi-DIY)', zh:'WordSunny（半DIY）', lo:10, hi:30, color:BLUE, note:'unbundled items from a few hundred RMB', noteZh:'单项服务几百元起'},
+    {en:'PEC', zh:'优越留学', lo:15, hi:60, color:TEAL, note:'base ~18k for 6 UK schools; premium tiers higher', noteZh:'基础套餐约 1.8 万（6 校）；高端更贵'},
+    {en:'Compass', zh:'指南者留学', lo:18, hi:24, color:TEAL, note:'published prices · 12 written guarantees', noteZh:'公开定价 · 12 项书面承诺'},
+    {en:'BeBeyond (workshop)', zh:'BeBeyond（工作坊）', lo:20, hi:45, color:BLUE, note:'cohort workshop, students write everything', noteZh:'工作坊制，学生自己写全部材料'},
+    {en:'PalmDrive', zh:'棕榈大道', lo:30, hi:60, color:GOLD, note:'4-to-1 team incl. part-time mentor pool', noteZh:'四对一，含兼职导师池'},
+    {en:'HiTure', zh:'和创留学', lo:30, hi:80, color:BLUE, note:'coach model, US-focused', noteZh:'教练模式，主攻美国'},
+    {en:'Zhishiq (full service)', zh:'芝士圈（全服务）', lo:35, hi:40, color:BLUE, note:'document specialist; full package tier', noteZh:'文书专家；一站式档位'},
+    {en:'BetterEdu', zh:'毕达教育', lo:40, hi:100, color:TEAL, note:'meet-your-consultant-first · named endorsements', noteZh:'签约前见顾问 · 实名客户代言'},
+    {en:'GGU', zh:'世毕盟', lo:60, hi:120, color:GOLD, note:'training + part-time PhD mentor', noteZh:'培训 + 兼职名校 PhD 导师'},
+    {en:'Topsedu', zh:'托普仕', lo:100, hi:150, color:GOLD, note:'“Top-30 or refund” · 5+1 team', noteZh:'「不进 Top30 退款」· 5+1 团队'},
+    {en:'Valeon (defunct 12/2025)', zh:'再来人（2025年12月倒闭）', lo:100, hi:200, color:RED, note:'PG avg 120k · gross margin <30% · collapsed', noteZh:'研究生均价 12 万 · 毛利 <30% · 已倒闭'}
+  ], {labelW: 235, max: 205, ticks: [0, 25, 50, 75, 100, 150, 200], fmt: function(v){ return '¥' + v + 'k'; }});
+
+  /* CH08: platform cohort — capital vs outcome (US$M) */
+  if (document.getElementById('fig-ch08-fund')) hbarChart('fig-ch08-fund', [
+    {en:'Taisha (acquisition value)', zh:'太傻（被收购估值）', v:104, vLabel:'$104M → 0', color:RED, tip:'<b>太傻</b><br>acquired by 华闻传媒 at ~RMB 700–800M (2015–16) · collapsed 2019–20, stranding prepaid clients'},
+    {en:'51offer', zh:'51offer', v:50, vLabel:'$50M', color:GOLD, tip:'<b>51offer</b><br>NEA + Starr, 3 rounds 2013–15 · now a content site pivoting to Japan'},
+    {en:'ShunShun (TAL)', zh:'顺顺留学', v:25, vLabel:'~$25M', color:GOLD, tip:'<b>顺顺</b><br>$18M from TAL 2015 + takeover 2016 · absorbed, contracted post-双减'},
+    {en:'myOffer / UVIC', zh:'学无国界', v:21, vLabel:'~$14–28M', color:GOLD, tip:'<b>myOffer</b><br>est. RMB 100–200M across A/A+/B · maintenance mode since 2019'},
+    {en:'Jiemo', zh:'芥末留学', v:14, vLabel:'~$7–21M', color:TEAL, tip:'<b>芥末留学</b><br>est. RMB 50–150M (真格系 angel, 蜂巢, 荣瑞) · Japan corridor · profitable since 2017'},
+    {en:'Liucheng', zh:'柳橙网', v:13, vLabel:'~$8–17M', color:RED, tip:'<b>柳橙网</b><br>NEEQ listing 2016 + rounds · zombie site on old SEO'},
+    {en:'ApplySquare', zh:'申请方', v:11, vLabel:'~$8–15M', color:GOLD, tip:'<b>申请方</b><br>$5M Series A 2016 (TAL-linked) · pivoted to B2B data · 13 employees by 2026'}
+  ], {labelW: 230});
+
+  /* later chapters' charts hook in below */
+  if (window.buildCharts2) buildCharts2();
+}
+</script>
