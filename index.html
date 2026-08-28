@@ -1327,14 +1327,30 @@ function renderSuccess(){
 }
 
 /* ------------------------------- Navigation -------------------------------- */
-// Duolingo-style encouragement: a friendly toast the moment you cross
-// roughly a quarter / half / three-quarters of the way through, and once
-// more right as you land on the final review. Each fires once per session.
-var MILESTONES = [
-  {frac:0.25, zh:"不错的开始，继续保持！", en:"Nice start, keep it up!"},
-  {frac:0.50, zh:"节奏很好，别停下！", en:"Great momentum, keep going!"},
-  {frac:0.75, zh:"就快完成了，加油！", en:"Almost there, you've got this!"}
+// Duolingo-style encouragement, deliberately generic — nothing here names
+// "start", "halfway", or "almost done", so a visitor can never read their
+// position in the form from the wording alone. Toasts fire on a fixed
+// question-count schedule (not a fraction, so it still spaces out sensibly
+// if questions are added/removed later), with the first one coming early —
+// right after just a few answers — for quick positive reinforcement, then
+// repeating every so often the rest of the way. Each fires once per session;
+// the phrase itself is picked at random from the pool each time.
+var ENCOURAGEMENTS = [
+  {zh:"很棒，继续保持！", en:"Great job, keep it up!"},
+  {zh:"做得好，你在状态里！", en:"Nicely done, you're on a roll!"},
+  {zh:"干得漂亮，我们继续！", en:"Awesome, keep going!"},
+  {zh:"很好，节奏稳稳的！", en:"Great pace, keep it going!"},
+  {zh:"真棒，就是这个感觉！", en:"Love this energy, keep it up!"},
+  {zh:"答得很好，继续加油！", en:"Nice work, keep going!"},
+  {zh:"你做得很好！", en:"You're doing great!"}
 ];
+var MILESTONE_INTERVAL = Math.max(4, Math.round(QUESTION_STEP_COUNT/7));
+var MILESTONE_FIRST = Math.max(2, Math.round(QUESTION_STEP_COUNT*0.06));
+var MILESTONE_NS = (function(){
+  var ns = [];
+  for(var n=MILESTONE_FIRST; n<QUESTION_STEP_COUNT; n+=MILESTONE_INTERVAL) ns.push(n);
+  return ns;
+})();
 function showMilestoneToast(msg){
   var toast = el("div", "milestone-toast");
   var icon = document.createElement("span");
@@ -1360,12 +1376,13 @@ function showMilestoneToast(msg){
 function checkMilestones(){
   var step = STEPS[state.index];
   if(NON_QUESTION_TYPES.indexOf(step.type)!==-1) return;
-  var ratio = currentQuestionNumber()/QUESTION_STEP_COUNT;
+  var n = currentQuestionNumber();
   var fired = false;
-  MILESTONES.forEach(function(m){
-    if(ratio>=m.frac && state.milestones.indexOf(m.frac)===-1){
-      state.milestones.push(m.frac);
-      showMilestoneToast(state.lang==="zh" ? m.zh : m.en);
+  MILESTONE_NS.forEach(function(threshold){
+    if(n>=threshold && state.milestones.indexOf(threshold)===-1){
+      state.milestones.push(threshold);
+      var phrase = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
+      showMilestoneToast(state.lang==="zh" ? phrase.zh : phrase.en);
       fired = true;
     }
   });
