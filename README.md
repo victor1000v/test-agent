@@ -12,9 +12,11 @@ Everything the visitor sees lives in a single self-contained file:
 
 1. **Google Sheets + Drive + PDF** (`apps-script/Code.gs`) — the primary
    path once deployed (see setup below). One call: appends a row to the
-   "AO1 Submissions" Sheet, saves a formatted PDF of that submission into
-   the "AO1 Submission PDFs" Drive folder, and emails Josie a notification
-   with links to both.
+   "AO1 Submissions" Sheet, builds a branded PDF of that submission (logo,
+   gold/black AcademiaOne styling, organized by the form's own sections
+   with the real question text — not a plain data dump) and saves it into
+   the "AO1 Submission PDFs" Drive folder, then emails everyone listed in
+   `RECIPIENTS` (see below) a notification with links to both.
 2. **Formspree** (`CONFIG.FORMSPREE_ENDPOINT`) — used automatically
    whenever the Sheets endpoint isn't configured yet, or a submission to it
    fails. Email-only, no Sheet/PDF/Drive.
@@ -62,6 +64,28 @@ app URL across redeployments as long as you choose **Deploy → Manage
 deployments → (pencil icon) → Version: New version** rather than creating
 a brand new deployment.
 
+### Sending to specific people with specific messages
+
+Near the top of `Code.gs` is a `RECIPIENTS` list — one entry per person who
+should be emailed on every submission, each with their own greeting:
+
+```js
+var RECIPIENTS = [
+  {
+    email: 'josie@academiaone.co.uk',
+    messageZh: '你好 Josie，新的问卷提交了，请查收 PDF 和表格链接。',
+    messageEn: 'Hi Josie, a new questionnaire has come in. PDF and sheet links below.'
+  }
+  // add more people the same way:
+  // { email: 'victor@academiaone.co.uk', messageZh: '...', messageEn: '...' }
+];
+```
+
+Add, remove, or edit entries directly in the Apps Script editor, then
+**Deploy → Manage deployments → New version** (same URL, no changes needed
+in `index.html`). Everyone in the list gets the same PDF/Sheet links, each
+with their own message ahead of it.
+
 ## What's on the form
 
 The flow mirrors the original Zoho form's content exactly (same questions,
@@ -77,14 +101,10 @@ pagination, just restyled and animated:
 7. Review & Submit
 8. Success screen
 
-Only questions that need a tap/click/drag (single-choice, multi-choice,
-the two 1–10 sliders) plus email/name/WeChat are required. Every other
-free-text question is optional and silently skippable — no visible
-"optional" label, required ones simply carry an asterisk. A small rotating
-sketchbook-style icon sits beside each page's content, and the progress
-bar advances live as each question is answered (not just when you hit
-Next), with occasional generic "great job" encouragement toasts along the
-way.
+Every question is required. A small rotating sketchbook-style icon sits
+beside each page's content, and the progress bar advances live as each
+question is answered (not just when you hit Next), with occasional generic
+"great job" encouragement toasts along the way.
 
 ## Language toggle
 
@@ -104,12 +124,9 @@ confirmation prompt.
 
 - Black-and-gold palette, "Playfair Display"/"Noto Serif SC" for headings,
   "Inter"/"Noto Sans SC" for body text (all via Google Fonts).
-- The logo is a hand-drawn SVG monogram ("AO" inside a laurel-and-ring
-  crest) plus the "AcademiaOne Education" wordmark, built to resemble the
-  original form's header since no logo file was supplied. **Swap in the
-  real logo file** by replacing the `<svg class="logo-mark">…</svg>` block
-  in the header with an `<img>` tag pointing at the actual logo asset
-  whenever you have it.
+- The real AcademiaOne logo (`<img class="brand-logo">` in the header,
+  embedded as base64 so the page stays a single file) is used both on the
+  page itself and in the header of every generated PDF.
 
 ## Deploying
 
