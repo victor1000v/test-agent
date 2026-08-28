@@ -16,8 +16,11 @@
  *   2. Builds a branded PDF of that one submission (logo, gold/black
  *      AcademiaOne styling, organized by section using the real question
  *      text) and saves it into the "AO1 Submission PDFs" Drive folder.
- *   3. Emails every address in RECIPIENTS a notification with a link to
- *      the PDF and the Sheet, each with its own greeting/message.
+ *   3. Emails the AcademiaOne team (TEAM_RECIPIENTS) an internal notification
+ *      with the PDF attached and a link to the Sheet, AND separately emails
+ *      the client their own confirmation (addressed by name, in whichever
+ *      language they filled the form in) with just the PDF attached, no
+ *      Sheet mention. Only the team notification touches the Sheet.
  *
  * Setup (see the repo README for the full walkthrough):
  *   1. Open the "AO1 Submissions" Sheet, Extensions -> Apps Script.
@@ -32,15 +35,12 @@
 var SHEET_ID = '1SSVSWtrPXcw06oaJKDWGsgJWqS6CIxVGZam2yQPmpTw';
 var FOLDER_ID = '1BUlv3JWvTzJe8FcbqwCslr_TlQsHzMWi';
 
-// One entry per person who should be emailed on every submission. Each gets
-// their own greeting/message ahead of the shared submission summary — edit
-// freely, add or remove entries, no code changes needed elsewhere.
-var RECIPIENTS = [
-  {
-    email: 'josie@academiaone.co.uk',
-    messageZh: '你好 Josie，新的问卷提交了，请查收 PDF 和表格链接。',
-    messageEn: 'Hi Josie, a new questionnaire has come in. PDF and sheet links below.'
-  }
+// The AcademiaOne team gets one shared internal notification per submission
+// (PDF attached, Sheet linked). Add or remove addresses freely.
+var TEAM_RECIPIENTS = [
+  'victor.kovalets@academiaone.co.uk',
+  'josie@academiaone.co.uk',
+  'content@academiaone.co.uk'
 ];
 
 // Brand palette used in the generated PDF (kept close to the site's
@@ -64,8 +64,8 @@ function doPost(e) {
     var sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
     var headers = ensureHeaders_(sheet, fields);
 
-    var pdfUrl = createSubmissionPdf_(fields, labels, sections);
-    fields.pdf_link = pdfUrl;
+    var pdf = createSubmissionPdf_(fields, labels, sections);
+    fields.pdf_link = pdf.url;
     if (headers.indexOf('pdf_link') === -1) {
       headers.push('pdf_link');
       sheet.getRange(1, headers.length, 1, 1).setValues([['pdf_link']]);
@@ -77,9 +77,9 @@ function doPost(e) {
     });
     sheet.appendRow(row);
 
-    sendNotificationEmails_(fields, pdfUrl);
+    sendNotificationEmails_(fields, pdf.url, pdf.blob);
 
-    return jsonOut_({ ok: true, pdf: pdfUrl });
+    return jsonOut_({ ok: true, pdf: pdf.url });
   } catch (err) {
     return jsonOut_({ ok: false, error: String(err) });
   }
@@ -187,7 +187,7 @@ function createSubmissionPdf_(fields, labels, sections) {
   // Keep only the PDF in Drive, not the intermediate Google Doc.
   docFile.setTrashed(true);
 
-  return pdfFile.getUrl();
+  return { url: pdfFile.getUrl(), blob: pdfBlob };
 }
 
 function sectionTitle_(sec) {
@@ -204,26 +204,73 @@ function styleText_(paragraph, opts) {
   text.setFontFamily(0, len - 1, opts.font);
 }
 
-function sendNotificationEmails_(fields, pdfUrl) {
+// Two different emails per submission:
+//  - an internal one to the whole AcademiaOne team (PDF attached, links the
+//    Sheet, bilingual since staff read both languages)
+//  - a personal one to the client themselves, addressed by the name they
+//    typed in, written in whichever language they filled the form in, with
+//    just the PDF attached (no Sheet mention -- that's internal-only)
+// Each is wrapped in its own try/catch so one failing (e.g. a malformed
+// client email) never blocks the other from sending.
+function sendNotificationEmails_(fields, pdfUrl, pdfBlob) {
+  var name = fields.name || '';
+  var lang = fields.language === 'en' ? 'en' : 'zh';
+
+  try {
+    sendTeamEmail_(fields, pdfUrl, pdfBlob, name);
+  } catch (teamErr) {
+    Logger.log('Team notification email failed: ' + teamErr);
+  }
+
+  if (fields.email) {
+    try {
+      sendClientEmail_(fields, pdfBlob, name, lang);
+    } catch (clientErr) {
+      Logger.log('Client confirmation email failed: ' + clientErr);
+    }
+  }
+}
+
+function sendTeamEmail_(fields, pdfUrl, pdfBlob, name) {
   var sheetUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit';
-  var subject = 'AO1 新问卷提交 / New AO1 Submission: ' + (fields.name || fields.email || '');
+  var subject = 'AO1 新问卷提交 / New AO1 Submission: ' + (name || fields.email || '');
+  var lines = [
+    '新的问卷提交，详情请查看附件 PDF 与 Excel 表格。',
+    'A new questionnaire has been submitted. See the attached PDF and the Sheet for full details.',
+    '',
+    '姓名 / Name: ' + name,
+    '邮箱 / Email: ' + (fields.email || ''),
+    '微信 / WeChat: ' + (fields.wechat || ''),
+    '',
+    'PDF: ' + pdfUrl,
+    'Sheet: ' + sheetUrl
+  ];
+  var message = { to: TEAM_RECIPIENTS.join(','), subject: subject, body: lines.join('\n'), attachments: [pdfBlob] };
+  if (fields.email) message.replyTo = fields.email;
+  MailApp.sendEmail(message);
+}
 
-  RECIPIENTS.forEach(function (r) {
-    var lines = [
-      r.messageZh || '',
-      r.messageEn || '',
-      '',
-      '姓名 / Name: ' + (fields.name || ''),
-      '邮箱 / Email: ' + (fields.email || ''),
-      '微信 / WeChat: ' + (fields.wechat || ''),
-      '',
-      'PDF: ' + pdfUrl,
-      'Sheet: ' + sheetUrl
-    ].filter(function (l) { return l !== null && l !== undefined; });
-
-    var options = {};
-    if (fields.email) options.replyTo = fields.email;
-    MailApp.sendEmail(r.email, subject, lines.join('\n'), options);
+function sendClientEmail_(fields, pdfBlob, name, lang) {
+  var greetingName = name || (lang === 'en' ? 'there' : '同学');
+  var subject, body;
+  if (lang === 'en') {
+    subject = 'Your AcademiaOne Questionnaire Has Been Received';
+    body = 'Dear ' + greetingName + ',\n\n' +
+      'Thank you for completing your AcademiaOne questionnaire. We have attached a PDF copy of your answers for your records. ' +
+      'Dr. Victor\'s team will review it carefully before your 1:1 consultation, and we will be in touch soon.\n\n' +
+      'AcademiaOne Education';
+  } else {
+    subject = '你的 AO 留学问卷已收到 · AcademiaOne';
+    body = '亲爱的 ' + greetingName + '，\n\n' +
+      '感谢你认真完成这份 AO 留学问卷。我们已将你的作答整理成 PDF 附在此邮件中，方便你保存。' +
+      'Victor 博士团队会在1v1咨询前仔细阅读，我们很快会与你联系。\n\n' +
+      'AcademiaOne Education';
+  }
+  MailApp.sendEmail({
+    to: fields.email,
+    subject: subject,
+    body: body,
+    attachments: [pdfBlob]
   });
 }
 

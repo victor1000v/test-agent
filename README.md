@@ -14,9 +14,13 @@ Everything the visitor sees lives in a single self-contained file:
    path once deployed (see setup below). One call: appends a row to the
    "AO1 Submissions" Sheet, builds a branded PDF of that submission (logo,
    gold/black AcademiaOne styling, organized by the form's own sections
-   with the real question text — not a plain data dump) and saves it into
-   the "AO1 Submission PDFs" Drive folder, then emails everyone listed in
-   `RECIPIENTS` (see below) a notification with links to both.
+   with the real question text — not a plain data dump), saves it into
+   the "AO1 Submission PDFs" Drive folder, then sends two different emails
+   with that PDF attached: an internal notification to the whole
+   AcademiaOne team (`TEAM_RECIPIENTS`, linking the Sheet too), and a
+   separate personal confirmation to the client themselves, addressed by
+   the name they typed in, in whichever language they filled the form in
+   (no Sheet mention — that stays internal-only).
 2. **Formspree** (`CONFIG.FORMSPREE_ENDPOINT`) — used automatically
    whenever the Sheets endpoint isn't configured yet, or a submission to it
    fails. Email-only, no Sheet/PDF/Drive.
@@ -55,36 +59,44 @@ To wire them up (~5 minutes, one-time):
 From then on, every submission appends a row to the Sheet (headers
 self-initialize from the first real submission — new questions later just
 show up as new trailing columns automatically), saves a PDF into the
-Drive folder, and emails Josie a notification with links to both. If you
-ever edit the questions in `index.html`, no changes to `Code.gs` are
-needed — it adapts to whatever keys the payload contains.
+Drive folder, emails the team, and emails the client their own
+confirmation. If you ever edit the questions in `index.html`, no changes
+to `Code.gs` are needed — it adapts to whatever keys the payload contains.
 
 **Redeploying after editing `Code.gs`:** Apps Script keeps the same Web
 app URL across redeployments as long as you choose **Deploy → Manage
 deployments → (pencil icon) → Version: New version** rather than creating
 a brand new deployment.
 
-### Sending to specific people with specific messages
+### Who gets emailed, and with what
 
-Near the top of `Code.gs` is a `RECIPIENTS` list — one entry per person who
-should be emailed on every submission, each with their own greeting:
+Near the top of `Code.gs`:
 
 ```js
-var RECIPIENTS = [
-  {
-    email: 'josie@academiaone.co.uk',
-    messageZh: '你好 Josie，新的问卷提交了，请查收 PDF 和表格链接。',
-    messageEn: 'Hi Josie, a new questionnaire has come in. PDF and sheet links below.'
-  }
-  // add more people the same way:
-  // { email: 'victor@academiaone.co.uk', messageZh: '...', messageEn: '...' }
+var TEAM_RECIPIENTS = [
+  'victor.kovalets@academiaone.co.uk',
+  'josie@academiaone.co.uk',
+  'content@academiaone.co.uk'
 ];
 ```
 
-Add, remove, or edit entries directly in the Apps Script editor, then
-**Deploy → Manage deployments → New version** (same URL, no changes needed
-in `index.html`). Everyone in the list gets the same PDF/Sheet links, each
-with their own message ahead of it.
+Everyone in that list gets the **same** internal email per submission (one
+email, all three as recipients) — bilingual, PDF attached, links the Sheet.
+Add or remove addresses freely.
+
+The **client** (whichever email address they typed into the form) gets a
+**separate, different** email — see `sendClientEmail_()` further down in
+`Code.gs`: addressed by the name they entered, written in whichever
+language (中文/English) they filled the form in, with the PDF attached but
+no mention of the Sheet, since that's internal-only. Edit its wording
+there if you want to change what the client is told.
+
+Either email failing to send (e.g. a malformed client address) doesn't
+block the other — each is wrapped in its own error handling.
+
+After editing anything in `Code.gs`, redeploy with **Deploy → Manage
+deployments → New version** (keeps the same URL, no changes needed in
+`index.html`).
 
 ## What's on the form
 
