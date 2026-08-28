@@ -867,7 +867,16 @@ function loadState(){
     if(raw){
       var parsed = JSON.parse(raw);
       if(parsed && typeof parsed === "object"){
-        return { index: parsed.index||0, answers: parsed.answers||{}, lang: parsed.lang||"zh", milestones: parsed.milestones||[] };
+        // A visitor may have saved progress against an earlier build of this
+        // page with a differently-shaped STEPS array. Blindly trusting a
+        // stale index would crash the render entirely (blank page) the
+        // moment it points past the end, or at a step of a different shape
+        // than current code expects — so validate it against today's STEPS
+        // before trusting it. Answers/lang/milestones stay safe to keep
+        // as-is since question ids haven't changed across restructures.
+        var idx = parsed.index;
+        if(typeof idx !== "number" || idx<0 || idx>=STEPS.length) idx = 0;
+        return { index: idx, answers: parsed.answers||{}, lang: parsed.lang||"zh", milestones: parsed.milestones||[] };
       }
     }
   }catch(e){}
