@@ -74,6 +74,9 @@ Near the top of `Code.gs`:
 
 ```js
 var TEAM_RECIPIENTS = [
+  'victor.kovalets@academiaone.co.uk',
+  'josie@academiaone.co.uk',
+  'content@academiaone.co.uk',
   'consultant@academiaone.co.uk',
   'socialmedia@academiaone.co.uk',
   'marketing@academiaone.co.uk',
