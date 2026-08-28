@@ -529,21 +529,22 @@
 "use strict";
 
 /* =========================================================================
-   CONFIGURATION — replace these two values to go live.
-   1) Create a free form at https://formspree.io (takes ~1 min), it gives
-      you an endpoint that looks like https://formspree.io/f/xxxxabcd
-   2) In the Formspree dashboard, set the notification email to whichever
-      inbox should receive submissions.
+   CONFIGURATION
+   1) SHEETS_WEBAPP_ENDPOINT — the primary channel once set up (see
+      apps-script/Code.gs + README for the one-time deploy steps): logs
+      every submission as a row in the "AO1 Submissions" Google Sheet,
+      saves a PDF of it into the "AO1 Submission PDFs" Drive folder, and
+      emails Josie — all in one call. Leave as the placeholder until
+      that's deployed; the page falls back to Formspree until then.
+   2) FORMSPREE_ENDPOINT — email-only fallback, used automatically when
+      the Sheets endpoint isn't configured yet or a submission to it fails.
+      Its own one-time step: the first real submission triggers a
+      confirmation email to DESTINATION_EMAIL that needs a single click.
    ========================================================================= */
 var CONFIG = {
-  // Formspree's no-signup endpoint: posting straight to an email address.
-  // The FIRST real submission triggers a one-time confirmation email to
-  // this inbox — someone needs to click "Confirm" in it once, after which
-  // every submission after that is delivered automatically. Free tier caps
-  // at 50 submissions/month; for higher volume, create a real Formspree
-  // account/form and swap this for its https://formspree.io/f/xxxxxxx URL.
+  SHEETS_WEBAPP_ENDPOINT: "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
   FORMSPREE_ENDPOINT: "https://formspree.io/josie@academiaone.co.uk",
-  DESTINATION_EMAIL: "josie@academiaone.co.uk" // used for the mailto fallback if the network request ever fails
+  DESTINATION_EMAIL: "josie@academiaone.co.uk" // used for the mailto fallback if every network request fails
 };
 
 /* ---------------------------- i18n shell strings ------------------------ */
@@ -1529,6 +1530,34 @@ function answerSummaryLabelFull(q, v){
   return String(v);
 }
 
+// Flat {key: string} export used by the Sheets/Drive/PDF pipeline — one key
+// per question (group questions get one key per sub-field, e.g.
+// "target_schools_top1"), in the form's own order, plus a couple of meta
+// fields up front. This is what becomes a spreadsheet row and a PDF.
+function buildExportPayload(){
+  var out = {};
+  out.submitted_at = new Date().toISOString();
+  out.language = state.lang;
+  SECTIONS.forEach(function(sec){
+    sec.questions.forEach(function(q){
+      var v = state.answers[q.id];
+      if(q.type==="group"){
+        q.fields.forEach(function(f){
+          out[q.id+"_"+f.id] = (v && v[f.id]) || "";
+        });
+      } else {
+        var s = answerSummaryLabelFull(q, v);
+        out[q.id] = s==="-" ? "" : s;
+      }
+    });
+  });
+  return out;
+}
+
+function sheetsEndpointConfigured(){
+  return CONFIG.SHEETS_WEBAPP_ENDPOINT && CONFIG.SHEETS_WEBAPP_ENDPOINT.indexOf("YOUR_DEPLOYMENT_ID")===-1;
+}
+
 function submitForm(){
   var submitBtn = document.getElementById("submitBtn");
   var errBox = document.getElementById("submitErrBox");
@@ -1537,28 +1566,55 @@ function submitForm(){
   submitBtn.disabled = true;
   submitBtn.textContent = t(UI.submitting);
 
-  var fd = new FormData();
-  fd.append("_subject", "AO1 新问卷提交 / New AO1 Questionnaire: " + (state.answers.name || state.answers.email || ""));
-  fd.append("_replyto", state.answers.email || "");
-  fd.append("language_used", state.lang);
-  fd.append("submitted_name", state.answers.name || "");
-  fd.append("submitted_email", state.answers.email || "");
-  fd.append("full_summary", buildSummaryText());
+  if(sheetsEndpointConfigured()){
+    // Primary path: one call logs a Sheet row, saves a PDF to Drive, and
+    // emails Josie, all inside apps-script/Code.gs. Sent as text/plain to
+    // dodge a CORS preflight Apps Script doesn't handle — the body is still
+    // plain JSON, doGet/doPost there just JSON.parse it regardless.
+    fetch(CONFIG.SHEETS_WEBAPP_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(buildExportPayload())
+    }).then(function(res){
+      if(res.ok) return res.json().catch(function(){ return {ok:true}; });
+      throw new Error("bad status");
+    }).then(function(json){
+      if(json && json.ok===false) throw new Error(json.error || "sheets endpoint reported failure");
+      finishSubmit();
+    }).catch(function(){
+      // Sheets/Drive pipeline not reachable (or not deployed yet) — fall
+      // back to the email-only Formspree path rather than lose the reply.
+      submitViaFormspree();
+    });
+  } else {
+    submitViaFormspree();
+  }
 
-  fetch(CONFIG.FORMSPREE_ENDPOINT, {
-    method: "POST",
-    headers: { "Accept": "application/json" },
-    body: fd
-  }).then(function(res){
-    if(res.ok){
-      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-      goTo(state.index+1, "fwd");
-    } else {
+  function finishSubmit(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    goTo(state.index+1, "fwd");
+  }
+
+  function submitViaFormspree(){
+    var fd = new FormData();
+    fd.append("_subject", "AO1 新问卷提交 / New AO1 Questionnaire: " + (state.answers.name || state.answers.email || ""));
+    fd.append("_replyto", state.answers.email || "");
+    fd.append("language_used", state.lang);
+    fd.append("submitted_name", state.answers.name || "");
+    fd.append("submitted_email", state.answers.email || "");
+    fd.append("full_summary", buildSummaryText());
+
+    fetch(CONFIG.FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: fd
+    }).then(function(res){
+      if(res.ok) finishSubmit();
+      else showSubmitError();
+    }).catch(function(){
       showSubmitError();
-    }
-  }).catch(function(){
-    showSubmitError();
-  });
+    });
+  }
 
   function showSubmitError(){
     submitBtn.disabled = false;
