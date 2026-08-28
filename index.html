@@ -203,14 +203,7 @@
   @keyframes enter{to{opacity:1;transform:translateY(0);}}
   @keyframes leave{to{opacity:0;transform:translateY(-14px);}}
 
-  .section-tag{
-    display:inline-flex;align-items:center;gap:8px;
-    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-2);
-    margin-bottom:14px;font-weight:600;
-  }
-  .section-tag::before{content:'';width:18px;height:1px;background:var(--gold-dim);}
-
-  /* One small rotating sketch icon per question — see SKETCH_ICONS in JS */
+  /* One small rotating sketch icon per page — see SKETCH_ICONS in JS */
   .q-header-row{display:flex;gap:16px;align-items:flex-start;}
   .q-header-text{flex:1;min-width:0;}
   .sketch-chip{
@@ -247,31 +240,31 @@
     margin:0 0 8px;
   }
   body.lang-zh h1.q-title{font-family:var(--serif-zh);}
-  .q-help{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 26px;}
+  .q-help{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 10px;}
   .required-mark{color:var(--gold);margin-left:2px;}
-  .optional-tag{color:var(--muted-2);font-size:12.5px;font-weight:400;font-style:italic;margin-left:4px;}
 
-  /* When a page groups more than one (optional) question together */
-  .q-block-stacked{margin-top:30px;padding-top:26px;border-top:1px dashed var(--border);}
+  /* Pages now hold several questions — kept compact on purpose so a long
+     page never reads as a big job. */
+  .q-block-stacked{margin-top:18px;padding-top:16px;border-top:1px dashed var(--border);}
   h2.q-title-sub{
     font-family:var(--serif-en);font-weight:600;
-    font-size:clamp(18px,3.2vw,22px);line-height:1.4;color:var(--cream);
-    margin:0 0 8px;
+    font-size:clamp(15px,2.4vw,17px);line-height:1.4;color:var(--cream);
+    margin:0 0 5px;
   }
   body.lang-zh h2.q-title-sub{font-family:var(--serif-zh);}
 
   /* Inputs */
-  .field{margin-bottom:18px;}
+  .field{margin-bottom:10px;}
   .field label.sub{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;letter-spacing:.02em;}
   input[type=text],input[type=email],textarea{
     width:100%;background:var(--card);border:1px solid var(--border);
-    color:var(--cream);border-radius:12px;padding:14px 16px;
-    font-family:var(--sans);font-size:15px;line-height:1.5;
+    color:var(--cream);border-radius:10px;padding:9px 12px;
+    font-family:var(--sans);font-size:13.5px;line-height:1.45;
     transition:border-color .2s,box-shadow .2s,background .2s;
     resize:vertical;
   }
   body.lang-zh input[type=text],body.lang-zh input[type=email],body.lang-zh textarea{font-family:'Noto Sans SC',var(--sans);}
-  textarea{min-height:120px;}
+  textarea{min-height:60px;}
   input::placeholder,textarea::placeholder{color:var(--muted-2);}
   input:focus,textarea:focus{
     outline:none;border-color:var(--gold-dim);background:var(--card-2);
@@ -284,10 +277,10 @@
   /* Choice cards */
   .choices{display:grid;gap:10px;}
   .choice-card{
-    display:flex;align-items:center;gap:12px;
-    background:var(--card);border:1px solid var(--border);border-radius:12px;
-    padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s,transform .12s;
-    font-size:14.5px;color:var(--cream);
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border:1px solid var(--border);border-radius:11px;
+    padding:11px 14px;cursor:pointer;transition:border-color .18s,background .18s,transform .12s;
+    font-size:13px;color:var(--cream);
     position:relative;overflow:hidden;
   }
   .choice-card:hover{border-color:var(--gold-dim);background:var(--card-2);}
@@ -810,57 +803,53 @@ var SECTIONS = [
 ];
 
 /* --------------------------------- Build steps --------------------------- */
-// No more click-through "section divider" screens — each new section's first
-// question just carries a small inline banner instead, so nothing costs the
-// visitor an extra tap.
-//
-// Fewer taps overall: a "page" can hold more than one question. Anything
-// that needs a click (single/multi/scale) or is a structured multi-field
-// group, plus the handful of identity fields we actually need (email, name,
-// WeChat), always gets its own focused page and stays required. Everything
-// else — the free-text reflection questions — is optional and gets batched
-// a few at a time onto shared pages, so filling the form out top-to-bottom
-// costs noticeably fewer button presses without losing the one-idea-at-a-
-// time feel for the questions that matter most.
+// Back to a handful of longer pages, closer to the original form's feel —
+// but only single/multi/scale questions (the ones you just tick or press)
+// plus the identity fields we actually need (email, name, WeChat) are
+// required. Every free-text or structured-typing question is optional and
+// silently skippable, with no visible "(optional)" label — required ones
+// simply carry the asterisk, everything else doesn't.
 var IMPORTANT_TEXT_IDS = ["email","name","wechat"];
 function isQuestionRequired(q){
-  if(q.type==="single" || q.type==="multi" || q.type==="scale" || q.type==="group") return true;
+  if(q.type==="single" || q.type==="multi" || q.type==="scale") return true;
   return IMPORTANT_TEXT_IDS.indexOf(q.id)!==-1;
 }
-var GROUP_PAGE_SIZE = 3; // max optional questions sharing one page
+
+// Which sections share a page. 5 pages total, in original question order,
+// each labeled and described on its own terms rather than inheriting a
+// single section's name.
+var PAGE_GROUPS = [
+  { sections:["lead","basic"],
+    zh:"开始之前 · 你的基本信息", en:"Before We Begin · Your Basic Information",
+    descZh:"先填一些基础信息，帮助我们认识你。", descEn:"A few basics to start with, so we can get to know you." },
+  { sections:["why"],
+    zh:"你为什么来找我们？", en:"Why Are You Here?",
+    descZh:"这是整份问卷的核心，请尽量坦诚、真实作答（能写多少写多少）。",
+    descEn:"The heart of this questionnaire. Answer as honestly as you can, however much you have time for." },
+  { sections:["goals","self"],
+    zh:"关于你的目标与你自己", en:"About Your Goals & Yourself",
+    descZh:"聊聊你心中的目标院校，以及你是谁。", descEn:"Let's talk about your target schools, and who you are." },
+  { sections:["pace"],
+    zh:"关于你的人生节奏", en:"About Your Life Pace",
+    descZh:"了解你的时间与节奏，帮你规划下一步。", descEn:"Understanding your time and pace helps us plan your next step." },
+  { sections:["final"],
+    zh:"最后的问题", en:"Final Questions",
+    descZh:"最后几个问题，帮助我们确认这是一次真正匹配的合作。", descEn:"A few last questions to help us confirm this is a genuine fit." }
+];
 
 var NON_QUESTION_TYPES = ["intro","review","success"];
 var STEPS = [];
 STEPS.push({type:"intro"});
 var __gi = 0; // running count of individual questions placed so far
-SECTIONS.forEach(function(sec, si){
-  var pending = [];
-  var pendingIsSectionStart = false;
-  function flushPending(){
-    if(!pending.length) return;
-    STEPS.push({
-      type:"page", questions:pending, section:sec, sectionIndex:si,
-      isSectionStart:pendingIsSectionStart, prevN:__gi, iconIndex:__gi
-    });
-    __gi += pending.length;
-    pending = [];
-    pendingIsSectionStart = false;
-  }
-  sec.questions.forEach(function(q, qi){
-    if(isQuestionRequired(q)){
-      flushPending();
-      STEPS.push({
-        type:"page", questions:[q], section:sec, sectionIndex:si,
-        isSectionStart:qi===0, prevN:__gi, iconIndex:__gi
-      });
-      __gi += 1;
-    } else {
-      if(!pending.length && qi===0) pendingIsSectionStart = true;
-      pending.push(q);
-      if(pending.length>=GROUP_PAGE_SIZE) flushPending();
-    }
+PAGE_GROUPS.forEach(function(pg){
+  var qs = [], stats = null;
+  pg.sections.forEach(function(sid){
+    var sec = SECTIONS.filter(function(s){ return s.id===sid; })[0];
+    qs = qs.concat(sec.questions);
+    if(sec.stats) stats = sec.stats;
   });
-  flushPending();
+  STEPS.push({ type:"page", questions:qs, pageInfo:pg, stats:stats, prevN:__gi, iconIndex:__gi });
+  __gi += qs.length;
 });
 STEPS.push({type:"review"});
 STEPS.push({type:"success"});
@@ -1048,7 +1037,7 @@ function render(direction){
   } else if(step.type==="review"){
     progressLabel.textContent = t(UI.reviewTitle);
   } else {
-    progressLabel.textContent = state.lang==="zh" ? step.section.zh : step.section.en;
+    progressLabel.textContent = state.lang==="zh" ? step.pageInfo.zh : step.pageInfo.en;
   }
 
   window.scrollTo({top:0, behavior:"smooth"});
@@ -1056,9 +1045,12 @@ function render(direction){
 }
 
 // Cheap re-check used on every keystroke/selection within a page — just
-// nudges the bar's width, no re-render, so typing never loses focus.
+// nudges the bar's width, no re-render, so typing never loses focus. Also
+// re-checks encouragement toasts here (not only on page transitions), since
+// pages are now long enough that most progress happens mid-page.
 function updateProgressLive(){
   progressFill.style.width = progressPercent() + "%";
+  checkMilestones();
 }
 
 function renderIntro(){
@@ -1080,22 +1072,6 @@ function renderIntro(){
   c.appendChild(actions);
   return c;
 }
-
-// One-line context for the first question of each section — shown inline,
-// never as a separate click-through screen.
-var SECTION_DESC_ZH = {
-  lead:"先了解一些基础信息。", basic:"帮助我们认识你，量身定制沟通方式。",
-  why:"这是整份问卷的核心，请尽量坦诚、真实作答。", goals:"聊聊你心中的目标院校与方向。",
-  self:"从你自己的视角，谈谈你是谁。", pace:"了解你的时间与节奏，帮你规划下一步。",
-  final:"最后几个问题，帮助我们确认这是一次真正匹配的合作。"
-};
-var SECTION_DESC_EN = {
-  lead:"A few basics to start with.", basic:"Helping us get to know you, so we can tailor how we communicate.",
-  why:"The heart of this questionnaire. Please answer as honestly as you can.",
-  goals:"Let's talk about your target schools and direction.",
-  self:"Tell us who you are, in your own words.", pace:"Understanding your time and pace helps us plan your next step.",
-  final:"A few last questions to help us confirm this is a genuine fit."
-};
 
 // A first pass at "something changes every question" — a small rotating set
 // of simple sketchbook-style line icons (academic/journey/nature themes),
@@ -1132,14 +1108,14 @@ function renderSketchIcon(step){
 }
 
 function renderChapterBanner(step){
-  var sec = step.section;
+  var pg = step.pageInfo;
   var banner = el("div", "chapter-banner");
-  banner.appendChild(el("div", "cb-eyebrow", state.lang==="zh" ? "新篇章" : "New chapter"));
-  banner.appendChild(el("h3", "", esc(state.lang==="zh" ? sec.zh : sec.en)));
-  banner.appendChild(el("p", "", esc(state.lang==="zh" ? SECTION_DESC_ZH[sec.id] : SECTION_DESC_EN[sec.id])));
-  if(sec.stats){
+  banner.appendChild(el("div", "cb-eyebrow", state.lang==="zh" ? "本页内容" : "On this page"));
+  banner.appendChild(el("h3", "", esc(state.lang==="zh" ? pg.zh : pg.en)));
+  banner.appendChild(el("p", "", esc(state.lang==="zh" ? pg.descZh : pg.descEn)));
+  if(step.stats){
     var list = el("div", "cb-stats");
-    sec.stats.items.forEach(function(item){
+    step.stats.items.forEach(function(item){
       var row = el("div", "cb-stat");
       row.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg><span></span>';
       row.querySelector("span").textContent = state.lang==="zh" ? item.zh : item.en;
@@ -1179,10 +1155,10 @@ function fieldValid(q){
 function renderFieldBlock(q, step, isFirst){
   var block = el("div", "q-block" + (isFirst ? "" : " q-block-stacked"));
   var required = isQuestionRequired(q);
-  var titleHtml = esc(qStr(q,"q")) + (required
-    ? '<span class="required-mark">*</span>'
-    : ' <span class="optional-tag">'+esc(state.lang==="zh" ? "（可选）" : "(optional)")+'</span>');
-  block.appendChild(el(isFirst ? "h1" : "h2", "q-title" + (isFirst ? "" : " q-title-sub"), titleHtml));
+  // No visible "(optional)" tag — required ones simply carry the asterisk,
+  // everything else is silently skippable.
+  var titleHtml = esc(qStr(q,"q")) + (required ? '<span class="required-mark">*</span>' : "");
+  block.appendChild(el("h2", "q-title-sub", titleHtml));
   if(qStr(q,"help")) block.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
 
   var fieldBox = el("div", "field", "");
@@ -1254,12 +1230,9 @@ function renderFieldBlock(q, step, isFirst){
         clearError(fieldBox);
         syncOtherField();
         updateProgressLive();
-        // single-choice with no free-text needed: confirm the pick, then glide on automatically
-        if(q.type==="single" && !opt.other){
-          setTimeout(function(){
-            if(STEPS[state.index]===step) attemptNext(step);
-          }, 380);
-        }
+        // Pages hold several questions now, so a pick just confirms itself
+        // (the sweep + filled mark) rather than jumping to the next page —
+        // that would skip whatever else is still on this page.
       };
       box.appendChild(card);
     });
@@ -1314,12 +1287,7 @@ function renderQuestion(step){
   var headerRow = el("div", "q-header-row");
   headerRow.appendChild(renderSketchIcon(step));
   var textCol = el("div", "q-header-text");
-  if(step.isSectionStart){
-    textCol.appendChild(renderChapterBanner(step));
-  } else {
-    var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
-    textCol.appendChild(tag);
-  }
+  textCol.appendChild(renderChapterBanner(step));
   headerRow.appendChild(textCol);
   wrap.appendChild(headerRow);
 
@@ -1437,13 +1405,16 @@ function renderSuccess(){
 // repeating every so often the rest of the way. Each fires once per session;
 // the phrase itself is picked at random from the pool each time.
 var ENCOURAGEMENTS = [
-  {zh:"很棒，继续保持！", en:"Great job, keep it up!"},
-  {zh:"做得好，你在状态里！", en:"Nicely done, you're on a roll!"},
-  {zh:"干得漂亮，我们继续！", en:"Awesome, keep going!"},
-  {zh:"很好，节奏稳稳的！", en:"Great pace, keep it going!"},
-  {zh:"真棒，就是这个感觉！", en:"Love this energy, keep it up!"},
-  {zh:"答得很好，继续加油！", en:"Nice work, keep going!"},
-  {zh:"你做得很好！", en:"You're doing great!"}
+  {zh:"很棒，继续保持！", en:"Great job, keep it up!", emoji:"⭐"},
+  {zh:"做得好，你在状态里！", en:"Nicely done, you're on a roll!", emoji:"🔥"},
+  {zh:"干得漂亮，我们继续！", en:"Awesome, keep going!", emoji:"🎉"},
+  {zh:"很好，节奏稳稳的！", en:"Great pace, keep it going!", emoji:"✨"},
+  {zh:"真棒，就是这个感觉！", en:"Love this energy, keep it up!", emoji:"💫"},
+  {zh:"答得很好，继续加油！", en:"Nice work, keep going!", emoji:"👏"},
+  {zh:"你做得很好！", en:"You're doing great!", emoji:"🌟"},
+  {zh:"太厉害了，继续！", en:"Amazing, keep it up!", emoji:"🚀"},
+  {zh:"漂亮，就是这样！", en:"Nice one, just like that!", emoji:"🙌"},
+  {zh:"很有感觉，加油！", en:"Loving this, keep going!", emoji:"💛"}
 ];
 var MILESTONE_INTERVAL = Math.max(4, Math.round(QUESTION_STEP_COUNT/7));
 var MILESTONE_FIRST = Math.max(2, Math.round(QUESTION_STEP_COUNT*0.06));
@@ -1452,10 +1423,10 @@ var MILESTONE_NS = (function(){
   for(var n=MILESTONE_FIRST; n<QUESTION_STEP_COUNT; n+=MILESTONE_INTERVAL) ns.push(n);
   return ns;
 })();
-function showMilestoneToast(msg){
+function showMilestoneToast(msg, emoji){
   var toast = el("div", "milestone-toast");
   var icon = document.createElement("span");
-  icon.textContent = "✨";
+  icon.textContent = emoji || "✨";
   toast.appendChild(icon);
   var label = document.createElement("span");
   label.textContent = msg;
@@ -1477,13 +1448,17 @@ function showMilestoneToast(msg){
 function checkMilestones(){
   var step = STEPS[state.index];
   if(NON_QUESTION_TYPES.indexOf(step.type)!==-1) return;
-  var n = step.prevN; // questions fully passed to have reached this page
+  // live count: questions completed before this page, plus however many on
+  // this page have been answered so far — pages are long now, so most
+  // threshold-crossings happen mid-page, not just at Next.
+  var answeredHere = step.questions.filter(questionHasAnswer).length;
+  var n = step.prevN + answeredHere;
   var fired = false;
   MILESTONE_NS.forEach(function(threshold){
     if(n>=threshold && state.milestones.indexOf(threshold)===-1){
       state.milestones.push(threshold);
       var phrase = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
-      showMilestoneToast(state.lang==="zh" ? phrase.zh : phrase.en);
+      showMilestoneToast(state.lang==="zh" ? phrase.zh : phrase.en, phrase.emoji);
       fired = true;
     }
   });
