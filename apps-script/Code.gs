@@ -39,7 +39,7 @@ var FOLDER_ID = '1BUlv3JWvTzJe8FcbqwCslr_TlQsHzMWi';
 // (PDF attached, Sheet linked). Add or remove addresses freely.
 var TEAM_RECIPIENTS = [
   'consultant@academiaone.co.uk',
-  'social@academiaone.co.uk',
+  'socialmedia@academiaone.co.uk',
   'marketing@academiaone.co.uk',
   'branding@academiaone.co.uk',
   'marketing2@academiaone.co.uk'
