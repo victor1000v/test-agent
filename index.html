@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23FBF8F1' stroke='%239F7A21' stroke-width='6'/%3E%3Cpath d='M50 14 L59 50 L50 86 L41 50 Z' fill='%2316233F'/%3E%3Cpath d='M50 14 L59 50 H41 Z' fill='%239F7A21'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Carlito:wght@400;700&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Carlito:wght@400;700&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Playfair+Display:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
 <style>
 :root{
   --ink:#16233F; --ink2:#3B4A69; --ink3:#6B7691;
@@ -292,6 +292,51 @@ footer p .zh{font-family:var(--cns);letter-spacing:.1em;text-transform:none;marg
   *{animation:none!important;transition-duration:.01ms!important}
   .bar-fill,.pfill{transition:none!important}
 }
+
+/* ================================================================
+   EXPERIMENTAL THEME LAB — testing only, delete this whole block
+   (and the matching HTML block + JS block marked THEME LAB) to
+   remove once a direction is picked.
+   ================================================================ */
+#theme-lab{
+  position:fixed;top:76px;right:16px;z-index:15;
+  display:flex;flex-direction:column;gap:6px;
+  background:var(--paper2);border:1px solid var(--rule);border-radius:12px;
+  padding:10px;box-shadow:0 8px 24px rgba(22,35,63,.12);
+  font-family:var(--sans);
+}
+#theme-lab .lab-title{font-size:9.5px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;padding:0 2px 2px}
+#theme-lab .lab-row{display:flex;gap:4px}
+#theme-lab button{
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.03em;padding:6px 8px;border-radius:7px;
+  border:1px solid var(--rule);background:var(--paper);color:var(--ink2);cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+#theme-lab button.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+#theme-lab button:hover{border-color:var(--gold2)}
+@media (max-width:720px){ #theme-lab{position:static;margin:12px auto 0;max-width:340px} }
+
+.theme-art-panel{display:none;margin:0 0 26px;border-radius:16px;overflow:hidden;border:1px solid var(--rule);background:var(--paper2);position:relative;height:180px;transition:opacity .18s ease}
+body.theme-reveal .theme-art-panel,body.theme-forest .theme-art-panel,body.theme-abstract .theme-art-panel{display:block}
+.theme-art-panel svg{width:100%;height:100%;display:block}
+#s-intro .theme-art-panel{height:220px;margin:0 auto 24px;max-width:520px}
+
+/* Classical university skin — Oxford/Yale-leaning navy + gold, serif display */
+body.theme-classical{
+  --ink:#0A2240; --ink2:#1F3A5F; --ink3:#5A6E88;
+  --paper:#F5F3EA; --paper2:#FAF8F1; --panel:#EDE8D8; --panel2:#E3DCC6;
+  --gold:#A6832E; --gold2:#C7A94F; --gold3:#E6D6A6;
+  --rule:#CBC2A4; --stone:#A9A288;
+  --serif:'Playfair Display',Georgia,'Noto Serif SC',serif;
+  --body:'EB Garamond',Georgia,'Noto Serif SC',serif;
+  --sans:'EB Garamond','Carlito',Georgia,'Noto Sans SC',serif;
+}
+body.theme-classical .btn,body.theme-classical .opt,body.theme-classical .dest,
+body.theme-classical .next-card,body.theme-classical .meta-strip span,
+body.theme-classical .verdict-chip,body.theme-classical .langs,
+body.theme-classical .theme-art-panel,body.theme-classical .watchout{border-radius:3px}
+body.theme-classical .badge{border-radius:0}
+body.theme-classical h1,body.theme-classical h2,body.theme-classical .qtitle{font-weight:700;letter-spacing:.01em}
+body.theme-classical .kicker,body.theme-classical .microhead,body.theme-classical .wordmark b{letter-spacing:.18em}
 </style>
 </head>
 <body class="mode-bi">
@@ -317,9 +362,26 @@ footer p .zh{font-family:var(--cns);letter-spacing:.1em;text-transform:none;marg
   </nav>
 </header>
 
+<!-- THEME LAB (experimental — testing only, remove this block later) -->
+<div id="theme-lab">
+  <div class="lab-title">Theme lab — testing only</div>
+  <div class="lab-row">
+    <button type="button" data-theme="original">Original</button>
+    <button type="button" data-theme="reveal">Reveal</button>
+  </div>
+  <div class="lab-row">
+    <button type="button" data-theme="forest">Forest</button>
+    <button type="button" data-theme="abstract">Abstract</button>
+  </div>
+  <div class="lab-row">
+    <button type="button" data-theme="classical">Classical</button>
+  </div>
+</div>
+
 <main>
   <!-- INTRO -->
   <section class="screen show" id="s-intro">
+    <div class="theme-art-panel" id="art-intro" aria-hidden="true"></div>
     <div class="compass-wrap" aria-hidden="true">
       <svg viewBox="0 0 200 200">
         <circle cx="100" cy="100" r="96" fill="#FDFBF5" stroke="#DAD2BC" stroke-width="1"/>
@@ -362,6 +424,7 @@ footer p .zh{font-family:var(--cns);letter-spacing:.1em;text-transform:none;marg
 
   <!-- QUIZ -->
   <section class="screen" id="s-quiz" aria-live="polite">
+    <div class="theme-art-panel" id="art-quiz" aria-hidden="true"></div>
     <div class="progress">
       <svg class="mini-compass" viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="46" fill="none" stroke="#DAD2BC" stroke-width="4"/>
@@ -392,6 +455,7 @@ footer p .zh{font-family:var(--cns);letter-spacing:.1em;text-transform:none;marg
 
   <!-- RESULT -->
   <section class="screen" id="s-result">
+    <div class="theme-art-panel" id="art-result" aria-hidden="true"></div>
     <div class="seal-wrap">
       <div class="seal" id="seal"></div>
       <p class="kicker"><span class="en-only">Your result</span><span class="zh" style="font-family:var(--cns);letter-spacing:.28em;margin-left:12px">你的罗盘读数</span></p>
@@ -635,6 +699,150 @@ function showScreen(id){
   window.scrollTo({top:0, behavior: reduced?'auto':'smooth'});
 }
 
+/* ================================================================
+   EXPERIMENTAL THEME LAB — testing only.
+   Delete this whole block (and the matching CSS block + the
+   #theme-lab / .theme-art-panel markup) once a direction is picked.
+   ================================================================ */
+var THEME = 'original'; // original | reveal | forest | abstract | classical
+try{ var st = localStorage.getItem('ao-theme'); if(st) THEME = st; }catch(e){}
+
+function answeredCount(){ return answers.filter(function(a){ return a!==-1; }).length; }
+
+function mulberry32(seed){
+  return function(){
+    seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s){
+  var h = 0;
+  for(var i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+
+function buildRevealSVG(progress){
+  var revealX = Math.round(progress*520);
+  return '<svg viewBox="0 0 520 220">'+
+    '<rect width="520" height="220" fill="#FDFBF5"/>'+
+    '<line x1="0" y1="196" x2="520" y2="196" stroke="#DAD2BC" stroke-width="1.5"/>'+
+    '<rect x="360" y="24" width="120" height="90" rx="4" fill="none" stroke="#16233F" stroke-width="2"/>'+
+    '<line x1="420" y1="24" x2="420" y2="114" stroke="#16233F" stroke-width="1.5"/>'+
+    '<line x1="360" y1="69" x2="480" y2="69" stroke="#16233F" stroke-width="1.5"/>'+
+    '<circle cx="440" cy="45" r="2.6" fill="#C6A455"/><circle cx="460" cy="90" r="2" fill="#C6A455"/><circle cx="400" cy="95" r="2.2" fill="#C6A455"/>'+
+    '<line x1="118" y1="30" x2="118" y2="120" stroke="#16233F" stroke-width="3"/>'+
+    '<path d="M84 30 L152 30 L136 66 L100 66 Z" fill="#9F7A21"/>'+
+    '<ellipse cx="118" cy="120" rx="10" ry="4" fill="#16233F"/>'+
+    '<rect x="150" y="150" width="70" height="14" rx="2" fill="#16233F"/>'+
+    '<rect x="158" y="136" width="60" height="14" rx="2" fill="#3B4A69"/>'+
+    '<rect x="166" y="122" width="50" height="14" rx="2" fill="#16233F"/>'+
+    '<path d="M40 150 Q90 130 140 150 L140 168 Q90 152 40 168 Z" fill="#FDFBF5" stroke="#9F7A21" stroke-width="2"/>'+
+    '<line x1="90" y1="134" x2="90" y2="164" stroke="#9F7A21" stroke-width="1.2"/>'+
+    '<rect x="230" y="150" width="16" height="46" rx="2" fill="#C6A455"/>'+
+    '<rect x="234" y="118" width="8" height="34" fill="none" stroke="#9F7A21" stroke-width="1.5"/>'+
+    '<line x1="234" y1="128" x2="242" y2="128" stroke="#9F7A21" stroke-width="1"/>'+
+    '<rect x="'+revealX+'" y="0" width="'+(520-revealX)+'" height="220" fill="#FDFBF5"/>'+
+    '<line x1="'+revealX+'" y1="0" x2="'+revealX+'" y2="220" stroke="#C6A455" stroke-width="2"/>'+
+    '<circle cx="'+revealX+'" cy="110" r="4" fill="#9F7A21"/>'+
+  '</svg>';
+}
+
+function treeGroup(cx, groundY, scale, canopyFill){
+  scale = scale || 1;
+  var trunkW = 8*scale, trunkH = 40*scale, r1 = 22*scale;
+  return '<g>'+
+    '<rect x="'+(cx-trunkW/2)+'" y="'+(groundY-trunkH)+'" width="'+trunkW+'" height="'+trunkH+'" fill="#6B5330"/>'+
+    '<circle cx="'+(cx-r1*0.55)+'" cy="'+(groundY-trunkH-r1*0.55)+'" r="'+r1+'" fill="'+canopyFill+'"/>'+
+    '<circle cx="'+(cx+r1*0.55)+'" cy="'+(groundY-trunkH-r1*0.55)+'" r="'+r1+'" fill="'+canopyFill+'"/>'+
+    '<circle cx="'+cx+'" cy="'+(groundY-trunkH-r1*1.1)+'" r="'+(r1*1.05)+'" fill="'+canopyFill+'"/>'+
+  '</g>';
+}
+function buildForestSVG(progress){
+  var stage = Math.min(4, Math.floor(progress*5));
+  var groundY = 190;
+  var scene = '<rect width="520" height="220" fill="#FDFBF5"/>'+
+    '<line x1="0" y1="'+groundY+'" x2="520" y2="'+groundY+'" stroke="#B9AF9E" stroke-width="1.5"/>';
+  if(stage===0){
+    scene += '<circle cx="260" cy="'+(groundY-4)+'" r="6" fill="#6B5330"/>';
+  } else if(stage===1){
+    scene += '<line x1="260" y1="'+groundY+'" x2="260" y2="'+(groundY-18)+'" stroke="#3E6B4C" stroke-width="3"/>'+
+      '<ellipse cx="250" cy="'+(groundY-20)+'" rx="10" ry="6" fill="#3E6B4C" transform="rotate(-20 250 '+(groundY-20)+')"/>'+
+      '<ellipse cx="270" cy="'+(groundY-20)+'" rx="10" ry="6" fill="#3E6B4C" transform="rotate(20 270 '+(groundY-20)+')"/>';
+  } else if(stage===2){
+    scene += treeGroup(260, groundY, 0.55, '#7FA383');
+  } else if(stage===3){
+    scene += treeGroup(260, groundY, 1, '#3E6B4C');
+    scene += '<ellipse cx="220" cy="'+groundY+'" rx="14" ry="4" fill="#B9AF9E" opacity=".5"/>'+
+      '<ellipse cx="310" cy="'+groundY+'" rx="14" ry="4" fill="#B9AF9E" opacity=".5"/>';
+  } else {
+    scene += '<circle cx="450" cy="40" r="22" fill="#E3D5AC"/>';
+    scene += treeGroup(150, groundY, 0.62, '#7FA383');
+    scene += treeGroup(260, groundY, 1, '#3E6B4C');
+    scene += treeGroup(360, groundY, 0.72, '#4E7A5C');
+    scene += '<ellipse cx="90" cy="'+groundY+'" rx="14" ry="4" fill="#B9AF9E" opacity=".5"/>'+
+      '<ellipse cx="420" cy="'+groundY+'" rx="14" ry="4" fill="#B9AF9E" opacity=".5"/>';
+  }
+  return '<svg viewBox="0 0 520 220">'+scene+'</svg>';
+}
+
+function buildAbstractSVG(seed){
+  var rnd = mulberry32(seed*1000+7);
+  var palette = ['#16233F','#9F7A21','#C6A455','#8E3B2A','#3E6B4C','#E3D5AC'];
+  var shapes = '<rect width="520" height="220" fill="#FDFBF5"/>';
+  for(var i=0;i<9;i++){
+    var color = palette[Math.floor(rnd()*palette.length)];
+    var alpha = (0.5 + rnd()*0.45).toFixed(2);
+    var kind = rnd();
+    if(kind < 0.4){
+      var r = 16 + rnd()*70;
+      shapes += '<circle cx="'+Math.round(rnd()*520)+'" cy="'+Math.round(rnd()*220)+'" r="'+Math.round(r)+'" fill="'+color+'" opacity="'+alpha+'"/>';
+    } else if(kind < 0.7){
+      var r2 = 20 + rnd()*60;
+      shapes += '<circle cx="'+Math.round(rnd()*520)+'" cy="'+Math.round(rnd()*220)+'" r="'+Math.round(r2)+'" fill="none" stroke="'+color+'" stroke-width="'+(3+rnd()*5).toFixed(1)+'" opacity="'+alpha+'"/>';
+    } else {
+      var w = 60 + rnd()*180, h = 6 + rnd()*22;
+      var rot = Math.round(rnd()*180);
+      var x = Math.round(rnd()*520), y = Math.round(rnd()*220);
+      shapes += '<rect x="'+(-w/2)+'" y="'+(-h/2)+'" width="'+Math.round(w)+'" height="'+Math.round(h)+'" fill="'+color+'" opacity="'+alpha+'" transform="translate('+x+' '+y+') rotate('+rot+')"/>';
+    }
+  }
+  return '<svg viewBox="0 0 520 220">'+shapes+'</svg>';
+}
+
+function setArtPanel(id, html){ var el=$(id); if(el) el.innerHTML = html; }
+
+function renderThemeArt(){
+  if(THEME==='reveal'){
+    setArtPanel('art-intro', buildRevealSVG(0));
+    setArtPanel('art-quiz', buildRevealSVG(answeredCount()/QUESTIONS.length));
+    setArtPanel('art-result', buildRevealSVG(1));
+  } else if(THEME==='forest'){
+    setArtPanel('art-intro', buildForestSVG(0));
+    setArtPanel('art-quiz', buildForestSVG(answeredCount()/QUESTIONS.length));
+    setArtPanel('art-result', buildForestSVG(1));
+  } else if(THEME==='abstract'){
+    setArtPanel('art-intro', buildAbstractSVG(1));
+    setArtPanel('art-quiz', buildAbstractSVG(2+answeredCount()));
+    setArtPanel('art-result', buildAbstractSVG(900 + (typeof LAST!=='undefined' && LAST ? hashStr(LAST.v.initials) : 0)));
+  }
+}
+
+function setTheme(t){
+  THEME = t;
+  document.body.classList.remove('theme-original','theme-reveal','theme-forest','theme-abstract','theme-classical');
+  document.body.classList.add('theme-'+t);
+  document.querySelectorAll('#theme-lab button').forEach(function(b){ b.classList.toggle('on', b.dataset.theme===t); });
+  try{ localStorage.setItem('ao-theme', t); }catch(e){}
+  renderThemeArt();
+}
+document.querySelectorAll('#theme-lab button').forEach(function(b){
+  b.addEventListener('click', function(){ setTheme(b.dataset.theme); });
+});
+setTheme(THEME);
+/* ============== END EXPERIMENTAL THEME LAB (part 1 of 3 — see renderQuestion, showResult, retake) ============== */
+
 /* =============== quiz flow =============== */
 var ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
@@ -677,6 +885,7 @@ function pick(i, btn){
   card.querySelectorAll('.opt').forEach(function(b){b.classList.remove('sel')});
   btn.classList.add('sel');
   $('pfill').style.width = ((qi+1)/QUESTIONS.length*100)+'%';
+  if(typeof renderThemeArt==='function') renderThemeArt(); /* THEME LAB (part 2 of 3) */
   setTimeout(function(){
     if(qi < QUESTIONS.length-1){
       card.classList.add('out');
@@ -762,6 +971,7 @@ function showResult(){
   var s=computeScores();
   var v=VERDICTS[pickVerdict(s)];
   LAST={s:s, v:v};
+  if(typeof renderThemeArt==='function') renderThemeArt(); /* THEME LAB (part 3 of 3) */
 
   $('seal').innerHTML=sealSVG(v.initials);
   // restart stamp animation
@@ -935,6 +1145,7 @@ function fallbackCopy(txt){
 $('retake').addEventListener('click',function(){
   answers=new Array(QUESTIONS.length).fill(-1); qi=0; LAST=null;
   showScreen('s-intro');
+  if(typeof renderThemeArt==='function') renderThemeArt(); /* THEME LAB */
 });
 </script>
 </body>
