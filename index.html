@@ -249,6 +249,16 @@
   body.lang-zh h1.q-title{font-family:var(--serif-zh);}
   .q-help{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 26px;}
   .required-mark{color:var(--gold);margin-left:2px;}
+  .optional-tag{color:var(--muted-2);font-size:12.5px;font-weight:400;font-style:italic;margin-left:4px;}
+
+  /* When a page groups more than one (optional) question together */
+  .q-block-stacked{margin-top:30px;padding-top:26px;border-top:1px dashed var(--border);}
+  h2.q-title-sub{
+    font-family:var(--serif-en);font-weight:600;
+    font-size:clamp(18px,3.2vw,22px);line-height:1.4;color:var(--cream);
+    margin:0 0 8px;
+  }
+  body.lang-zh h2.q-title-sub{font-family:var(--serif-zh);}
 
   /* Inputs */
   .field{margin-bottom:18px;}
@@ -803,19 +813,59 @@ var SECTIONS = [
 // No more click-through "section divider" screens — each new section's first
 // question just carries a small inline banner instead, so nothing costs the
 // visitor an extra tap.
+//
+// Fewer taps overall: a "page" can hold more than one question. Anything
+// that needs a click (single/multi/scale) or is a structured multi-field
+// group, plus the handful of identity fields we actually need (email, name,
+// WeChat), always gets its own focused page and stays required. Everything
+// else — the free-text reflection questions — is optional and gets batched
+// a few at a time onto shared pages, so filling the form out top-to-bottom
+// costs noticeably fewer button presses without losing the one-idea-at-a-
+// time feel for the questions that matter most.
+var IMPORTANT_TEXT_IDS = ["email","name","wechat"];
+function isQuestionRequired(q){
+  if(q.type==="single" || q.type==="multi" || q.type==="scale" || q.type==="group") return true;
+  return IMPORTANT_TEXT_IDS.indexOf(q.id)!==-1;
+}
+var GROUP_PAGE_SIZE = 3; // max optional questions sharing one page
+
 var NON_QUESTION_TYPES = ["intro","review","success"];
 var STEPS = [];
 STEPS.push({type:"intro"});
-var __qCounter = 0;
+var __gi = 0; // running count of individual questions placed so far
 SECTIONS.forEach(function(sec, si){
+  var pending = [];
+  var pendingIsSectionStart = false;
+  function flushPending(){
+    if(!pending.length) return;
+    STEPS.push({
+      type:"page", questions:pending, section:sec, sectionIndex:si,
+      isSectionStart:pendingIsSectionStart, prevN:__gi, iconIndex:__gi
+    });
+    __gi += pending.length;
+    pending = [];
+    pendingIsSectionStart = false;
+  }
   sec.questions.forEach(function(q, qi){
-    STEPS.push({type:q.type, q:q, section:sec, sectionIndex:si, isSectionStart: qi===0, iconIndex: __qCounter++});
+    if(isQuestionRequired(q)){
+      flushPending();
+      STEPS.push({
+        type:"page", questions:[q], section:sec, sectionIndex:si,
+        isSectionStart:qi===0, prevN:__gi, iconIndex:__gi
+      });
+      __gi += 1;
+    } else {
+      if(!pending.length && qi===0) pendingIsSectionStart = true;
+      pending.push(q);
+      if(pending.length>=GROUP_PAGE_SIZE) flushPending();
+    }
   });
+  flushPending();
 });
 STEPS.push({type:"review"});
 STEPS.push({type:"success"});
 
-var QUESTION_STEP_COUNT = STEPS.filter(function(s){ return NON_QUESTION_TYPES.indexOf(s.type)===-1; }).length;
+var QUESTION_STEP_COUNT = __gi;
 
 /* --------------------------------- State ---------------------------------- */
 var STORAGE_KEY = "ao1_intake_v1";
@@ -850,15 +900,6 @@ function t(pair){ return pair[state.lang]; }
 function qStr(q, key){ return q[state.lang][key] || ""; }
 function esc(s){ return (s===undefined||s===null) ? "" : String(s).replace(/[&<>"]/g, function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
-function currentQuestionNumber(){
-  var n = 0;
-  for(var i=0;i<=state.index;i++){
-    var s = STEPS[i];
-    if(NON_QUESTION_TYPES.indexOf(s.type)===-1) n++;
-  }
-  return n;
-}
-
 // Duolingo-style pacing: big visible jumps early on, smaller ones as you go,
 // so the bar always *feels* like it's moving faster than the raw count would.
 // Hand-tuned control points (fraction of questions done -> % shown) describe
@@ -880,9 +921,10 @@ var PROGRESS_CURVE = [
   [0.46, 71],
   [0.57, 77],
   [0.68, 83],
-  [0.79, 88],
-  [0.89, 93],
-  [1.00, 97]
+  [0.79, 89],
+  [0.89, 94],
+  [0.96, 97],
+  [1.00, 98]
 ];
 function envelopeProgress(ratio){
   ratio = Math.max(0, Math.min(1, ratio));
@@ -937,17 +979,45 @@ var PCT_BY_N = (function(){
   for(var i=1;i<out.length;i++){
     var v = Math.round(out[i]);
     if(v<=rounded[i-1]) v = rounded[i-1]+1;
-    rounded.push(Math.min(97, v));
+    rounded.push(Math.min(98, v));
   }
   return rounded;
 })();
+
+// A question counts as "answered" for live progress purposes as soon as it
+// has anything in it — doesn't need to be valid/complete, just started.
+function questionHasAnswer(q){
+  var v = state.answers[q.id];
+  if(v===undefined || v===null) return false;
+  if(q.type==="text" || q.type==="email" || q.type==="textarea"){
+    return String(v).trim().length>0;
+  }
+  if(q.type==="group"){
+    return (q.fields||[]).some(function(f){ return v && String(v[f.id]||"").trim().length>0; });
+  }
+  if(q.type==="single") return !!(v && v.value);
+  if(q.type==="multi") return !!(v && v.values && v.values.length);
+  if(q.type==="scale") return true; // always has a default value the moment it renders
+  return false;
+}
+// A page's progress interpolates live between "before this page" and "after
+// this page" as each of its questions gets answered — so on a page holding
+// several grouped questions, the bar visibly moves after each one, not just
+// once when you hit Next.
+function pageProgressPercent(step){
+  var before = PCT_BY_N[step.prevN];
+  var after = PCT_BY_N[Math.min(PCT_BY_N.length-1, step.prevN+step.questions.length)];
+  if(!step.questions.length) return after;
+  var answered = step.questions.filter(questionHasAnswer).length;
+  var frac = answered/step.questions.length;
+  return Math.round(before + (after-before)*frac);
+}
 function progressPercent(){
   var step = STEPS[state.index];
   if(step.type==="intro") return 0;
   if(step.type==="success") return 100;
-  if(step.type==="review") return 98;
-  var n = Math.max(0, Math.min(PCT_BY_N.length-1, currentQuestionNumber()));
-  return PCT_BY_N[n];
+  if(step.type==="review") return 99;
+  return pageProgressPercent(step);
 }
 
 /* --------------------------------- Render --------------------------------- */
@@ -983,6 +1053,12 @@ function render(direction){
 
   window.scrollTo({top:0, behavior:"smooth"});
   saveState();
+}
+
+// Cheap re-check used on every keystroke/selection within a page — just
+// nudges the bar's width, no re-render, so typing never loses focus.
+function updateProgressLive(){
+  progressFill.style.width = progressPercent() + "%";
 }
 
 function renderIntro(){
@@ -1075,7 +1151,7 @@ function renderChapterBanner(step){
 }
 
 function fieldValid(q){
-  if(!q.required) return true;
+  if(!isQuestionRequired(q)) return true;
   var v = state.answers[q.id];
   if(q.type==="single"){
     if(!v || !v.value) return false;
@@ -1096,45 +1172,38 @@ function fieldValid(q){
   return !!(v && String(v).trim());
 }
 
-function renderQuestion(step){
-  var q = step.q;
-  var wrap = el("div");
-
-  var headerRow = el("div", "q-header-row");
-  headerRow.appendChild(renderSketchIcon(step));
-  var textCol = el("div", "q-header-text");
-  if(step.isSectionStart){
-    textCol.appendChild(renderChapterBanner(step));
-  } else {
-    var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
-    textCol.appendChild(tag);
-  }
-  var titleHtml = esc(qStr(q,"q")) + (q.required ? '<span class="required-mark">*</span>' : "");
-  textCol.appendChild(el("h1", "q-title", titleHtml));
-  if(qStr(q,"help")) textCol.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
-  headerRow.appendChild(textCol);
-  wrap.appendChild(headerRow);
+// Renders one question's title/help/input into its own fieldBox and wires up
+// all its interaction. Returns {el, fieldBox} so the caller (renderQuestion)
+// can stack several of these on one page and validate/highlight them
+// individually. isFirst controls heading level/size only.
+function renderFieldBlock(q, step, isFirst){
+  var block = el("div", "q-block" + (isFirst ? "" : " q-block-stacked"));
+  var required = isQuestionRequired(q);
+  var titleHtml = esc(qStr(q,"q")) + (required
+    ? '<span class="required-mark">*</span>'
+    : ' <span class="optional-tag">'+esc(state.lang==="zh" ? "（可选）" : "(optional)")+'</span>');
+  block.appendChild(el(isFirst ? "h1" : "h2", "q-title" + (isFirst ? "" : " q-title-sub"), titleHtml));
+  if(qStr(q,"help")) block.appendChild(el("p", "q-help", esc(qStr(q,"help"))));
 
   var fieldBox = el("div", "field", "");
-  fieldBox.id = "fieldBox";
 
   if(q.type==="text" || q.type==="email"){
     var input = el("input");
     input.type = q.type;
     input.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
     input.value = state.answers[q.id] || "";
-    input.oninput = function(){ state.answers[q.id] = input.value; clearError(fieldBox); };
-    input.onkeydown = function(e){ if(e.key==="Enter"){ e.preventDefault(); attemptNext(q); } };
+    input.oninput = function(){ state.answers[q.id] = input.value; clearError(fieldBox); updateProgressLive(); };
+    input.onkeydown = function(e){ if(e.key==="Enter"){ e.preventDefault(); attemptNext(step); } };
     fieldBox.appendChild(input);
-    setTimeout(function(){ input.focus(); }, 200);
+    if(isFirst) setTimeout(function(){ input.focus(); }, 200);
   }
   else if(q.type==="textarea"){
     var ta = el("textarea");
     ta.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
     ta.value = state.answers[q.id] || "";
-    ta.oninput = function(){ state.answers[q.id] = ta.value; clearError(fieldBox); };
+    ta.oninput = function(){ state.answers[q.id] = ta.value; clearError(fieldBox); updateProgressLive(); };
     fieldBox.appendChild(ta);
-    setTimeout(function(){ ta.focus(); }, 200);
+    if(isFirst) setTimeout(function(){ ta.focus(); }, 200);
   }
   else if(q.type==="single" || q.type==="multi"){
     var box = el("div", "choices");
@@ -1153,7 +1222,7 @@ function renderQuestion(step){
         otherInput.type = "text";
         otherInput.placeholder = esc(t(UI.otherPlaceholder));
         otherInput.value = cur.other || "";
-        otherInput.oninput = function(){ cur.other = otherInput.value; state.answers[q.id]=cur; clearError(fieldBox); };
+        otherInput.oninput = function(){ cur.other = otherInput.value; state.answers[q.id]=cur; clearError(fieldBox); updateProgressLive(); };
         otherWrap.appendChild(otherInput);
         box.insertAdjacentElement("afterend", otherWrap);
         setTimeout(function(){ otherInput.focus(); }, 150);
@@ -1184,10 +1253,11 @@ function renderQuestion(step){
         state.answers[q.id] = cur;
         clearError(fieldBox);
         syncOtherField();
+        updateProgressLive();
         // single-choice with no free-text needed: confirm the pick, then glide on automatically
         if(q.type==="single" && !opt.other){
           setTimeout(function(){
-            if(STEPS[state.index]===step) attemptNext(q);
+            if(STEPS[state.index]===step) attemptNext(step);
           }, 380);
         }
       };
@@ -1205,7 +1275,7 @@ function renderQuestion(step){
     range.type = "range"; range.min = "1"; range.max = "10"; range.step = "1"; range.value = String(val);
     var setFill = function(v){ range.style.setProperty("--fill", ((v-1)/9*100)+"%"); };
     setFill(val);
-    range.oninput = function(){ val = parseInt(range.value,10); readout.textContent = String(val); setFill(val); state.answers[q.id]=val; clearError(fieldBox); };
+    range.oninput = function(){ val = parseInt(range.value,10); readout.textContent = String(val); setFill(val); state.answers[q.id]=val; clearError(fieldBox); updateProgressLive(); };
     scaleWrap.appendChild(range);
     var ticks = el("div", "scale-ticks");
     for(var i=1;i<=10;i++) ticks.appendChild(el("span","",String(i)));
@@ -1226,21 +1296,46 @@ function renderQuestion(step){
       if(f.type!=="textarea") fInput.type = "text";
       fInput.placeholder = state.lang==="zh" ? "请输入…" : "Type your answer…";
       fInput.value = cur2[f.id] || "";
-      fInput.oninput = function(){ cur2[f.id] = fInput.value; state.answers[q.id]=cur2; clearError(fieldBox); };
+      fInput.oninput = function(){ cur2[f.id] = fInput.value; state.answers[q.id]=cur2; clearError(fieldBox); updateProgressLive(); };
       row.appendChild(fInput);
       fieldBox.appendChild(row);
     });
   }
 
-  wrap.appendChild(fieldBox);
   var errMsg = el("div", "error-msg", esc(t(UI.required)));
   fieldBox.appendChild(errMsg);
+  block.appendChild(fieldBox);
+  return {el: block, fieldBox: fieldBox};
+}
+
+function renderQuestion(step){
+  var wrap = el("div");
+
+  var headerRow = el("div", "q-header-row");
+  headerRow.appendChild(renderSketchIcon(step));
+  var textCol = el("div", "q-header-text");
+  if(step.isSectionStart){
+    textCol.appendChild(renderChapterBanner(step));
+  } else {
+    var tag = el("div", "section-tag", esc(state.lang==="zh" ? step.section.zh : step.section.en));
+    textCol.appendChild(tag);
+  }
+  headerRow.appendChild(textCol);
+  wrap.appendChild(headerRow);
+
+  var blockRefs = [];
+  step.questions.forEach(function(q, qi){
+    var res = renderFieldBlock(q, step, qi===0);
+    wrap.appendChild(res.el);
+    blockRefs.push({q:q, fieldBox:res.fieldBox});
+  });
+  step.blockRefs = blockRefs; // read by attemptNext
 
   var actions = el("div", "actions");
   var backBtn = el("button", "btn btn-ghost", "← " + esc(t(UI.back)));
   backBtn.onclick = function(){ goTo(state.index-1, "back"); };
   var nextBtn = el("button", "btn btn-primary", esc(t(UI.next)) + " →");
-  nextBtn.onclick = function(){ attemptNext(q); };
+  nextBtn.onclick = function(){ attemptNext(step); };
   actions.appendChild(backBtn);
   actions.appendChild(nextBtn);
   wrap.appendChild(actions);
@@ -1250,11 +1345,17 @@ function renderQuestion(step){
 
 function clearError(fieldBox){ fieldBox.classList.remove("error"); }
 
-function attemptNext(q){
-  var fieldBox = document.getElementById("fieldBox");
-  if(!fieldValid(q)){
-    fieldBox.classList.add("error");
-    fieldBox.scrollIntoView({behavior:"smooth", block:"center"});
+function attemptNext(step){
+  var refs = step.blockRefs || [];
+  var firstInvalid = null;
+  refs.forEach(function(ref){
+    if(!fieldValid(ref.q)){
+      ref.fieldBox.classList.add("error");
+      if(!firstInvalid) firstInvalid = ref.fieldBox;
+    }
+  });
+  if(firstInvalid){
+    firstInvalid.scrollIntoView({behavior:"smooth", block:"center"});
     return;
   }
   goTo(state.index+1, "fwd");
@@ -1376,7 +1477,7 @@ function showMilestoneToast(msg){
 function checkMilestones(){
   var step = STEPS[state.index];
   if(NON_QUESTION_TYPES.indexOf(step.type)!==-1) return;
-  var n = currentQuestionNumber();
+  var n = step.prevN; // questions fully passed to have reached this page
   var fired = false;
   MILESTONE_NS.forEach(function(threshold){
     if(n>=threshold && state.milestones.indexOf(threshold)===-1){
