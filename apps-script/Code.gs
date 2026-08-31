@@ -48,13 +48,14 @@ var TEAM_RECIPIENTS = [
   'marketing2@academiaone.co.uk'
 ];
 
-// Brand palette used in the generated PDF (kept close to the site's
-// black-and-gold look, adapted for a white/print-friendly page).
-var COLOR_INK = '#1a1610';
-var COLOR_GOLD = '#8a6d23';
-var COLOR_GOLD_BG = '#f4ecd8';
-var COLOR_BODY = '#2b2b2b';
-var COLOR_MUTED = '#7a7264';
+// Brand palette used in the generated PDF, mirroring the form itself:
+// dark page, gold headings, cream body text.
+var COLOR_PAGE = '#1a1610';      // page background (the form's ink black)
+var COLOR_CREAM = '#f2e9d8';     // body text and title
+var COLOR_GOLD = '#c9a24b';      // headings, question labels, rules
+var COLOR_GOLD_SOFT = '#e6c87a'; // section banner text
+var COLOR_CARD = '#2a2214';      // section banner background
+var COLOR_MUTED = '#a3946e';     // meta line and footer
 
 // Base64 PNG of the AcademiaOne logo, embedded in the PDF header.
 var LOGO_BASE64 =
@@ -432,6 +433,12 @@ function createSubmissionPdf_(fields, labels, sections) {
   var body = doc.getBody();
   body.setMarginTop(40).setMarginBottom(40).setMarginLeft(50).setMarginRight(50);
 
+  // Dark page, matching the form. BACKGROUND_COLOR on the body sets the
+  // document's page color, which carries through to the PDF export.
+  var pageStyle = {};
+  pageStyle[DocumentApp.Attribute.BACKGROUND_COLOR] = COLOR_PAGE;
+  body.setAttributes(pageStyle);
+
   // --- Header: logo, title, meta line, gold rule ---
   try {
     var imgBlob = Utilities.newBlob(Utilities.base64Decode(LOGO_BASE64), 'image/png', 'logo.png');
@@ -444,13 +451,13 @@ function createSubmissionPdf_(fields, labels, sections) {
 
   var title = body.appendParagraph('AO 留学 · 名校申请深度规划自查表');
   title.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-  styleText_(title, { size: 17, bold: true, color: COLOR_INK, font: 'Georgia' });
+  styleText_(title, { size: 17, bold: true, color: COLOR_CREAM, font: 'Georgia' });
 
   var subtitle = body.appendParagraph('AcademiaOne Education · Submission Record');
   subtitle.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
   styleText_(subtitle, { size: 10, bold: false, color: COLOR_GOLD, font: 'Georgia' });
 
-  body.appendHorizontalRule();
+  appendGoldRule_(body);
 
   var meta = body.appendParagraph(
     'Submitted: ' + (fields.submitted_at || new Date().toISOString()) +
@@ -469,9 +476,9 @@ function createSubmissionPdf_(fields, labels, sections) {
     var chip = body.appendTable([[sectionTitle_(sec)]]);
     chip.setBorderWidth(0);
     var cell = chip.getCell(0, 0);
-    cell.setBackgroundColor(COLOR_GOLD_BG);
+    cell.setBackgroundColor(COLOR_CARD);
     cell.setPaddingTop(6).setPaddingBottom(6).setPaddingLeft(10).setPaddingRight(10);
-    styleText_(cell.getChild(0).asParagraph(), { size: 11, bold: true, color: COLOR_GOLD, font: 'Georgia' });
+    styleText_(cell.getChild(0).asParagraph(), { size: 11, bold: true, color: COLOR_GOLD_SOFT, font: 'Georgia' });
     body.appendParagraph(' ');
 
     visibleKeys.forEach(function (k) {
@@ -480,7 +487,7 @@ function createSubmissionPdf_(fields, labels, sections) {
       styleText_(qPar, { size: 10.5, bold: true, color: COLOR_GOLD, font: 'Georgia' });
 
       var aPar = body.appendParagraph(String(fields[k]));
-      styleText_(aPar, { size: 11, bold: false, color: COLOR_BODY, font: 'Georgia' });
+      styleText_(aPar, { size: 11, bold: false, color: COLOR_CREAM, font: 'Georgia' });
       body.appendParagraph(' ');
     });
   });
@@ -504,6 +511,21 @@ function createSubmissionPdf_(fields, labels, sections) {
 
 function sectionTitle_(sec) {
   return sec.zh + ' / ' + sec.en;
+}
+
+// A thin gold divider. Docs' built-in horizontal rule is a fixed gray that
+// all but vanishes on the dark page, so this uses a borderless one-cell
+// table with a gold background and a tiny font size instead.
+function appendGoldRule_(body) {
+  var rule = body.appendTable([['']]);
+  rule.setBorderWidth(0);
+  var cell = rule.getCell(0, 0);
+  cell.setBackgroundColor(COLOR_GOLD);
+  cell.setPaddingTop(0).setPaddingBottom(0).setPaddingLeft(0).setPaddingRight(0);
+  var attrs = {};
+  attrs[DocumentApp.Attribute.FONT_SIZE] = 1;
+  cell.getChild(0).asParagraph().setAttributes(attrs);
+  return rule;
 }
 
 function styleText_(paragraph, opts) {
