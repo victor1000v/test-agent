@@ -691,8 +691,8 @@ var UI = {
     // restarted. The last two are a time buffer for a slower connection:
     // if the real request is still in flight once the first three have had
     // their say, these keep it feeling like progress instead of repeating.
-    zh:["正在发送你的作答…","正在生成PDF…","正在通知顾问团队…","正在保存记录…","网络较慢，仍在处理中…","马上就好，感谢你的耐心…"],
-    en:["Sending your answers…","Preparing your PDF…","Notifying the team…","Saving your record…","Still working, your connection is just a little slow…","Almost there, thanks for your patience…"]
+    zh:["正在发送你的作答…","正在生成PDF…","正在通知顾问团队…","正在保存记录…","正在完成最后几步…","马上就好，感谢你的耐心…"],
+    en:["Sending your answers…","Preparing your PDF…","Notifying the team…","Saving your record…","Wrapping up the last few steps…","Almost there, thanks for your patience…"]
   },
   continue: {zh:"继续", en:"Continue"},
   required: {zh:"此项为必填", en:"This field is required"},
@@ -881,8 +881,8 @@ var SECTIONS = [
       en:{q:"If you had to describe your ideal offer, what would it mean? Why do you want it?", help:""} }
   ]},
   { id:"pace", zh:"关于你的人生节奏", en:"About Your Life Pace", questions:[
-    { id:"life_status", type:"multi", required:true,
-      zh:{q:"你现在的生活状态是：", help:"可多选"}, en:{q:"What is your current life status?", help:"Select all that apply"},
+    { id:"life_status", type:"single", required:true,
+      zh:{q:"哪一项最符合你现在的生活状态？", help:""}, en:{q:"Which one best describes your current life status?", help:""},
       options:[
         {v:"in_school", zh:"学校在读", en:"In school"},
         {v:"undergrad", zh:"本科在读", en:"Undergraduate student"},
@@ -891,8 +891,16 @@ var SECTIONS = [
         {v:"full_time", zh:"全职工作", en:"Working full-time"},
         {v:"part_time", zh:"兼职/自由职业", en:"Part-time/freelance"}
       ] },
-    { id:"weekly_time", type:"text", required:true,
-      zh:{q:"你平均每周可以用于申请的时间是多少？", help:""}, en:{q:"On average, how many hours per week can you dedicate to your application?", help:""} },
+    { id:"weekly_time", type:"single", required:true,
+      zh:{q:"你平均每周可以用于申请的时间是多少？", help:""}, en:{q:"On average, how many hours per week can you dedicate to your application?", help:""},
+      options:[
+        {v:"under_30m", zh:"每周不到30分钟", en:"Less than 30 minutes a week"},
+        {v:"1_2h", zh:"每周1至2小时", en:"1-2 hours a week"},
+        {v:"3_4h", zh:"每周3至4小时", en:"3-4 hours a week"},
+        {v:"4_10h", zh:"每周4至10小时", en:"4-10 hours a week"},
+        {v:"10_20h", zh:"每周10至20小时", en:"10-20 hours a week"},
+        {v:"over_20h", zh:"每周20小时以上", en:"More than 20 hours a week"}
+      ] },
     { id:"apply_timing", type:"single", required:true,
       zh:{q:"你准备何时提交申请？", help:""}, en:{q:"When do you plan to submit your application?", help:""},
       options:[
@@ -904,8 +912,8 @@ var SECTIONS = [
       zh:{q:"你准备何时付出行动，做出改变？", help:""}, en:{q:"When are you ready to take action and make a change?", help:""},
       options:[
         {v:"now", zh:"马上", en:"Right now"},
-        {v:"1-3d", zh:"1-3天", en:"1–3 days"},
-        {v:"3-7d", zh:"3-7天", en:"3–7 days"},
+        {v:"1-3d", zh:"1-3天", en:"1-3 days"},
+        {v:"3-7d", zh:"3-7天", en:"3-7 days"},
         {v:"1w+", zh:"1周以上", en:"More than 1 week"},
         {v:"1m+", zh:"1个月以上", en:"More than 1 month"}
       ] },
