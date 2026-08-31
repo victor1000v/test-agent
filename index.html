@@ -51,12 +51,48 @@
     background-repeat:repeat;
     opacity:.7;
   }
+  /* Slow-drifting gold aurora, in the spirit of OpenAI's moving gradient
+     but kept deliberately cheap: three soft radial-gradient blobs animated
+     with transform only (fully GPU-composited, no repaints, no blur
+     filters), on 50-80 second loops so the page never feels busy. */
   .glow{
-    position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(700px 420px at 8% -6%, rgba(201,162,75,.14), transparent 60%),
-      radial-gradient(600px 500px at 105% 15%, rgba(201,162,75,.10), transparent 60%),
-      radial-gradient(900px 600px at 50% 115%, rgba(201,162,75,.08), transparent 60%);
+    position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  }
+  .glow-blob{
+    position:absolute;border-radius:50%;will-change:transform;
+  }
+  .glow-b1{
+    width:60vmax;height:44vmax;left:-18vmax;top:-16vmax;
+    background:radial-gradient(closest-side, rgba(201,162,75,.13), rgba(201,162,75,0));
+    animation:blobDrift1 52s ease-in-out infinite alternate;
+  }
+  .glow-b2{
+    width:52vmax;height:52vmax;right:-20vmax;top:-4vmax;
+    background:radial-gradient(closest-side, rgba(230,200,122,.10), rgba(230,200,122,0));
+    animation:blobDrift2 67s ease-in-out infinite alternate;
+  }
+  .glow-b3{
+    width:70vmax;height:50vmax;left:8vmax;bottom:-28vmax;
+    background:radial-gradient(closest-side, rgba(201,162,75,.09), rgba(201,162,75,0));
+    animation:blobDrift3 79s ease-in-out infinite alternate;
+  }
+  @keyframes blobDrift1{
+    0%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(9vmax,6vmax) scale(1.12);}
+    100%{transform:translate(20vmax,2vmax) scale(.95);}
+  }
+  @keyframes blobDrift2{
+    0%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-10vmax,10vmax) scale(1.15);}
+    100%{transform:translate(-4vmax,22vmax) scale(1);}
+  }
+  @keyframes blobDrift3{
+    0%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-8vmax,-6vmax) scale(1.1);}
+    100%{transform:translate(10vmax,-3vmax) scale(.92);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .glow-blob{animation:none;}
   }
 
   .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
@@ -687,7 +723,11 @@
 <body class="lang-zh">
 
 <div class="watermark"></div>
-<div class="glow"></div>
+<div class="glow" aria-hidden="true">
+  <div class="glow-blob glow-b1"></div>
+  <div class="glow-blob glow-b2"></div>
+  <div class="glow-blob glow-b3"></div>
+</div>
 
 <div class="app">
   <div class="topbar-fixed">
