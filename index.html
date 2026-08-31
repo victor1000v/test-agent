@@ -396,6 +396,30 @@
   }
   @keyframes draw{to{stroke-dashoffset:0;}}
 
+  .success-eyebrow{
+    background:linear-gradient(135deg,rgba(201,162,75,.2),rgba(201,162,75,.06));
+    animation:successEyebrowIn .5s .5s both ease;
+  }
+  @keyframes successEyebrowIn{ from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+  .success-wrap h2.hero-title{animation:successFadeIn .5s .6s both ease;}
+  .success-wrap .hero-body{animation:successFadeIn .5s .72s both ease;}
+  @keyframes successFadeIn{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+  .success-next{
+    margin-top:26px;text-align:left;display:flex;gap:14px;align-items:flex-start;
+    background:linear-gradient(135deg,rgba(201,162,75,.1),rgba(201,162,75,.03));
+    border:1px solid var(--gold-dim);border-radius:14px;padding:18px 20px;
+    animation:successFadeIn .5s .86s both ease;
+  }
+  .success-next-icon{flex:none;width:22px;height:22px;margin-top:2px;color:var(--gold-2);}
+  .success-next-label{
+    font-family:var(--serif-en);font-weight:700;font-size:15px;color:var(--gold-2);margin-bottom:6px;
+  }
+  body.lang-zh .success-next-label{font-family:var(--serif-zh);}
+  .success-next-body{font-size:13.5px;line-height:1.75;color:#d9cdb4;margin:0;}
+  @media (prefers-reduced-motion: reduce){
+    .success-eyebrow, .success-wrap h2.hero-title, .success-wrap .hero-body, .success-next{animation:none;}
+  }
+
   /* Buttons / Nav */
   .actions{display:flex;gap:12px;margin-top:28px;align-items:center;}
   .btn{
@@ -583,8 +607,13 @@ var UI = {
   // instead of stalled. Order matters: roughly matches what's happening
   // server-side, though timing is illustrative, not literal.
   submittingSteps: {
-    zh:["正在发送你的作答…","正在生成PDF…","正在通知顾问团队…","马上就好…"],
-    en:["Sending your answers…","Preparing your PDF…","Notifying the team…","Almost there…"]
+    // Forward-only — never loops back to an earlier phrase, since re-showing
+    // "sending" after "notifying the team" reads as if that step failed and
+    // restarted. The last two are a time buffer for a slower connection:
+    // if the real request is still in flight once the first three have had
+    // their say, these keep it feeling like progress instead of repeating.
+    zh:["正在发送你的作答…","正在生成PDF…","正在通知顾问团队…","正在保存记录…","网络较慢，仍在处理中…","马上就好，感谢你的耐心…"],
+    en:["Sending your answers…","Preparing your PDF…","Notifying the team…","Saving your record…","Still working, your connection is just a little slow…","Almost there, thanks for your patience…"]
   },
   continue: {zh:"继续", en:"Continue"},
   required: {zh:"此项为必填", en:"This field is required"},
@@ -592,8 +621,11 @@ var UI = {
   stepOf: {zh:function(a,b){return "第 " + a + " / " + b + " 步";}, en:function(a,b){return "Step " + a + " of " + b;}},
   reviewTitle: {zh:"确认信息", en:"Review Your Answers"},
   reviewBody: {zh:"以下是你的关键信息摘要，确认无误后即可提交。你的全部作答内容会一并安全发送给 Victor 博士团队。", en:"Here is a quick summary of your key details. Once confirmed, submit. Your full answers are sent securely to Dr. Victor's team."},
-  successTitle: {zh:"提交成功！", en:"Submitted!"},
-  successBody: {zh:"感谢你认真填写这份问卷。Victor博士团队会在1v1咨询前仔细阅读你的每一个答案，我们很快与你联系。", en:"Thank you for completing this so thoughtfully. Dr. Victor's team will review every answer before your 1:1 consultation and will be in touch soon."},
+  successEyebrow: {zh:"提交成功", en:"All Set"},
+  successTitle: {zh:"恭喜你，完成这一步了！", en:"Congratulations, you're all set!"},
+  successBody: {zh:"感谢你如此认真、坦诚地完成这份问卷，这正是我们能够真正帮到你的起点。", en:"Thank you for completing this so thoughtfully and honestly — it's exactly what lets us actually help you."},
+  successNextLabel: {zh:"接下来会发生什么", en:"What happens next"},
+  successNextBody: {zh:"Victor博士团队会仔细阅读你的每一个答案，并据此为你准备一份贴合你情况的初步建议，让你的1v1咨询从第一分钟起就能聚焦在真正重要的事情上。", en:"Dr. Victor's team will read every answer closely and use it to prepare a tailored initial recommendation, so your 1:1 consultation can focus on what matters most from the very first minute."},
   errorTitle: {zh:"提交遇到问题", en:"Something went wrong"},
   errorBody: {zh:"网络提交失败，请点击下方按钮通过邮件直接发送，或稍后重试。", en:"The submission couldn't reach our server. Use the button below to send it by email directly, or try again shortly."},
   retry: {zh:"重试提交", en:"Retry submission"},
@@ -1444,8 +1476,21 @@ function renderSuccess(){
   var svg = '<svg class="check-circle" viewBox="0 0 84 84"><circle cx="42" cy="42" r="38"/><path d="M25 43l12 12 22-24" stroke-dasharray="70" stroke-dashoffset="70" style="animation:draw .7s .3s cubic-bezier(.22,.61,.36,1) forwards; --tw:0;"/></svg>';
   var holder = el("div"); holder.innerHTML = svg;
   wrap.appendChild(holder.firstChild);
+  wrap.appendChild(el("span", "hero-eyebrow success-eyebrow", esc(t(UI.successEyebrow))));
   wrap.appendChild(el("h2", "hero-title", esc(t(UI.successTitle))));
   wrap.appendChild(el("p", "hero-body", esc(t(UI.successBody))));
+
+  var nextBox = el("div", "success-next");
+  var iconHolder = el("div"); iconHolder.innerHTML =
+    '<svg class="success-next-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+
+    '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.3 2.3M15.7 15.7L18 18M18 6l-2.3 2.3M8.3 15.7L6 18"/></svg>';
+  nextBox.appendChild(iconHolder.firstChild);
+  var nextText = el("div");
+  nextText.appendChild(el("div", "success-next-label", esc(t(UI.successNextLabel))));
+  nextText.appendChild(el("p", "success-next-body", esc(t(UI.successNextBody))));
+  nextBox.appendChild(nextText);
+  wrap.appendChild(nextBox);
+
   return wrap;
 }
 
@@ -1634,18 +1679,28 @@ function startSubmitLoading(btn){
   btn.appendChild(spinner);
   btn.appendChild(label);
 
+  // Predicted timing per phrase, front-loaded quick then slower — a guess
+  // at where the real pipeline (send, PDF, emails) spends its time, not a
+  // measurement of it. Forward-only: once on the last phrase, the timer
+  // simply stops rather than wrapping back to "Sending your answers…",
+  // which would read as that step having failed and restarted.
+  var delays = [1300, 1600, 1900, 2300, 2800];
   var i = 0;
-  var timer = setInterval(function(){
-    i = (i+1) % steps.length;
+  var timer = null;
+  function advance(){
+    if(i >= steps.length-1) return;
+    i++;
     // Re-trigger the fade-in animation on each phrase change.
     label.style.animation = "none";
     label.textContent = steps[i];
     void label.offsetWidth;
     label.style.animation = "";
-  }, 1700);
+    if(i < steps.length-1) timer = setTimeout(advance, delays[Math.min(i, delays.length-1)]);
+  }
+  timer = setTimeout(advance, delays[0]);
 
   return function stopLoading(){
-    clearInterval(timer);
+    clearTimeout(timer);
   };
 }
 
