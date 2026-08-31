@@ -45,9 +45,9 @@
   body.lang-en [lang-zh]{display:none !important;}
   body.lang-zh{font-family:'Noto Sans SC',var(--sans);}
 
-  /* Pronounced gold aurora: three abstract circle-like washes drifting
-     around the page, OpenAI-style. Transform-only animation, so it is
-     fully GPU-composited: no repaints, no blur filters, no slowdown. */
+  /* Pronounced gold aurora: abstract circle-like washes visibly roaming
+     the page, OpenAI-style. Transform-only animation, so it is fully
+     GPU-composited: no repaints, no blur filters, no slowdown. */
   .glow{
     position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
   }
@@ -56,36 +56,43 @@
   }
   .glow-b1{
     width:58vmax;height:46vmax;left:-16vmax;top:-14vmax;
-    background:radial-gradient(closest-side, rgba(201,162,75,.26) 0%, rgba(201,162,75,.17) 45%, rgba(201,162,75,0) 74%);
-    animation:blobDrift1 36s ease-in-out infinite alternate;
+    background:radial-gradient(closest-side, rgba(201,162,75,.28) 0%, rgba(201,162,75,.18) 45%, rgba(201,162,75,0) 74%);
+    animation:blobDrift1 16s ease-in-out infinite alternate;
   }
   .glow-b2{
     width:50vmax;height:50vmax;right:-18vmax;top:-2vmax;
-    background:radial-gradient(closest-side, rgba(230,200,122,.21) 0%, rgba(230,200,122,.13) 48%, rgba(230,200,122,0) 74%);
-    animation:blobDrift2 47s ease-in-out infinite alternate;
+    background:radial-gradient(closest-side, rgba(230,200,122,.22) 0%, rgba(230,200,122,.14) 48%, rgba(230,200,122,0) 74%);
+    animation:blobDrift2 21s ease-in-out infinite alternate;
   }
   .glow-b3{
     width:66vmax;height:50vmax;left:10vmax;bottom:-26vmax;
-    background:radial-gradient(closest-side, rgba(201,162,75,.18) 0%, rgba(201,162,75,.12) 45%, rgba(201,162,75,0) 74%);
-    animation:blobDrift3 58s ease-in-out infinite alternate;
+    background:radial-gradient(closest-side, rgba(201,162,75,.2) 0%, rgba(201,162,75,.13) 45%, rgba(201,162,75,0) 74%);
+    animation:blobDrift3 26s ease-in-out infinite alternate;
   }
   @keyframes blobDrift1{
     0%{transform:translate(0,0) scale(1);}
-    50%{transform:translate(16vmax,10vmax) scale(1.18);}
-    100%{transform:translate(34vmax,4vmax) scale(.9);}
+    45%{transform:translate(28vmax,14vmax) scale(1.25);}
+    100%{transform:translate(52vmax,4vmax) scale(.85);}
   }
   @keyframes blobDrift2{
     0%{transform:translate(0,0) scale(1);}
-    50%{transform:translate(-16vmax,16vmax) scale(1.22);}
-    100%{transform:translate(-6vmax,34vmax) scale(.95);}
+    45%{transform:translate(-26vmax,20vmax) scale(1.3);}
+    100%{transform:translate(-8vmax,46vmax) scale(.9);}
   }
   @keyframes blobDrift3{
     0%{transform:translate(0,0) scale(1);}
-    50%{transform:translate(-12vmax,-10vmax) scale(1.15);}
-    100%{transform:translate(16vmax,-5vmax) scale(.9);}
+    45%{transform:translate(-18vmax,-14vmax) scale(1.2);}
+    100%{transform:translate(24vmax,-6vmax) scale(.85);}
   }
   @media (prefers-reduced-motion: reduce){
     .glow-blob{animation:none;}
+  }
+  /* Feather the sticky bar's bottom edge so the roaming gold wash emerges
+     softly beneath it instead of stopping at a hard horizontal line. */
+  .topbar-fixed::after{
+    content:'';position:absolute;top:100%;left:0;right:0;height:30px;
+    background:linear-gradient(var(--ink), rgba(0,0,0,0));
+    pointer-events:none;
   }
 
   .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
