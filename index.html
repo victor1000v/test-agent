@@ -447,6 +447,28 @@
   .btn-wide{width:100%;justify-content:center;}
   .btn svg{flex:none;}
 
+  /* Submit-in-progress state: a small spinning ring plus status text that
+     cycles through a few phrases, so a multi-second submission (PDF +
+     Sheet + emails, all server-side) reads as active progress rather than
+     a frozen button. */
+  .btn-spinner{
+    width:15px;height:15px;flex:none;border-radius:50%;
+    border:2px solid rgba(26,22,16,.28);border-top-color:var(--ink);
+    animation:btnSpin .7s linear infinite;
+  }
+  @keyframes btnSpin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){
+    .btn-spinner{animation-duration:1.6s;}
+  }
+  .btn-loading-text{
+    display:inline-block;min-width:1px;
+    animation:btnTextFade .45s ease;
+  }
+  @keyframes btnTextFade{ from{opacity:0;transform:translateY(3px);} to{opacity:1;transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){
+    .btn-loading-text{animation:none;}
+  }
+
   .hint-key{font-size:11.5px;color:var(--muted-2);margin-top:10px;}
 
   footer.site-footer{
@@ -465,10 +487,24 @@
   @media (max-width:480px){
     .brand-logo{width:88px;}
     header.site-header{padding:14px 14px;}
-    main.stage-outer{padding:26px 14px 130px;}
+    main.stage-outer{padding:26px 14px 40px;}
     .hero-card{padding:24px 18px;}
     .actions{flex-wrap:wrap;}
     .btn{padding:13px 22px;}
+
+    /* The review screen's label/value rows and its "start over" link are
+       the two spots most likely to collide with real content on a short
+       phone screen — both get a dedicated, safer mobile layout below. */
+    .review-item{flex-direction:column;align-items:flex-start;gap:4px;padding:13px 15px;}
+    .review-item .v{text-align:left;font-size:14.5px;}
+
+    /* On mobile, a viewport-fixed corner link can end up sitting on top of
+       real buttons underneath it (the review screen's action row is tall
+       enough to land there on a short phone screen). Flow it in after the
+       footer instead, so it can never overlap anything. */
+    .restart-link{
+      position:static;display:block;width:max-content;margin:18px auto 0;
+    }
   }
 </style>
 </head>
@@ -542,7 +578,14 @@ var UI = {
   back: {zh:"上一步", en:"Back"},
   start: {zh:"开始填写", en:"Begin"},
   submit: {zh:"提交问卷", en:"Submit"},
-  submitting: {zh:"提交中…", en:"Submitting…"},
+  // Cycled while a submission is in flight — the PDF/Sheet/email pipeline
+  // genuinely takes a few seconds, so this keeps the wait feeling active
+  // instead of stalled. Order matters: roughly matches what's happening
+  // server-side, though timing is illustrative, not literal.
+  submittingSteps: {
+    zh:["正在发送你的作答…","正在生成PDF…","正在通知顾问团队…","马上就好…"],
+    en:["Sending your answers…","Preparing your PDF…","Notifying the team…","Almost there…"]
+  },
   continue: {zh:"继续", en:"Continue"},
   required: {zh:"此项为必填", en:"This field is required"},
   otherPlaceholder: {zh:"请填写…", en:"Please specify…"},
@@ -1144,6 +1187,24 @@ function fieldValid(q){
 // all its interaction. Returns {el, fieldBox} so the caller (renderQuestion)
 // can stack several of these on one page and validate/highlight them
 // individually. isFirst controls heading level/size only.
+// After a single-choice pick (never for multi-select, since the visitor may
+// still want to tick more boxes), nudge the page down just enough to bring
+// the next question — or the Back/Submit row, on a page's last question —
+// into view below the sticky header. A gentle forward push, not a jump;
+// scrolling back up freely is unaffected.
+function scrollToNextBlock(block){
+  var target = block.nextElementSibling;
+  if(!target) return;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(function(){
+    var topbar = document.querySelector(".topbar-fixed");
+    var offset = (topbar ? topbar.offsetHeight : 0) + 16;
+    var rect = target.getBoundingClientRect();
+    var targetY = window.scrollY + rect.top - offset;
+    window.scrollTo({top: Math.max(targetY, 0), behavior: reduceMotion ? "auto" : "smooth"});
+  }, 260);
+}
+
 function renderFieldBlock(q, step, isFirst){
   var block = el("div", "q-block" + (isFirst ? "" : " q-block-stacked"));
   var required = isQuestionRequired(q);
@@ -1212,6 +1273,7 @@ function renderFieldBlock(q, step, isFirst){
           box.querySelectorAll(".choice-card.selected").forEach(function(c){ c.classList.remove("selected"); });
           cur = {value: opt.v, other: opt.other ? cur.other : ""};
           card.classList.add("selected");
+          if(!opt.other) scrollToNextBlock(block);
         } else {
           cur.values = cur.values || [];
           var idx = cur.values.indexOf(opt.v);
@@ -1561,13 +1623,39 @@ function sheetsEndpointConfigured(){
   return CONFIG.SHEETS_WEBAPP_ENDPOINT && CONFIG.SHEETS_WEBAPP_ENDPOINT.indexOf("YOUR_DEPLOYMENT_ID")===-1;
 }
 
+// Builds the spinner + cycling-status content for the submit button while
+// a submission is in flight, and returns a function that stops the cycle
+// (call it once the request settles, success or failure).
+function startSubmitLoading(btn){
+  var steps = t(UI.submittingSteps);
+  btn.innerHTML = "";
+  var spinner = el("span", "btn-spinner");
+  var label = el("span", "btn-loading-text", esc(steps[0]));
+  btn.appendChild(spinner);
+  btn.appendChild(label);
+
+  var i = 0;
+  var timer = setInterval(function(){
+    i = (i+1) % steps.length;
+    // Re-trigger the fade-in animation on each phrase change.
+    label.style.animation = "none";
+    label.textContent = steps[i];
+    void label.offsetWidth;
+    label.style.animation = "";
+  }, 1700);
+
+  return function stopLoading(){
+    clearInterval(timer);
+  };
+}
+
 function submitForm(){
   var submitBtn = document.getElementById("submitBtn");
   var errBox = document.getElementById("submitErrBox");
   errBox.className = "field";
   errBox.innerHTML = "";
   submitBtn.disabled = true;
-  submitBtn.textContent = t(UI.submitting);
+  var stopLoading = startSubmitLoading(submitBtn);
 
   if(sheetsEndpointConfigured()){
     // Primary path: one call logs a Sheet row, saves a PDF to Drive, and
@@ -1594,6 +1682,7 @@ function submitForm(){
   }
 
   function finishSubmit(){
+    stopLoading();
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     goTo(state.index+1, "fwd");
   }
@@ -1620,6 +1709,7 @@ function submitForm(){
   }
 
   function showSubmitError(){
+    stopLoading();
     submitBtn.disabled = false;
     submitBtn.textContent = t(UI.submit) + " ✦";
     errBox.classList.add("error");
