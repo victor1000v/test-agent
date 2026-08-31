@@ -367,6 +367,17 @@
     text-shadow:0 0 24px rgba(201,162,75,.25);
     transition:color .2s;
   }
+  /* Quick pop of the big number each time the slider lands on a value,
+     so every pick gives a beat of feedback. */
+  .scale-readout.pop{animation:readoutPop .32s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes readoutPop{
+    0%{transform:scale(1);}
+    40%{transform:scale(1.28);text-shadow:0 0 34px rgba(201,162,75,.5);}
+    100%{transform:scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .scale-readout.pop{animation:none;}
+  }
   input[type=range]{
     -webkit-appearance:none;width:100%;height:6px;border-radius:999px;
     background:linear-gradient(90deg,var(--gold-dim),var(--gold) var(--fill,50%),var(--ink-3) var(--fill,50%));
@@ -502,17 +513,19 @@
   .letter-env-icon{
     width:26px;height:26px;color:var(--gold-2);
     transform-origin:50% 42%;
-    animation:envShake 2.6s ease-in-out infinite;
+    animation:envShake 1.7s ease-in-out infinite;
   }
-  /* Mostly still, then a quick eager wiggle, over and over */
+  /* A short rest, then an eager rattle, over and over */
   @keyframes envShake{
-    0%, 70%, 100%{transform:rotate(0);}
-    74%{transform:rotate(-10deg);}
-    78%{transform:rotate(9deg);}
-    82%{transform:rotate(-7deg);}
-    86%{transform:rotate(5deg);}
-    90%{transform:rotate(-2deg);}
-    94%{transform:rotate(0);}
+    0%, 52%, 100%{transform:rotate(0) translateY(0);}
+    56%{transform:rotate(-16deg) translateY(-1px);}
+    61%{transform:rotate(14deg) translateY(0);}
+    66%{transform:rotate(-12deg) translateY(-1px);}
+    71%{transform:rotate(10deg) translateY(0);}
+    76%{transform:rotate(-7deg) translateY(-1px);}
+    81%{transform:rotate(5deg) translateY(0);}
+    86%{transform:rotate(-2deg) translateY(0);}
+    91%{transform:rotate(0) translateY(0);}
   }
   .letter-tap{font-size:11px;color:var(--muted);letter-spacing:.12em;font-weight:500;text-transform:uppercase;}
   @keyframes sealPulse{
@@ -1557,7 +1570,12 @@ function renderFieldBlock(q, step, isFirst){
     range.type = "range"; range.min = "1"; range.max = "10"; range.step = "1"; range.value = String(val);
     var setFill = function(v){ range.style.setProperty("--fill", ((v-1)/9*100)+"%"); };
     setFill(val);
-    range.oninput = function(){ val = parseInt(range.value,10); readout.textContent = String(val); setFill(val); state.answers[q.id]=val; clearError(fieldBox); updateProgressLive(); };
+    range.oninput = function(){
+      val = parseInt(range.value,10); readout.textContent = String(val); setFill(val);
+      state.answers[q.id]=val; clearError(fieldBox); updateProgressLive();
+      // Restart the pop so dragging across values gives a beat per number.
+      readout.classList.remove("pop"); void readout.offsetWidth; readout.classList.add("pop");
+    };
     scaleWrap.appendChild(range);
     var ticks = el("div", "scale-ticks");
     for(var i=1;i<=10;i++) ticks.appendChild(el("span","",String(i)));
